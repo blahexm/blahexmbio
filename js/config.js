@@ -40,7 +40,7 @@ const C = {
      crimson | rose | orange | amber | gold | yellow
      caramel | gingerbread | mocha | silver | mint | cobalt | violet
   ────────────────────────────── */
-  theme: "silver",
+  theme: "rose",
 
 
   /* ──────────────────────────────
