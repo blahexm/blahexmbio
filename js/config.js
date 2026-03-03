@@ -32,7 +32,7 @@ const C = {
   ────────────────────────────── */
   discordId:        "", // 576653002924883978
   manualStatus:     "idle",   // "online" | "idle" | "dnd" | "offline"
-  manualStatusText: "coding  💻",         // เช่น "coding 💻" — ปล่อยว่าง = ใช้ default
+  manualStatusText: "copy & paste then successfull",         // เช่น "coding 💻" — ปล่อยว่าง = ใช้ default
 
 
   /* ──────────────────────────────
@@ -40,7 +40,7 @@ const C = {
      crimson | rose | orange | amber | gold | yellow
      caramel | gingerbread | mocha | silver | mint | cobalt | violet
   ────────────────────────────── */
-  theme: "crimson",
+  theme: "cobalt",
 
 
   /* ──────────────────────────────
