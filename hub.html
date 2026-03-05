@@ -528,10 +528,15 @@ async function verifyKey(k,isAuto){
 function showUI(key,label){
   hideLoading()
   document.getElementById('login-screen').style.display='none'
-  document.getElementById('app').style.display='flex'
+  var appEl=document.getElementById('app')
+  appEl.style.display='flex'
   document.getElementById('sb-name').textContent=label
   document.getElementById('sb-key').textContent='KEY: '+key.slice(0,4)+'••••'
   document.getElementById('sb-ava').textContent=label.charAt(0).toUpperCase()
+  // render skeleton ก่อนให้ panel ไม่ว่าง แล้วค่อย loadAccounts
+  currentTab='money'
+  document.getElementById('tb-title').textContent='Player Monitor'
+  render()
   loadAccounts()
   rtCh=sb.channel('rt-blox').on('postgres_changes',{event:'*',schema:'public',table:'blox_stats'},loadAccounts).subscribe()
 }
@@ -577,8 +582,9 @@ async function loadAccounts(){
   if(res.data)accounts=res.data
   var dc=document.getElementById('device-count');if(dc)dc.textContent='('+accounts.length+')'
   ['refresh-ico','refresh-ico-mob'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('spinning')})
+  render() // render ก่อนให้เห็น data ทันที ไม่ต้องรอ avatar
   await fetchAvatars(accounts)
-  render()
+  render() // render อีกทีหลัง avatar โหลด
 }
 
 function setTab(tab,el){
