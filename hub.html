@@ -120,64 +120,97 @@
 
         /* ─── SIDEBAR ─── */
         .sidebar {
-            width: 220px; flex-shrink: 0;
-            background: rgba(10,13,24,0.95);
-            border-right: 1px solid rgba(59,130,246,0.1);
+            width: 260px; flex-shrink: 0;
+            background: rgba(8,11,20,0.98);
+            border-right: 1px solid rgba(59,130,246,0.15);
             display: flex; flex-direction: column;
-            padding: 20px 0;
             overflow-y: auto;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+        }
+
+        /* Logo area */
+        .sb-logo {
+            display: flex; align-items: center; gap: 12px;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(59,130,246,0.1);
+        }
+        .sb-logo-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #fff;
+            box-shadow: 0 0 14px rgba(59,130,246,0.4);
+        }
+        .sb-logo-text {
+            font-size: 16px; font-weight: 900; letter-spacing: 1px;
+            background: linear-gradient(to right, #fff, #3b82f6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         .sb-section {
             font-family: 'JetBrains Mono', monospace;
             font-size: 9px; letter-spacing: 2px;
-            color: #334155; padding: 16px 20px 8px;
+            color: #1e3a5f; padding: 18px 20px 6px;
             text-transform: uppercase;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sb-section::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(59,130,246,0.08);
         }
 
         .nav-item {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 20px; cursor: pointer;
-            color: #64748b; font-size: 13px; font-weight: 600;
+            color: #475569; font-size: 13px; font-weight: 600;
             transition: 0.2s; border: none; background: none;
             width: 100%; text-align: left;
             font-family: 'Poppins', sans-serif;
             border-left: 3px solid transparent;
             text-decoration: none;
         }
-        .nav-item:hover { color: #fff; background: rgba(59,130,246,0.05); }
+        .nav-item:hover { color: #94a3b8; background: rgba(59,130,246,0.04); }
         .nav-item.active {
-            color: var(--blue); background: rgba(59,130,246,0.1);
+            color: #fff; background: rgba(59,130,246,0.1);
             border-left-color: var(--blue);
         }
-        .nav-item i { width: 16px; text-align: center; font-size: 12px; }
+        .nav-item.active i { color: var(--blue); }
+        .nav-item i { width: 16px; text-align: center; font-size: 12px; color: #334155; transition: 0.2s; }
+        .nav-item:hover i { color: #64748b; }
 
         .sb-spacer { flex: 1; }
 
+        /* User card bottom */
         .sb-user-card {
-            margin: 12px; padding: 14px;
-            background: rgba(15,23,42,0.8);
-            border: 1px solid rgba(59,130,246,0.2);
+            margin: 12px;
+            background: rgba(15,23,42,0.9);
+            border: 1px solid rgba(59,130,246,0.15);
             border-radius: 14px;
+            overflow: hidden;
+        }
+        .sb-user-top {
+            padding: 14px 16px 10px;
+            display: flex; align-items: center; gap: 10px;
         }
         .sb-avatar {
-            width: 36px; height: 36px; border-radius: 10px;
+            width: 34px; height: 34px; border-radius: 8px;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             display: flex; align-items: center; justify-content: center;
-            font-family: 'JetBrains Mono'; font-size: 14px; color: #fff;
-            font-weight: 700; margin-bottom: 8px;
+            font-family: 'JetBrains Mono'; font-size: 13px; color: #fff;
+            font-weight: 700; flex-shrink: 0;
         }
         .sb-name { font-size: 13px; font-weight: 700; color: #fff; }
-        .sb-key { font-family: 'JetBrains Mono'; font-size: 10px; color: #475569; margin-top: 2px; }
-        .sb-rank { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--cyan); margin-top: 2px; }
+        .sb-key { font-family: 'JetBrains Mono'; font-size: 10px; color: #334155; margin-top: 2px; letter-spacing: 1px; }
         .sb-logout {
-            width: 100%; margin-top: 10px; padding: 8px;
-            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
-            border-radius: 8px; color: var(--red);
-            font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 1px;
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+            width: 100%; padding: 11px;
+            background: rgba(239,68,68,0.06);
+            border: none; border-top: 1px solid rgba(239,68,68,0.15);
+            color: var(--red);
+            font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+            cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .sb-logout:hover { background: rgba(239,68,68,0.15); }
+        .sb-logout:hover { background: rgba(239,68,68,0.12); }
 
         /* ─── MAIN PANEL ─── */
         .panel {
@@ -447,29 +480,39 @@
 <div id="main-hub">
     <!-- Sidebar -->
     <aside class="sidebar">
+        <!-- Logo -->
+        <div class="sb-logo">
+            <div class="sb-logo-icon"><i class="fa-solid fa-dragon"></i></div>
+            <div class="sb-logo-text">DEVHIMLOG</div>
+        </div>
+
         <div class="sb-section">BLOX FRUITS</div>
-        <button class="nav-item active" onclick="setTab('dashboard')">
+        <button class="nav-item active" onclick="setTab('dashboard', event)">
             <i class="fa-solid fa-gauge"></i> Dashboard
         </button>
-        <button class="nav-item" onclick="setTab('monitor')">
+        <button class="nav-item" onclick="setTab('monitor', event)">
             <i class="fa-solid fa-desktop"></i> Money Monitor
         </button>
-        <button class="nav-item" onclick="setTab('trackstat')">
+        <button class="nav-item" onclick="setTab('trackstat', event)">
             <i class="fa-solid fa-chart-line"></i> Trackstat
         </button>
 
         <div class="sb-section">TOOLS</div>
-        <a class="nav-item" href="https://blahexm.vercel.app/" target="_blank">
-            <i class="fa-solid fa-arrow-left"></i> Back to Hub
+        <a class="nav-item" href="index.html">
+            <i class="fa-solid fa-house"></i> Home Hub
         </a>
 
         <div class="sb-spacer"></div>
 
+        <!-- User card -->
         <div class="sb-user-card">
-            <div class="sb-avatar" id="sb-avatar">?</div>
-            <div class="sb-name" id="sb-name">...</div>
-            <div class="sb-key" id="sb-key">KEY: ••••••••</div>
-            <div class="sb-rank" id="sb-rank">...</div>
+            <div class="sb-user-top">
+                <div class="sb-avatar" id="sb-avatar">?</div>
+                <div>
+                    <div class="sb-name" id="sb-name">...</div>
+                    <div class="sb-key" id="sb-key">KEY: ••••••••</div>
+                </div>
+            </div>
             <button class="sb-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
             </button>
@@ -599,10 +642,10 @@
     }
 
     // ─── TABS ───
-    function setTab(tab) {
+    function setTab(tab, e) {
         currentTab = tab
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
-        event.currentTarget.classList.add('active')
+        if (e) e.currentTarget.classList.add('active')
         renderPanel()
     }
 
