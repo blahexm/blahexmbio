@@ -38,10 +38,10 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 /* SIDEBAR */
 .sb{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:50;}
 .sb::-webkit-scrollbar{width:0}
-.sb-head{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.sb-head{display:flex;align-items:center;justify-content:center;padding:22px 16px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;}
 .sb-logo{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;}
-.sb-title{font-size:15px;font-weight:900;color:#fff;letter-spacing:1px;}
-.sb-title span{color:var(--primary)}
+.sb-log-title{font-size:20px;font-weight:900;color:#fff;letter-spacing:4px;text-shadow:0 0 20px rgba(255,255,255,0.6),0 0 40px rgba(255,255,255,0.3);}
+
 .sb-glabel{padding:20px 16px 6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
 .sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:9px;color:var(--muted-fg);font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:'Poppins';}
 .sb-item i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
@@ -50,10 +50,10 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 .sb-item.active i{color:var(--primary)}
 .sb-game-row{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:1px 8px;color:var(--muted-fg);font-size:12px;font-weight:800;}
 .sb-spacer{flex:1}
-.sb-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0;}
-.sb-user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--card);border:1px solid var(--border);margin-bottom:8px;}
-.sb-avatar{width:34px;height:34px;border-radius:9px;flex-shrink:0;background:linear-gradient(135deg,#3b82f6,#7c3aed);display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:14px;font-weight:900;color:#fff;}
-.sb-uname{font-size:13px;font-weight:800;color:#fff;line-height:1.2}
+.sb-footer{padding:12px;border-top:1px solid rgba(255,255,255,0.05);flex-shrink:0;}
+.sb-user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:transparent;margin-bottom:8px;}
+.sb-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:13px;font-weight:900;color:var(--primary);}
+.sb-uname{font-size:13px;font-weight:700;color:#fff;line-height:1.2}
 .sb-ukey{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);letter-spacing:1px}
 .sb-logout{width:100%;padding:10px;border:none;cursor:pointer;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);border-radius:10px;color:var(--red);font-family:'Poppins';font-size:12px;font-weight:800;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;}
 .sb-logout:hover{background:rgba(239,68,68,0.14)}
@@ -193,12 +193,11 @@ tbody td.td-name{color:#fff;font-weight:800;}
 <div id="app" style="display:flex;flex-direction:row">
   <aside class="sb">
     <div class="sb-head">
-      <div class="sb-logo"><i class="fa-solid fa-dragon" style="font-size:12px"></i></div>
-      <div class="sb-title">DEVHIM<span>LOG</span></div>
+      <div class="sb-log-title">LOG</div>
     </div>
     <div class="sb-glabel">Games</div>
     <div class="sb-game-row">
-      <i class="fa-solid fa-dragon" style="color:#ef4444;font-size:11px"></i>
+      <img src="https://static.wikia.nocookie.net/roblox-blox-piece/images/e/e6/Site-logo.png/revision/latest?cb=20250404120109" style="height:20px;width:auto;object-fit:contain;filter:drop-shadow(0 0 4px rgba(239,68,68,0.4))">
       <span>BLOX FRUITS</span>
     </div>
     <button class="sb-item active" id="nav-money" onclick="setTab('money',this)">
