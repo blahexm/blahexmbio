@@ -2,7 +2,7 @@
 <html lang="en" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>DEVHIMLOG</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,14 +15,14 @@ html,body{height:100%;overflow:hidden;font-family:'Poppins',sans-serif;}
   --border:#27272a;--border-hover:#3f3f46;--muted:#71717a;--muted-fg:#a1a1aa;
   --primary:#3b82f6;--green:#22c55e;--red:#ef4444;
   --purple:#a855f7;--amber:#f59e0b;--cyan:#06b6d4;--text:#e4e4e7;
-  --pirate:#f97316;--marine:#3b82f6;
+  --pirate:#f97316;--marine:#3b82f6;--sb-width:220px;
 }
 body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
-/* LOGIN */
-#login-screen{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 40%,#0f172a 0%,#09090b 100%);display:flex;justify-content:center;align-items:center;}
+/* ===== LOGIN ===== */
+#login-screen{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 40%,#0f172a 0%,#09090b 100%);display:flex;justify-content:center;align-items:center;padding:20px;}
 @keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(59,130,246,0.2),0 0 40px rgba(59,130,246,0.08)}50%{box-shadow:0 0 0 1px rgba(59,130,246,0.7),0 0 60px rgba(59,130,246,0.2)}}
-.login-card{width:380px;padding:52px 44px;background:#111114;border:1px solid #1e1e22;border-radius:20px;display:flex;flex-direction:column;align-items:center;animation:breathe 3s ease-in-out infinite;}
+.login-card{width:100%;max-width:380px;padding:52px 44px;background:#111114;border:1px solid #1e1e22;border-radius:20px;display:flex;flex-direction:column;align-items:center;animation:breathe 3s ease-in-out infinite;}
 .login-icon{width:64px;height:64px;border-radius:16px;margin-bottom:24px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 0 32px rgba(59,130,246,0.45);}
 .login-title{font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;text-transform:uppercase;}
 .login-sub{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:2px;}
@@ -33,221 +33,155 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(37,99,235,0.6)}
 .login-err{margin-top:14px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);min-height:18px;letter-spacing:1px;}
 
-/* APP */
+/* ===== APP SHELL ===== */
 #app{display:none;height:100vh;width:100vw;overflow:hidden;}
 
-/* SIDEBAR */
-.sb{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:50;}
+/* ===== MOBILE TOPBAR ===== */
+.mob-topbar{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:var(--sidebar-bg);border-bottom:1px solid var(--border);z-index:200;align-items:center;justify-content:space-between;padding:0 14px;}
+.mob-title{font-size:16px;font-weight:900;color:#fff;letter-spacing:1px;}
+.mob-title span{color:var(--primary)}
+.mob-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--border);background:none;color:var(--muted-fg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.15s;}
+.mob-btn:hover{color:#fff;border-color:var(--border-hover)}
+.mob-actions{display:flex;gap:8px;}
+
+/* ===== SIDEBAR OVERLAY ===== */
+.sb-overlay{display:none;position:fixed;inset:0;z-index:149;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);}
+.sb-overlay.open{display:block;}
+
+/* ===== SIDEBAR ===== */
+.sb{position:fixed;top:0;left:0;bottom:0;width:var(--sb-width);background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;z-index:150;transition:transform .28s cubic-bezier(.4,0,.2,1);}
 .sb::-webkit-scrollbar{width:0}
-.sb-head{display:flex;align-items:center;justify-content:center;padding:18px 8px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;overflow:hidden;}
-.sb-logo{width:30px;height:30px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;}
-.sb-log-title{font-size:58px;font-weight:900;color:#fff;letter-spacing:2px;transform:rotate(-4deg);display:inline-block;text-shadow:0 0 30px rgba(255,255,255,0.8),0 0 60px rgba(255,255,255,0.4),0 0 100px rgba(255,255,255,0.2);line-height:1;}
+.sb-head{display:flex;align-items:center;justify-content:center;padding:20px 12px;border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0;}
 .sb-glabel{padding:20px 16px 6px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:2px;}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:9px;color:var(--muted-fg);font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:'Poppins';}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:1px 8px;border-radius:9px;color:var(--muted-fg);font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:'Poppins';}
 .sb-item i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
 .sb-item:hover{color:#fff;background:rgba(255,255,255,0.05)}
 .sb-item.active{color:#fff;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.15);}
 .sb-item.active i{color:var(--primary)}
-.sb-game-row{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:1px 8px;color:var(--muted-fg);font-size:12px;font-weight:800;}
+.sb-game-row{display:flex;align-items:center;gap:8px;padding:8px 14px;margin:1px 8px;color:var(--muted-fg);font-size:12px;font-weight:800;}
 .sb-spacer{flex:1}
 .sb-footer{padding:12px;border-top:1px solid rgba(255,255,255,0.05);flex-shrink:0;}
-.sb-user-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:transparent;margin-bottom:8px;}
+.sb-user-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;}
 .sb-avatar{width:32px;height:32px;border-radius:8px;flex-shrink:0;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:13px;font-weight:900;color:var(--primary);}
 .sb-uname{font-size:13px;font-weight:700;color:#fff;line-height:1.2}
 .sb-ukey{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);letter-spacing:1px}
-.sb-logout{width:100%;padding:10px;border:none;cursor:pointer;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.15);border-radius:10px;color:var(--red);font-family:'Poppins';font-size:12px;font-weight:800;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;}
-.sb-logout:hover{background:rgba(239,68,68,0.14)}
 
-/* MAIN */
-.main{margin-left:220px;height:100vh;width:calc(100vw - 220px);display:flex;flex-direction:column;overflow:hidden;}
+/* ===== MAIN ===== */
+.main{margin-left:var(--sb-width);height:100vh;width:calc(100vw - var(--sb-width));display:flex;flex-direction:column;overflow:hidden;}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--bg);}
 .breadcrumb{font-size:13px;font-weight:600;color:var(--muted)}
 .breadcrumb span{color:#fff;font-weight:800;}
-.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-right{display:flex;align-items:center;gap:8px;}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);font-family:'Poppins';font-size:12px;font-weight:700;cursor:pointer;transition:.15s;}
 .btn:hover{border-color:var(--border-hover);color:#fff;background:rgba(255,255,255,0.04)}
 .btn.danger{border-color:rgba(239,68,68,0.2);color:var(--red)}
 .btn.danger:hover{background:rgba(239,68,68,0.1)}
-.btn i{font-size:11px}
-.panel{flex:1;overflow-y:auto;padding:24px;width:100%;}
+.panel{flex:1;overflow-y:auto;padding:22px;width:100%;}
 .panel::-webkit-scrollbar{width:4px}.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.page-title{font-size:20px;font-weight:900;color:#fff;margin-bottom:18px;letter-spacing:.5px;}
 
-/* PAGE TITLE */
-.page-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:20px;letter-spacing:.5px;}
-
-/* STAT GRID */
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.stat-card{display:flex;align-items:center;gap:14px;padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:.2s;}
+/* ===== STAT GRID ===== */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.stat-card{display:flex;align-items:center;gap:12px;padding:16px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:.2s;cursor:pointer;}
 .stat-card:hover{border-color:var(--border-hover);background:var(--card-hover)}
-.stat-icon{width:46px;height:46px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.stat-label{font-size:12px;font-weight:700;color:var(--muted-fg);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;}
-.stat-val{font-size:24px;font-weight:900;color:#fff;line-height:1.1;}
+.stat-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.stat-label{font-size:11px;font-weight:700;color:var(--muted-fg);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;}
+.stat-val{font-size:22px;font-weight:900;color:#fff;line-height:1.1;}
 .stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}
 
-/* MONITOR GRID - replaced by player cards */
-.sec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;}
-.sec-card-head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.sec-card-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted-fg);flex-shrink:0;}
-.sec-card-title{font-size:15px;font-weight:800;color:#fff}
-.sec-card-sub{font-size:12px;font-weight:600;color:var(--muted)}
-
-/* PLAYER CARD CAROUSEL */
-.carousel-wrap{position:relative;margin-bottom:20px;}
-.carousel-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+/* ===== CAROUSEL — centred oval-scroll ===== */
+.carousel-section{margin-bottom:22px;}
+.carousel-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .carousel-label::after{content:'';flex:1;height:1px;background:var(--border);}
-.carousel-track-outer{overflow-x:auto;overflow-y:visible;padding:8px 4px 16px;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+
+/* pill outer: edge-fade mask gives the "oval" feel */
+.carousel-oval-outer{
+  position:relative;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,black 5%,black 95%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,black 5%,black 95%,transparent 100%);
+}
+.carousel-track-outer{
+  overflow-x:auto;overflow-y:visible;
+  padding:14px 50px 24px;
+  cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
 .carousel-track-outer::-webkit-scrollbar{display:none}
 .carousel-track-outer.grabbing{cursor:grabbing;}
-.carousel-track{display:flex;gap:14px;width:max-content;}
+/* flex centred so few cards sit in the middle; many cards scroll */
+.carousel-track{display:flex;gap:18px;min-width:100%;width:max-content;justify-content:center;}
 
-/* THE CARD */
-.pcard{
-  width:200px;flex-shrink:0;border-radius:18px;
-  position:relative;overflow:hidden;
-  background:#111318;
-  border:1px solid rgba(255,255,255,0.07);
-  transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
-  cursor:pointer;
-  animation: cardIn .4s cubic-bezier(.34,1.56,.64,1) both;
-}
-.pcard:hover{transform:translateY(-8px) scale(1.03);z-index:10;}
-.pcard.pirate:hover{box-shadow:0 20px 40px rgba(249,115,22,0.35);}
-.pcard.marine:hover{box-shadow:0 20px 40px rgba(59,130,246,0.35);}
-@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
-
-/* card bg glow layer */
-.pcard-glow{
-  position:absolute;inset:0;pointer-events:none;opacity:0;
-  transition:opacity .3s;
-}
-.pcard.pirate .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(249,115,22,0.18) 0%,transparent 70%);}
-.pcard.marine .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.18) 0%,transparent 70%);}
+/* ===== PLAYER CARD (260px, taller avatar) ===== */
+.pcard{width:260px;flex-shrink:0;border-radius:20px;position:relative;overflow:hidden;background:#111318;border:1px solid rgba(255,255,255,0.07);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease;cursor:pointer;animation:cardIn .4s cubic-bezier(.34,1.56,.64,1) both;}
+.pcard:hover{transform:translateY(-10px) scale(1.04);z-index:10;}
+.pcard.pirate:hover{box-shadow:0 24px 50px rgba(249,115,22,0.4);}
+.pcard.marine:hover{box-shadow:0 24px 50px rgba(59,130,246,0.4);}
+@keyframes cardIn{from{opacity:0;transform:translateY(22px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.pcard-glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;}
+.pcard.pirate .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(249,115,22,0.2) 0%,transparent 70%);}
+.pcard.marine .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.2) 0%,transparent 70%);}
 .pcard:hover .pcard-glow{opacity:1;}
-
-/* shimmer scan line */
-.pcard-shine{
-  position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.06) 50%,transparent 60%);
-  background-size:200% 100%;
-  background-position:200% 0;
-  transition:background-position .5s ease;
-}
+.pcard-shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.06) 50%,transparent 60%);background-size:200% 100%;background-position:200% 0;transition:background-position .5s ease;}
 .pcard:hover .pcard-shine{background-position:-200% 0;}
-
-/* avatar area */
-.pcard-avatar-wrap{
-  position:relative;height:210px;overflow:hidden;
-  display:flex;align-items:flex-end;justify-content:center;
-  background:linear-gradient(180deg,#12151e 0%,#0a0c13 100%);
-}
-.pcard-avatar-wrap::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:70px;
-  background:linear-gradient(to bottom,transparent,#111318);
-  pointer-events:none;z-index:2;
-}
-.pcard-avatar-img{
-  width:190px;height:210px;object-fit:cover;object-position:top center;
-  border-radius:0;
-  transition:transform .35s ease;
-  position:relative;z-index:1;
-}
-.pcard:hover .pcard-avatar-img{transform:scale(1.06) translateY(-4px);}
-.pcard-avatar-fb{
-  width:90px;height:90px;border-radius:50%;
-  background:rgba(59,130,246,0.1);border:3px solid rgba(59,130,246,0.2);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Poppins';font-size:32px;font-weight:900;color:var(--primary);
-  position:relative;z-index:1;margin-bottom:20px;
-}
-
-/* online dot on avatar */
-.pcard-dot{
-  position:absolute;bottom:12px;right:14px;
-  width:12px;height:12px;border-radius:50%;
-  border:2px solid #111318;z-index:2;
-}
-.pcard-dot.on{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.9);animation:pulse 1.5s infinite;}
+.pcard-avatar-wrap{position:relative;height:270px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;background:linear-gradient(180deg,#12151e 0%,#0a0c13 100%);}
+.pcard-avatar-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,transparent,#111318);pointer-events:none;z-index:2;}
+.pcard-avatar-img{width:250px;height:270px;object-fit:cover;object-position:top center;border-radius:0;transition:transform .35s ease;position:relative;z-index:1;}
+.pcard:hover .pcard-avatar-img{transform:scale(1.06) translateY(-5px);}
+.pcard-avatar-fb{width:110px;height:110px;border-radius:50%;background:rgba(59,130,246,0.1);border:3px solid rgba(59,130,246,0.2);display:flex;align-items:center;justify-content:center;font-family:'Poppins';font-size:38px;font-weight:900;color:var(--primary);position:relative;z-index:1;margin-bottom:24px;}
+.pcard-dot{position:absolute;bottom:14px;right:16px;width:13px;height:13px;border-radius:50%;border:2px solid #111318;z-index:2;}
+.pcard-dot.on{background:var(--green);box-shadow:0 0 9px rgba(34,197,94,.9);animation:pulse 1.5s infinite;}
 .pcard-dot.off{background:#3f3f46;}
-
-/* team stripe top */
-.pcard-stripe{height:3px;width:100%;}
+.pcard-stripe{height:4px;width:100%;}
 .pcard.pirate .pcard-stripe{background:linear-gradient(90deg,#ea580c,#f97316,#fb923c);}
 .pcard.marine .pcard-stripe{background:linear-gradient(90deg,#1d4ed8,#3b82f6,#60a5fa);}
-
-/* body */
-.pcard-body{padding:10px 12px 14px;position:relative;z-index:1;}
-.pcard-name{font-family:'Poppins';font-size:13px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
-.pcard-team{display:inline-flex;align-items:center;gap:3px;font-family:'Poppins';font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:5px;margin-bottom:8px;}
+.pcard-body{padding:12px 14px 16px;position:relative;z-index:1;}
+.pcard-name{font-family:'Poppins';font-size:14px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
+.pcard-team{display:inline-flex;align-items:center;gap:3px;font-family:'Poppins';font-size:10px;font-weight:800;letter-spacing:.5px;padding:3px 9px;border-radius:6px;margin-bottom:10px;}
 .pcard.pirate .pcard-team{background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.3);color:#fb923c;}
 .pcard.marine .pcard-team{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;}
-
-.pcard-divider{height:1px;background:rgba(255,255,255,0.05);margin-bottom:8px;}
-
-.pcard-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.pcard-stat-label{font-family:'Poppins';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
-.pcard-stat-val{font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#e4e4e7;}
-
-.pcard-race-row{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;}
-.pcard-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.pcard-divider{height:1px;background:rgba(255,255,255,0.05);margin-bottom:9px;}
+.pcard-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.pcard-stat-label{font-family:'Poppins';font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.pcard-stat-val{font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:#e4e4e7;}
+.pcard-race-row{margin-top:9px;display:flex;gap:5px;flex-wrap:wrap;}
+.pcard-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;}
 .pcard-tag.race{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--muted-fg);}
 .pcard-tag.fruit{background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:var(--cyan);}
+.pcard-lvbar-wrap{margin-bottom:9px;}
+.pcard-lvbar-head{display:flex;justify-content:space-between;margin-bottom:4px;}
+.pcard-lvbar-label{font-family:'Poppins';font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.pcard-lvbar-val{font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--amber);}
+.pcard-lvbar{height:4px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;}
+.pcard-lvfill{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--primary));transition:width .6s ease;}
 
-/* level bar */
-.pcard-lvbar-wrap{margin-bottom:8px;}
-.pcard-lvbar-head{display:flex;justify-content:space-between;margin-bottom:3px;}
-.pcard-lvbar-label{font-family:'Poppins';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
-.pcard-lvbar-val{font-family:'JetBrains Mono';font-size:9px;font-weight:700;color:var(--amber);}
-.pcard-lvbar{height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;}
-.pcard-lvfill{height:3px;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--primary));transition:width .6s ease;}
-
-
-
-/* PCARD TILE & LINE EFFECT (from CSS reference) */
+/* tile/line fx */
 .pcard-bg{border-radius:inherit;position:absolute;inset:0;overflow:hidden;-webkit-mask-image:radial-gradient(circle at 60% 5%,black 0%,black 15%,transparent 60%);mask-image:radial-gradient(circle at 60% 5%,black 0%,black 15%,transparent 60%);}
-.pcard-tiles{opacity:0;transition:opacity .25s;}
-.pcard:hover .pcard-tiles{opacity:1;transition-delay:.25s;}
+.pcard-tiles{opacity:0;transition:opacity .25s;}.pcard:hover .pcard-tiles{opacity:1;transition-delay:.25s;}
 .ptile{position:absolute;background-color:rgba(249,115,22,0.06);animation-duration:8s;animation-iteration-count:infinite;opacity:0;}
 .pcard.marine .ptile{background-color:rgba(59,130,246,0.06);}
 .pcard:hover .ptile{animation-name:ptile;}
-.ptile.t4,.ptile.t6,.ptile.t10{animation-delay:-2s;}
-.ptile.t3,.ptile.t5,.ptile.t8{animation-delay:-4s;}
-.ptile.t2,.ptile.t9{animation-delay:-6s;}
-.ptile.t1{top:0;left:0;height:10%;width:22.5%}
-.ptile.t2{top:0;left:22.5%;height:10%;width:27.5%}
-.ptile.t3{top:0;left:50%;height:10%;width:27.5%}
-.ptile.t4{top:0;left:77.5%;height:10%;width:22.5%}
-.ptile.t5{top:10%;left:0;height:22.5%;width:22.5%}
-.ptile.t6{top:10%;left:22.5%;height:22.5%;width:27.5%}
-.ptile.t7{top:10%;left:50%;height:22.5%;width:27.5%}
-.ptile.t8{top:10%;left:77.5%;height:22.5%;width:22.5%}
-.ptile.t9{top:32.5%;left:50%;height:22.5%;width:27.5%}
-.ptile.t10{top:32.5%;left:77.5%;height:22.5%;width:22.5%}
+.ptile.t4,.ptile.t6,.ptile.t10{animation-delay:-2s;}.ptile.t3,.ptile.t5,.ptile.t8{animation-delay:-4s;}.ptile.t2,.ptile.t9{animation-delay:-6s;}
+.ptile.t1{top:0;left:0;height:10%;width:22.5%}.ptile.t2{top:0;left:22.5%;height:10%;width:27.5%}.ptile.t3{top:0;left:50%;height:10%;width:27.5%}.ptile.t4{top:0;left:77.5%;height:10%;width:22.5%}.ptile.t5{top:10%;left:0;height:22.5%;width:22.5%}.ptile.t6{top:10%;left:22.5%;height:22.5%;width:27.5%}.ptile.t7{top:10%;left:50%;height:22.5%;width:27.5%}.ptile.t8{top:10%;left:77.5%;height:22.5%;width:22.5%}.ptile.t9{top:32.5%;left:50%;height:22.5%;width:27.5%}.ptile.t10{top:32.5%;left:77.5%;height:22.5%;width:22.5%}
 @keyframes ptile{0%,12.5%,100%{opacity:1}25%,82.5%{opacity:0}}
 .pcard-lines{position:absolute;inset:0;}
-.pline{position:absolute;inset:0;opacity:0;transition:opacity .35s;}
-.pcard:hover .pline{opacity:1;transition-duration:.15s;}
+.pline{position:absolute;inset:0;opacity:0;transition:opacity .35s;}.pcard:hover .pline{opacity:1;transition-duration:.15s;}
 .pline::before,.pline::after{content:'';position:absolute;transition:transform .35s;}
 .pline::before{left:0;right:0;height:1px;transform-origin:0 50%;transform:scaleX(0);}
 .pline::after{top:0;bottom:0;width:1px;transform-origin:50% 0;transform:scaleY(0);}
-.pcard:hover .pline::before{transform:scaleX(1);}
-.pcard:hover .pline::after{transform:scaleY(1);}
+.pcard:hover .pline::before{transform:scaleX(1);}.pcard:hover .pline::after{transform:scaleY(1);}
 .pline.pl1::before{top:10%;background:rgba(249,115,22,0.15);}.pline.pl1::after{left:22.5%;background:rgba(249,115,22,0.15);}
 .pline.pl2::before{top:32.5%;background:rgba(249,115,22,0.1);}.pline.pl2::after{left:50%;background:rgba(249,115,22,0.1);}
 .pline.pl3::before{top:55%;background:rgba(249,115,22,0.07);}.pline.pl3::after{right:22.5%;left:auto;background:rgba(249,115,22,0.07);}
 .pcard.marine .pline.pl1::before,.pcard.marine .pline.pl1::after{background:rgba(59,130,246,0.15);}
 .pcard.marine .pline.pl2::before,.pcard.marine .pline.pl2::after{background:rgba(59,130,246,0.1);}
 .pcard.marine .pline.pl3::before,.pcard.marine .pline.pl3::after{background:rgba(59,130,246,0.07);}
-.pline.pl1::before,.pline.pl1::after{transition-delay:.3s;}
-.pcard:hover .pline.pl1::before,.pcard:hover .pline.pl1::after{transition-delay:0s;}
-.pline.pl2::before,.pline.pl2::after{transition-delay:.15s;}
-.pcard:hover .pline.pl2::before,.pcard:hover .pline.pl2::after{transition-delay:.15s;}
+.pline.pl1::before,.pline.pl1::after{transition-delay:.3s;}.pcard:hover .pline.pl1::before,.pcard:hover .pline.pl1::after{transition-delay:0s;}
+.pline.pl2::before,.pline.pl2::after{transition-delay:.15s;}.pcard:hover .pline.pl2::before,.pcard:hover .pline.pl2::after{transition-delay:.15s;}
 .pcard:hover .pline.pl3::before,.pcard:hover .pline.pl3::after{transition-delay:.3s;}
-/* enhanced shine */
 .pcard-shine::before{content:'';width:150%;padding-bottom:150%;border-radius:50%;position:absolute;left:50%;bottom:55%;filter:blur(35px);opacity:.12;transform:translateX(-50%);background-image:conic-gradient(from 205deg at 50% 50%,rgba(249,115,22,0) 0deg,#f97316 25deg,rgba(251,146,60,0.18) 295deg,rgba(249,115,22,0) 360deg);transition:opacity .5s;}
 .pcard.marine .pcard-shine::before{background-image:conic-gradient(from 205deg at 50% 50%,rgba(59,130,246,0) 0deg,#3b82f6 25deg,rgba(96,165,250,0.18) 295deg,rgba(59,130,246,0) 360deg);}
 .pcard:hover .pcard-shine::before{opacity:.2;}
 
-/* PC CARD */
+/* ===== PC CARD ===== */
 .pc-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
 .pc-card-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
 .pc-card-name{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:#fff;}
@@ -262,19 +196,19 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 .pc-nv.on{color:var(--green)}.pc-nv.off{color:var(--red)}.pc-nv.tot{color:#52525b}
 .pc-nl{font-family:'JetBrains Mono';font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-/* TABLE */
-.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+/* ===== TABLE ===== */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:18px;}
 .tbl-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;}
-.tbl-search{padding:8px 14px;border-radius:9px;background:var(--bg);border:1px solid var(--border);color:#fff;font-family:'Poppins';font-size:12px;font-weight:600;outline:none;width:200px;transition:.2s;}
+.tbl-search{padding:8px 14px;border-radius:9px;background:var(--bg);border:1px solid var(--border);color:#fff;font-family:'Poppins';font-size:12px;font-weight:600;outline:none;width:180px;transition:.2s;}
 .tbl-search:focus{border-color:var(--primary)}.tbl-search::placeholder{color:var(--muted)}
-table{width:100%;border-collapse:collapse;font-size:13px}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px;}
 thead tr{border-bottom:1px solid var(--border)}
-thead th{padding:11px 16px;text-align:left;font-family:'Poppins';font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;white-space:nowrap;}
+thead th{padding:11px 14px;text-align:left;font-family:'Poppins';font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:800;text-transform:uppercase;white-space:nowrap;}
 tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:.15s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,0.02)}
-tbody td{padding:11px 16px;color:var(--muted-fg);vertical-align:middle}
-tbody td.td-name{color:#fff;font-weight:800;}
+tbody td{padding:11px 14px;color:var(--muted-fg);vertical-align:middle}
 .pc-tag{display:inline-block;margin-left:6px;font-family:'JetBrains Mono';font-size:9px;padding:2px 7px;border-radius:5px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--primary);}
 .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:7px;font-family:'Poppins';font-size:10px;font-weight:800;white-space:nowrap;letter-spacing:.5px;}
 .badge.on{background:rgba(22,163,74,0.12);border:1px solid rgba(34,197,94,0.25);color:var(--green)}
@@ -286,42 +220,32 @@ tbody td.td-name{color:#fff;font-weight:800;}
 .td-num{font-family:'JetBrains Mono';font-size:12px;color:var(--muted-fg)}
 .del{background:none;border:none;padding:6px;border-radius:7px;color:#3f3f46;cursor:pointer;transition:.15s;}
 .del:hover{background:rgba(239,68,68,0.08);color:var(--red)}
-
-/* AVATAR IN TABLE */
-.tbl-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
-.tbl-avatar-fallback{width:32px;height:32px;border-radius:50%;background:rgba(59,130,246,0.1);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:var(--primary);flex-shrink:0;}
-.tbl-player{display:flex;align-items:center;gap:10px;}
-
-/* TEAM BADGE */
 .team-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-family:'Poppins';font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap;}
 .team-badge.pirate{background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);color:#fb923c;}
 .team-badge.marine{background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;}
-
-/* RACE BADGE */
 .race-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-family:'Poppins';font-size:10px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted-fg);}
-
-/* FRUIT TAG */
 .fruit-tag{font-family:'JetBrains Mono';font-size:10px;color:var(--cyan);background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);padding:3px 8px;border-radius:6px;white-space:nowrap;}
-
-/* EMPTY */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px;gap:10px;color:var(--muted);text-align:center;}
 .empty i{font-size:30px;color:#27272a}.empty-t{font-size:14px;font-weight:800;color:#52525b}
 .empty-s{font-family:'JetBrains Mono';font-size:10px;color:#3f3f46}
+.filter-tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.ftab{padding:6px 12px;border-radius:8px;font-family:'Poppins';font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted-fg);transition:.15s;}
+.ftab:hover{color:#fff;border-color:var(--border-hover)}
+.ftab.active-all{background:rgba(255,255,255,0.06);border-color:var(--border-hover);color:#fff;}
+.ftab.active-pirate{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.3);color:#fb923c;}
+.ftab.active-marine{background:rgba(59,130,246,0.12);border-color:rgba(59,130,246,0.3);color:#60a5fa;}
 
-/* TRACK */
-.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.track-card{padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:.2s;position:relative;overflow:hidden;}
-.track-card:hover{border-color:var(--border-hover)}
+/* ===== TRACK PAGE ===== */
+.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.track-card{padding:18px;border-radius:14px;background:var(--card);border:1px solid var(--border);transition:.2s;}
 .track-label{font-family:'Poppins';font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-.track-val{font-family:'Poppins';font-size:32px;font-weight:900;line-height:1;}
+.track-val{font-family:'Poppins';font-size:30px;font-weight:900;line-height:1;}
 .track-sub{font-size:12px;font-weight:600;color:var(--muted);margin-top:6px}
-
-/* ACC GRID */
-.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .acc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;transition:.2s;}
 .acc-card:hover{border-color:var(--border-hover);background:var(--card-hover)}
 .acc-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.acc-card-name{font-size:14px;font-weight:900;color:#fff}
+.acc-card-name{font-size:13px;font-weight:900;color:#fff}
 .acc-card-money{font-family:'JetBrains Mono';font-size:13px;color:var(--green);font-weight:700;margin-bottom:8px}
 .prog-bar{background:var(--border);border-radius:4px;height:3px;margin-bottom:10px;overflow:hidden}
 .prog-fill{height:3px;border-radius:4px;background:linear-gradient(90deg,var(--amber),var(--primary))}
@@ -330,20 +254,15 @@ tbody td.td-name{color:#fff;font-weight:800;}
 .stat-box-v{font-family:'Poppins';font-size:15px;font-weight:900;}
 .stat-box-l{font-family:'Poppins';font-size:8px;font-weight:800;color:var(--muted);letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
 .acc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
-.acc-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;}
-.acc-avatar-fb{width:40px;height:40px;border-radius:50%;background:rgba(59,130,246,0.1);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:var(--primary);flex-shrink:0;}
+.sec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;margin-bottom:16px;}
+.sec-card-head{display:flex;align-items:center;justify-content:space-between;}
+.sec-card-icon{width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted-fg);flex-shrink:0;}
+.sec-card-title{font-size:15px;font-weight:800;color:#fff}
+.sec-card-sub{font-size:12px;font-weight:600;color:var(--muted)}
 
-/* TEAM FILTER TABS */
-.filter-tabs{display:flex;gap:8px;align-items:center;}
-.ftab{padding:6px 14px;border-radius:8px;font-family:'Poppins';font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted-fg);transition:.15s;}
-.ftab:hover{color:#fff;border-color:var(--border-hover)}
-.ftab.active-all{background:rgba(255,255,255,0.06);border-color:var(--border-hover);color:#fff;}
-.ftab.active-pirate{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.3);color:#fb923c;}
-.ftab.active-marine{background:rgba(59,130,246,0.12);border-color:rgba(59,130,246,0.3);color:#60a5fa;}
-
-/* MODAL */
-.overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;}
-.modal{background:#111114;border:1px solid #1e1e22;border-radius:16px;padding:28px;width:300px;text-align:center;}
+/* ===== MODAL ===== */
+.overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:#111114;border:1px solid #1e1e22;border-radius:16px;padding:28px;width:100%;max-width:300px;text-align:center;}
 .modal-ico{width:46px;height:46px;border-radius:12px;margin:0 auto 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:18px;}
 .modal-t{font-size:15px;font-weight:900;margin-bottom:6px}
 .modal-s{font-size:12px;font-weight:600;color:var(--muted);line-height:1.7;margin-bottom:22px}
@@ -353,14 +272,56 @@ tbody td.td-name{color:#fff;font-weight:800;}
 .mbtn.danger{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.15);color:var(--red)}
 .mbtn.danger:hover{background:rgba(239,68,68,0.14)}
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111114;border:1px solid #1e1e22;border-radius:12px;padding:10px 22px;font-size:12px;font-weight:700;color:#fff;z-index:9999;display:flex;align-items:center;gap:8px;animation:toastIn .2s ease;}
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111114;border:1px solid #1e1e22;border-radius:12px;padding:10px 22px;font-size:12px;font-weight:700;color:#fff;z-index:9999;display:flex;align-items:center;gap:8px;animation:toastIn .2s ease;white-space:nowrap;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}.spinning{animation:spin .6s linear infinite}
+
+/* ===== MOBILE BREAKPOINTS ===== */
+@media(max-width:768px){
+  /* Show mobile topbar */
+  .mob-topbar{display:flex;}
+  /* Hide desktop topbar */
+  .topbar{display:none;}
+  /* Sidebar slides off-screen */
+  .sb{transform:translateX(-100%);}
+  .sb.open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,0.6);}
+  /* Main: full width, shift down for mob-topbar */
+  .main{margin-left:0;width:100vw;}
+  .panel{padding:68px 14px 20px;}
+  /* Stats: 2 cols */
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:9px;}
+  .stat-val{font-size:18px;}
+  .stat-icon{width:36px;height:36px;font-size:15px;}
+  /* Cards a touch smaller */
+  .pcard{width:220px;}
+  .pcard-avatar-wrap{height:230px;}
+  .pcard-avatar-img{width:210px;height:230px;}
+  .pcard-avatar-fb{width:90px;height:90px;font-size:30px;}
+  /* Track: 2 cols */
+  .track-grid{grid-template-columns:repeat(2,1fr);}
+  .track-val{font-size:24px;}
+  /* Table toolbar stacks */
+  .tbl-toolbar{flex-direction:column;align-items:flex-start;}
+  .tbl-search{width:100%;}
+  /* Acc: 1 col */
+  .acc-grid{grid-template-columns:1fr;}
+  .page-title{font-size:17px;margin-bottom:14px;}
+  /* Carousel padding tighter */
+  .carousel-track-outer{padding:12px 20px 20px;}
+}
+@media(max-width:420px){
+  .login-card{padding:36px 22px;}
+  .pcard{width:190px;}
+  .pcard-avatar-wrap{height:205px;}
+  .pcard-avatar-img{width:180px;height:205px;}
+  .stat-grid{gap:8px;}
+}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-icon"><i class="fa-solid fa-dragon"></i></div>
@@ -372,13 +333,27 @@ tbody td.td-name{color:#fff;font-weight:800;}
   </div>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:flex;flex-direction:row">
-  <aside class="sb">
+
+  <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+
+  <!-- Mobile top bar -->
+  <div class="mob-topbar">
+    <button class="mob-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="mob-title">DEV<span>HIM</span>LOG</div>
+    <div class="mob-actions">
+      <button class="mob-btn" onclick="loadAccounts()"><i class="fa-solid fa-arrows-rotate" id="refresh-ico-mob"></i></button>
+      <button class="mob-btn danger" style="border-color:rgba(239,68,68,0.25);color:var(--red)" onclick="deleteAll()"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sb" id="sidebar">
     <div class="sb-head">
-      <div class="sb-head-avatar"><i class="fa-solid fa-dragon" style="font-size:14px"></i></div>
-      <div class="sb-head-info">
-        <div class="sb-head-name">DEVHIM<span style="color:var(--primary)">LOG</span></div>
-        <div class="sb-head-sub">Free monitoring for all items</div>
+      <div style="text-align:center;">
+        <div style="font-size:20px;font-weight:900;color:#fff;letter-spacing:2px;">DEV<span style="color:var(--primary)">HIM</span>LOG</div>
+        <div style="font-family:'JetBrains Mono';font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:5px;">Free monitoring for all items</div>
       </div>
     </div>
     <div class="sb-glabel">Games</div>
@@ -386,14 +361,14 @@ tbody td.td-name{color:#fff;font-weight:800;}
       <img src="https://img5.pic.in.th/file/secure-sv1/latestdf46ad559c43906f.png" style="height:22px;width:auto;object-fit:contain" onerror="this.style.display='none'">
       <span>Blox Fruit</span>
     </div>
-    <button class="sb-item active" id="nav-money" onclick="setTab('money',this)">
+    <button class="sb-item active" id="nav-money" onclick="setTab('money',this);closeSidebar()">
       <i class="fa-solid fa-user"></i> Player Monitor
     </button>
-    <button class="sb-item" id="nav-track" onclick="setTab('track',this)">
+    <button class="sb-item" id="nav-track" onclick="setTab('track',this);closeSidebar()">
       <i class="fa-solid fa-chart-line"></i> Trackstat
     </button>
     <div class="sb-glabel" style="margin-top:4px">Tools</div>
-    <button class="sb-item" onclick="setTab('block',this)">
+    <button class="sb-item" onclick="setTab('block',this);closeSidebar()">
       <i class="fa-solid fa-shield-halved"></i> Block ID
     </button>
     <div class="sb-spacer"></div>
@@ -406,34 +381,30 @@ tbody td.td-name{color:#fff;font-weight:800;}
             <div class="sb-ukey" id="sb-key">Starter</div>
           </div>
         </div>
-        <button onclick="logout()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-chevron-up-down" style="font-size:11px"></i></button>
+        <button onclick="logout()" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;font-size:14px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-right-from-bracket"></i></button>
       </div>
     </div>
   </aside>
 
+  <!-- MAIN -->
   <div class="main">
     <div class="topbar">
-      <div>
-        <span class="breadcrumb">Dashboard &rsaquo; <span id="tb-title">Player Monitor</span></span>
-      </div>
+      <span class="breadcrumb">Dashboard &rsaquo; <span id="tb-title">Player Monitor</span></span>
       <div class="topbar-right">
         <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:9px;font-family:'Poppins';font-size:11px;font-weight:700;color:var(--muted-fg)">
           <i class="fa-solid fa-display" style="font-size:10px;color:var(--primary)"></i>
           <span>All Devices</span>
           <span id="device-count" style="color:var(--green);font-weight:900"></span>
         </div>
-        <button class="btn" onclick="loadAccounts()">
-          <i class="fa-solid fa-arrows-rotate" id="refresh-ico"></i> Refresh
-        </button>
-        <button class="btn danger" onclick="deleteAll()">
-          <i class="fa-solid fa-trash"></i> All
-        </button>
+        <button class="btn" onclick="loadAccounts()"><i class="fa-solid fa-arrows-rotate" id="refresh-ico"></i> Refresh</button>
+        <button class="btn danger" onclick="deleteAll()"><i class="fa-solid fa-trash"></i> All</button>
       </div>
     </div>
     <div class="panel" id="panel"></div>
   </div>
 </div>
 
+<!-- MODAL -->
 <div class="overlay" id="modal" style="display:none" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-ico"><i class="fa-solid fa-trash"></i></div>
@@ -448,389 +419,262 @@ tbody td.td-name{color:#fff;font-weight:800;}
 <div class="toast" id="toast" style="display:none"></div>
 
 <script>
-const SUPA_URL = 'https://zwavwijmgjgpaembmpnl.supabase.co'
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU'
-const { createClient } = supabase
-const sb = createClient(SUPA_URL, SUPA_KEY)
-let accounts = [], currentTab = 'money', toDelUser = null, rtCh = null
-let teamFilter = 'all' // 'all' | 'Pirates' | 'Marines'
+const SUPA_URL='https://zwavwijmgjgpaembmpnl.supabase.co'
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU'
+const{createClient}=supabase
+const sb=createClient(SUPA_URL,SUPA_KEY)
+let accounts=[],currentTab='money',toDelUser=null,rtCh=null,teamFilter='all'
 
-// ---- RACE META ----
-const RACE_META = {
-  Human:   { emoji: '👤', color: '#a1a1aa' },
-  Shark:   { emoji: '🦈', color: '#63b3ed' },
-  Sky:     { emoji: '☁️', color: '#c4b5fd' },
-  Mink:    { emoji: '🐾', color: '#fbbf24' },
-  Fishman: { emoji: '🐟', color: '#34d399' },
-  Cyborg:  { emoji: '🤖', color: '#f87171' },
-  Ghoul:   { emoji: '💀', color: '#a78bfa' },
-  Draco:   { emoji: '🐉', color: '#fde047' },
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sb-overlay').classList.toggle('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open')}
+
+const RACE_META={Human:{emoji:'👤',color:'#a1a1aa'},Shark:{emoji:'🦈',color:'#63b3ed'},Sky:{emoji:'☁️',color:'#c4b5fd'},Mink:{emoji:'🐾',color:'#fbbf24'},Fishman:{emoji:'🐟',color:'#34d399'},Cyborg:{emoji:'🤖',color:'#f87171'},Ghoul:{emoji:'💀',color:'#a78bfa'},Draco:{emoji:'🐉',color:'#fde047'}}
+function getRaceMeta(r){return RACE_META[r]||{emoji:'❓',color:'#71717a'}}
+
+function teamBadgeHtml(team){
+  if(!team||team==='Unknown')return '<span style="color:var(--muted);font-size:11px">—</span>'
+  var p=team==='Pirates'
+  return '<span class="team-badge '+(p?'pirate':'marine')+'">'+(p?'☠️':'⚓')+' '+(p?'Pirate':'Marine')+'</span>'
+}
+function raceBadgeHtml(race){
+  if(!race)return ''
+  var m=getRaceMeta(race)
+  return '<span class="race-badge" style="color:'+m.color+';border-color:'+m.color+'22">'+m.emoji+' '+race+'</span>'
+}
+function fruitTagHtml(fruit){
+  if(!fruit)return '<span style="color:var(--muted);font-size:11px">—</span>'
+  return '<span class="fruit-tag">🍎 '+fruit+'</span>'
 }
 
-function getRaceMeta(race) {
-  return RACE_META[race] || { emoji: '❓', color: '#71717a' }
+var avatarCache={}
+function avatarHtml(a,size){
+  size=size||32
+  var url=avatarCache[String(a.user_id)]||avatarCache[a.username]||a.avatar_url||''
+  var fbInit=(a.username||'?')[0].toUpperCase()
+  var fb='<div style="width:'+size+'px;height:'+size+'px;border-radius:50%;background:rgba(59,130,246,0.1);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:'+Math.floor(size*.4)+'px;color:var(--primary);flex-shrink:0;">'+fbInit+'</div>'
+  if(url)return '<img src="'+url+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;" onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\''+fb.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"')+'\')">'
+  return fb
 }
 
-function teamBadgeHtml(team) {
-  if (!team || team === 'Unknown') return '<span style="color:var(--muted);font-size:11px">—</span>'
-  var isPirate = team === 'Pirates'
-  return '<span class="team-badge ' + (isPirate ? 'pirate' : 'marine') + '">'
-    + (isPirate ? '☠️' : '⚓') + ' ' + (isPirate ? 'Pirate' : 'Marine') + '</span>'
+window.onload=async function(){var k=localStorage.getItem('hexz_key');if(k){showUI(k,localStorage.getItem('hexz_label')||'...');await verifyKey(k,true)}}
+async function login(){var k=document.getElementById('key-input').value.trim();if(!k)return;setErr('Authenticating...');await verifyKey(k,false)}
+async function verifyKey(k,isAuto){
+  var res=await sb.from('access_keys').select('key_value,label,rank,active').eq('key_value',k).eq('active',true).single()
+  if(res.error||!res.data){if(!isAuto)setErr('Access Denied');else{localStorage.clear();location.reload()}return}
+  localStorage.setItem('hexz_key',k);localStorage.setItem('hexz_label',res.data.label||'User')
+  showUI(k,res.data.label||'User')
 }
-
-function raceBadgeHtml(race) {
-  if (!race) return ''
-  var m = getRaceMeta(race)
-  return '<span class="race-badge" style="color:' + m.color + ';border-color:' + m.color + '22">'
-    + m.emoji + ' ' + race + '</span>'
-}
-
-function fruitTagHtml(fruit) {
-  if (!fruit) return '<span style="color:var(--muted);font-size:11px">—</span>'
-  return '<span class="fruit-tag">🍎 ' + fruit + '</span>'
-}
-
-function avatarHtml(a, size) {
-  size = size || 32
-  if (a.avatar_url) {
-    return '<img src="' + a.avatar_url + '" '
-      + 'style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;" '
-      + 'onerror="this.outerHTML=\'<div style=&quot;width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:rgba(59,130,246,0.1);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:' + Math.floor(size*0.4) + 'px;color:var(--primary);&quot;>' + (a.username||'?')[0].toUpperCase() + '</div>\'">'
-  }
-  return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:rgba(59,130,246,0.1);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:' + Math.floor(size*0.4) + 'px;color:var(--primary);">' + (a.username||'?')[0].toUpperCase() + '</div>'
-}
-
-window.onload = async function() {
-  var k = localStorage.getItem('hexz_key')
-  if (k) { showUI(k, localStorage.getItem('hexz_label') || '...'); await verifyKey(k, true) }
-}
-
-async function login() {
-  var k = document.getElementById('key-input').value.trim()
-  if (!k) return
-  setErr('Authenticating...')
-  await verifyKey(k, false)
-}
-
-async function verifyKey(k, isAuto) {
-  var res = await sb.from('access_keys').select('key_value,label,rank,active').eq('key_value', k).eq('active', true).single()
-  if (res.error || !res.data) {
-    if (!isAuto) setErr('Access Denied')
-    else { localStorage.clear(); location.reload() }
-    return
-  }
-  localStorage.setItem('hexz_key', k)
-  localStorage.setItem('hexz_label', res.data.label || 'User')
-  showUI(k, res.data.label || 'User')
-}
-
-function showUI(key, label) {
-  document.getElementById('login-screen').style.display = 'none'
-  document.getElementById('app').style.display = 'flex'
-  document.getElementById('sb-name').textContent = label
-  document.getElementById('sb-key').textContent = 'KEY: ' + key.slice(0,4) + '••••'
-  document.getElementById('sb-ava').textContent = label.charAt(0).toUpperCase()
+function showUI(key,label){
+  document.getElementById('login-screen').style.display='none'
+  document.getElementById('app').style.display='flex'
+  document.getElementById('sb-name').textContent=label
+  document.getElementById('sb-key').textContent='KEY: '+key.slice(0,4)+'••••'
+  document.getElementById('sb-ava').textContent=label.charAt(0).toUpperCase()
   loadAccounts()
-  rtCh = sb.channel('rt-blox').on('postgres_changes', { event: '*', schema: 'public', table: 'blox_stats' }, loadAccounts).subscribe()
+  rtCh=sb.channel('rt-blox').on('postgres_changes',{event:'*',schema:'public',table:'blox_stats'},loadAccounts).subscribe()
+}
+function logout(){localStorage.clear();if(rtCh)sb.removeChannel(rtCh);location.reload()}
+function setErr(m){document.getElementById('login-err').textContent=m}
+
+async function fetchAvatars(accs){
+  var ids=accs.filter(function(a){return a.user_id&&!avatarCache[String(a.user_id)]}).map(function(a){return a.user_id})
+  if(!ids.length)return
+  try{
+    var res=await fetch('https://thumbnails.roproxy.com/v1/users/avatar?userIds='+ids.join(',')+'&size=352x352&format=Png&isCircular=false')
+    var json=await res.json()
+    if(json&&json.data)json.data.forEach(function(item){if(item.imageUrl)avatarCache[String(item.targetId)]=item.imageUrl})
+  }catch(e){console.warn('Avatar fetch failed',e)}
 }
 
-function logout() { localStorage.clear(); if(rtCh) sb.removeChannel(rtCh); location.reload() }
-function setErr(m) { document.getElementById('login-err').textContent = m }
-
-var avatarCache = {}  // user_id -> imageUrl
-
-async function fetchAvatars(accs) {
-  // collect user_ids that we don't have yet
-  var ids = accs.filter(function(a){ return a.user_id && !avatarCache[a.user_id] }).map(function(a){ return a.user_id })
-  if (!ids.length) return
-  // Roblox thumbnail API: returns JSON {data:[{targetId, imageUrl}]}
-  var url = 'https://thumbnails.roproxy.com/v1/users/avatar?userIds=' + ids.join(',') + '&size=352x352&format=Png&isCircular=false'
-  try {
-    var res = await fetch(url)
-    var json = await res.json()
-    if (json && json.data) {
-      json.data.forEach(function(item) {
-        if (item.imageUrl) avatarCache[String(item.targetId)] = item.imageUrl
-      })
-    }
-  } catch(e) { console.warn('Avatar fetch failed', e) }
-}
-
-async function loadAccounts() {
-  var ico = document.getElementById('refresh-ico')
-  if (ico) ico.classList.add('spinning')
-  var res = await sb.from('blox_stats').select('*').order('updated_at', { ascending: false })
-  if (res.data) accounts = res.data
-  var dc = document.getElementById('device-count')
-  if (dc) dc.textContent = '(' + accounts.length + ')'
-  if (ico) ico.classList.remove('spinning')
+async function loadAccounts(){
+  ['refresh-ico','refresh-ico-mob'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('spinning')})
+  var res=await sb.from('blox_stats').select('*').order('updated_at',{ascending:false})
+  if(res.data)accounts=res.data
+  var dc=document.getElementById('device-count');if(dc)dc.textContent='('+accounts.length+')'
+  ['refresh-ico','refresh-ico-mob'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('spinning')})
   await fetchAvatars(accounts)
   render()
 }
 
-function setTab(tab, el) {
-  currentTab = tab
-  teamFilter = 'all'
-  document.querySelectorAll('.sb-item').forEach(function(n){ n.classList.remove('active') })
-  if (el) el.classList.add('active')
-  var titles = { money: 'Player Monitor', track: 'Trackstat', block: 'Block ID' }
-  document.getElementById('tb-title').textContent = titles[tab] || tab
+function setTab(tab,el){
+  currentTab=tab;teamFilter='all'
+  document.querySelectorAll('.sb-item').forEach(function(n){n.classList.remove('active')})
+  if(el)el.classList.add('active')
+  var titles={money:'Player Monitor',track:'Trackstat',block:'Block ID'}
+  document.getElementById('tb-title').textContent=titles[tab]||tab
   render()
 }
+function setTeamFilter(f){teamFilter=f;render()}
+function fmt(n){if(n==null)return '—';if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(1)+'M';if(n>=1e3)return (n/1e3).toFixed(0)+'K';return n.toLocaleString()}
+function fmtFull(n){return n==null?'—':n.toLocaleString()}
 
-function setTeamFilter(f) {
-  teamFilter = f
-  render()
-}
-
-function fmt(n) {
-  if (n == null) return '—'
-  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B'
-  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M'
-  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K'
-  return n.toLocaleString()
-}
-function fmtFull(n) { return n == null ? '—' : n.toLocaleString() }
-
-function render() {
-  document.getElementById('panel').innerHTML =
-    currentTab === 'money' ? renderMoney() :
-    currentTab === 'track' ? renderTrack() : renderCS()
-  setTimeout(function() {
-    document.querySelectorAll('.carousel-track-outer').forEach(function(el) {
-      var isDown=false, startX, scrollLeft
+function render(){
+  document.getElementById('panel').innerHTML=currentTab==='money'?renderMoney():currentTab==='track'?renderTrack():renderCS()
+  setTimeout(function(){
+    document.querySelectorAll('.carousel-track-outer').forEach(function(el){
+      var isDown=false,startX,scrollLeft
       el.addEventListener('mousedown',function(e){isDown=true;el.classList.add('grabbing');startX=e.pageX-el.offsetLeft;scrollLeft=el.scrollLeft})
       el.addEventListener('mouseleave',function(){isDown=false;el.classList.remove('grabbing')})
       el.addEventListener('mouseup',function(){isDown=false;el.classList.remove('grabbing')})
       el.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();var x=e.pageX-el.offsetLeft;el.scrollLeft=scrollLeft-(x-startX)*1.2})
     })
-  }, 50)
+  },50)
 }
 
-function filteredAccounts() {
-  var el = document.getElementById('search-input')
-  var q = el ? el.value.toLowerCase() : ''
-  var list = q ? accounts.filter(function(a){ return a.username && a.username.toLowerCase().includes(q) }) : accounts
-  if (teamFilter !== 'all') list = list.filter(function(a){ return a.team === teamFilter })
+function filteredAccounts(){
+  var el=document.getElementById('search-input')
+  var q=el?el.value.toLowerCase():''
+  var list=q?accounts.filter(function(a){return a.username&&a.username.toLowerCase().includes(q)}):accounts
+  if(teamFilter!=='all')list=list.filter(function(a){return a.team===teamFilter})
   return list
 }
 
-function renderMoney() {
-  var on = accounts.filter(function(a){ return a.online })
-  var off = accounts.filter(function(a){ return !a.online })
-  var pirates = accounts.filter(function(a){ return a.team === 'Pirates' })
-  var marines = accounts.filter(function(a){ return a.team === 'Marines' })
-  var tot = accounts.reduce(function(s,a){ return s + (a.money||0) }, 0)
-  var net = Math.floor(tot * 0.9)
-  var thb = (net / 1258).toFixed(2)
-  var pcs = Array.from(new Set(accounts.map(function(a){ return a.pc }).filter(Boolean)))
-
-  var pcHtml = ''
-  if (pcs.length === 0) {
-    pcHtml = '<div class="empty"><i class="fa-solid fa-desktop"></i><div class="empty-t">No PCs found</div></div>'
-  } else {
-    pcs.forEach(function(pc) {
-      var pa = accounts.filter(function(a){ return a.pc === pc })
-      var pon = pa.filter(function(a){ return a.online }).length
-      pcHtml += '<div class="pc-card"><div class="pc-card-head"><div class="pc-card-name"><i class="fa-solid fa-display" style="color:var(--cyan);font-size:10px"></i> ' + pc + '</div><span class="pc-led ' + (pon>0?'on':'off') + '"></span></div><div class="pc-nums"><div class="pc-num"><div class="pc-nv on">' + pon + '</div><div class="pc-nl">ON</div></div><div class="pc-num"><div class="pc-nv off">' + (pa.length-pon) + '</div><div class="pc-nl">OFF</div></div><div class="pc-num"><div class="pc-nv tot">' + pa.length + '</div><div class="pc-nl">TOT</div></div></div></div>'
-    })
-  }
-
-  // filter tabs
-  var filterHtml = '<div class="filter-tabs">'
-    + '<button class="ftab ' + (teamFilter==='all'?'active-all':'') + '" onclick="setTeamFilter(\'all\')">All (' + accounts.length + ')</button>'
-    + '<button class="ftab ' + (teamFilter==='Pirates'?'active-pirate':'') + '" onclick="setTeamFilter(\'Pirates\')">☠️ Pirates (' + pirates.length + ')</button>'
-    + '<button class="ftab ' + (teamFilter==='Marines'?'active-marine':'') + '" onclick="setTeamFilter(\'Marines\')">⚓ Marines (' + marines.length + ')</button>'
-    + '</div>'
-
-  var shown = filteredAccounts()
-  var rows = ''
-  shown.forEach(function(a) {
-    var bountyLabel = (a.team === 'Marines') ? 'Honor' : 'Bounty'
-    rows += '<tr>'
-      + '<td><div style="display:flex;align-items:center;gap:8px">' + avatarHtml(a,32) + '<div><div style="font-weight:800;color:#fff;font-size:13px">' + (a.username||'') + (a.pc?'<span class="pc-tag">'+a.pc+'</span>':'') + '</div>' + teamBadgeHtml(a.team) + '</div></div></td>'
-      + '<td><span class="badge ' + (a.online?'on':'off') + '"><span class="bdot"></span>' + (a.online?'Online':'Offline') + '</span></td>'
-      + '<td class="td-money">' + fmtFull(a.money) + ' C$</td>'
-      + '<td class="td-num">' + (a.level||'—') + '</td>'
-      + '<td><div style="display:flex;flex-direction:column;gap:3px"><span style="font-family:\'JetBrains Mono\';font-size:11px;color:' + (a.team==='Marines'?'#60a5fa':'#fb923c') + ';font-weight:700">' + fmt(a.bounty) + '</span><span style="font-family:\'Poppins\';font-size:9px;font-weight:700;color:var(--muted)">' + bountyLabel + '</span></div></td>'
-      + '<td class="td-num">' + fmt(a.fragments) + '</td>'
-      + '<td>' + raceBadgeHtml(a.race) + '</td>'
-      + '<td>' + fruitTagHtml(a.devil_fruit) + '</td>'
-      + '<td><button class="del" onclick="openDel(\'' + a.username + '\')"><i class="fa-solid fa-trash"></i></button></td>'
-    + '</tr>'
-  })
-
-  var tableHtml = shown.length === 0
-    ? '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data found</div><div class="empty-s">Run script then click Refresh</div></div>'
-    : '<table><thead><tr><th>Player</th><th>Status</th><th>Money</th><th>Level</th><th>Bounty/Honor</th><th>Fragment</th><th>Race</th><th>Devil Fruit</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
-
-  // build carousel cards
-  var onCards = '', offCards = ''
-  accounts.forEach(function(a, i) {
-    var isPirate = a.team === 'Pirates'
-    var teamClass = isPirate ? 'pirate' : (a.team === 'Marines' ? 'marine' : 'pirate')
-    var teamIcon  = isPirate ? '☠️' : '⚓'
-    var teamLabel = isPirate ? 'PIRATE' : 'MARINE'
-    var bountyLabel = isPirate ? 'BOUNTY' : 'HONOR'
-    var bountyColor = isPirate ? '#fb923c' : '#60a5fa'
-    var raceMeta = getRaceMeta(a.race)
-    var lvPct = Math.min(100, ((a.level||0)/2800*100)).toFixed(1)
-    var delay = (i * 0.06).toFixed(2)
-
-    // proxy to bypass Roblox CORS
-    var proxySrc = avatarCache[a.user_id] || avatarCache[a.username] || ''
-    var fbInit = (a.username||'?')[0].toUpperCase()
-    var avatarInner = proxySrc
-      ? '<img class="pcard-avatar-img" src="'+proxySrc+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
-        + '<div class="pcard-avatar-fb" style="display:none">'+fbInit+'</div>'
-      : '<div class="pcard-avatar-fb">'+fbInit+'</div>'
-
-    var bgTiles = '<div class="pcard-bg"><div class="pcard-tiles">'
-      + '<div class="ptile t1"></div><div class="ptile t2"></div><div class="ptile t3"></div><div class="ptile t4"></div>'
-      + '<div class="ptile t5"></div><div class="ptile t6"></div><div class="ptile t7"></div><div class="ptile t8"></div>'
-      + '<div class="ptile t9"></div><div class="ptile t10"></div>'
-      + '</div><div class="pcard-lines">'
-      + '<div class="pline pl1"></div><div class="pline pl2"></div><div class="pline pl3"></div>'
-      + '</div></div>'
-
-    var card = '<div class="pcard '+teamClass+'" style="animation-delay:'+delay+'s">'
-      + '<div class="pcard-stripe"></div>'
-      + '<div class="pcard-glow"></div>'
-      + '<div class="pcard-shine"></div>'
-      + bgTiles
-      + '<div class="pcard-avatar-wrap">'
-      +   avatarInner
-      +   '<span class="pcard-dot '+(a.online?'on':'off')+'"></span>'
-      + '</div>'
-      + '<div class="pcard-body">'
-      +   '<div class="pcard-name">'+a.username+'</div>'
-      +   '<div class="pcard-team">'+teamIcon+' '+teamLabel+'</div>'
-      +   '<div class="pcard-lvbar-wrap">'
-      +     '<div class="pcard-lvbar-head"><span class="pcard-lvbar-label">Level</span><span class="pcard-lvbar-val">'+(a.level||0)+'</span></div>'
-      +     '<div class="pcard-lvbar"><div class="pcard-lvfill" style="width:'+lvPct+'%"></div></div>'
-      +   '</div>'
-      +   '<div class="pcard-divider"></div>'
-      +   '<div class="pcard-stat"><span class="pcard-stat-label">'+bountyLabel+'</span><span class="pcard-stat-val" style="color:'+bountyColor+'">'+fmt(a.bounty)+'</span></div>'
-      +   '<div class="pcard-stat"><span class="pcard-stat-label">Beli</span><span class="pcard-stat-val" style="color:var(--green)">'+fmt(a.money)+'</span></div>'
-      +   '<div class="pcard-stat"><span class="pcard-stat-label">Frags</span><span class="pcard-stat-val" style="color:var(--cyan)">'+fmt(a.fragments)+'</span></div>'
-      +   '<div class="pcard-race-row">'
-      +     (a.race ? '<span class="pcard-tag race" style="color:'+raceMeta.color+'">'+raceMeta.emoji+' '+a.race+'</span>' : '')
-      +     (a.devil_fruit ? '<span class="pcard-tag fruit">🍎 '+a.devil_fruit+'</span>' : '')
-      +   '</div>'
-      + '</div>'
-    + '</div>'
-
-    if (a.online) onCards += card
-    else offCards += card
-  })
-
-  var carouselHtml = ''
-  if (accounts.length === 0) {
-    carouselHtml = '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No players found</div><div class="empty-s">Run script then click Refresh</div></div>'
-  } else {
-    if (onCards) carouselHtml += '<div class="carousel-label"><i class="fa-solid fa-wifi" style="color:var(--green)"></i> Online — ' + on.length + '</div><div class="carousel-wrap"><div class="carousel-track-outer" id="ct-on"><div class="carousel-track">' + onCards + '</div></div></div>'
-    if (offCards) carouselHtml += '<div class="carousel-label" style="margin-top:4px"><i class="fa-solid fa-wifi" style="color:var(--muted)"></i> Offline — ' + off.length + '</div><div class="carousel-wrap"><div class="carousel-track-outer" id="ct-off"><div class="carousel-track">' + offCards + '</div></div></div>'
-  }
-
-  return '<div class="page-title">Player Monitor</div>'
-    + '<div class="stat-grid">'
-    + '<div class="stat-card"><div class="stat-icon" style="background:rgba(34,197,94,0.08)"><i class="fa-solid fa-wifi" style="color:var(--green)"></i></div><div><div class="stat-label">Online</div><div class="stat-val green">' + on.length + '</div></div></div>'
-    + '<div class="stat-card"><div class="stat-icon" style="background:rgba(239,68,68,0.08)"><i class="fa-solid fa-wifi" style="color:var(--red)"></i></div><div><div class="stat-label">Offline</div><div class="stat-val red">' + off.length + '</div></div></div>'
-    + '<div class="stat-card" style="cursor:pointer" onclick="setTeamFilter(teamFilter===\'Pirates\'?\'all\':\'Pirates\')"><div class="stat-icon" style="background:rgba(249,115,22,0.08)"><span style="font-size:20px">☠️</span></div><div><div class="stat-label">Pirates</div><div class="stat-val" style="color:#fb923c">' + pirates.length + '</div></div></div>'
-    + '<div class="stat-card" style="cursor:pointer" onclick="setTeamFilter(teamFilter===\'Marines\'?\'all\':\'Marines\')"><div class="stat-icon" style="background:rgba(59,130,246,0.08)"><span style="font-size:20px">⚓</span></div><div><div class="stat-label">Marines</div><div class="stat-val" style="color:#60a5fa">' + marines.length + '</div></div></div>'
-    + '</div>'
-    + carouselHtml
-    + '<div class="tbl-wrap" style="margin-top:20px"><div class="tbl-toolbar"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:900;color:#fff">Active Accounts</span><span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted)">' + shown.length + '</span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + filterHtml + '<input class="tbl-search" placeholder="Search..." id="search-input" oninput="render()"></div></div>' + tableHtml + '</div>'
+function buildCard(a,i){
+  var isPirate=a.team==='Pirates'
+  var teamClass=isPirate?'pirate':(a.team==='Marines'?'marine':'pirate')
+  var teamIcon=isPirate?'☠️':'⚓'
+  var teamLabel=isPirate?'PIRATE':'MARINE'
+  var bountyLabel=isPirate?'BOUNTY':'HONOR'
+  var bountyColor=isPirate?'#fb923c':'#60a5fa'
+  var raceMeta=getRaceMeta(a.race)
+  var lvPct=Math.min(100,((a.level||0)/2800*100)).toFixed(1)
+  var delay=(i*0.06).toFixed(2)
+  var proxySrc=avatarCache[String(a.user_id)]||avatarCache[a.username]||''
+  var fbInit=(a.username||'?')[0].toUpperCase()
+  var avatarInner=proxySrc
+    ?'<img class="pcard-avatar-img" src="'+proxySrc+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'"><div class="pcard-avatar-fb" style="display:none">'+fbInit+'</div>'
+    :'<div class="pcard-avatar-fb">'+fbInit+'</div>'
+  var bgTiles='<div class="pcard-bg"><div class="pcard-tiles"><div class="ptile t1"></div><div class="ptile t2"></div><div class="ptile t3"></div><div class="ptile t4"></div><div class="ptile t5"></div><div class="ptile t6"></div><div class="ptile t7"></div><div class="ptile t8"></div><div class="ptile t9"></div><div class="ptile t10"></div></div><div class="pcard-lines"><div class="pline pl1"></div><div class="pline pl2"></div><div class="pline pl3"></div></div></div>'
+  return '<div class="pcard '+teamClass+'" style="animation-delay:'+delay+'s">'
+    +'<div class="pcard-stripe"></div><div class="pcard-glow"></div><div class="pcard-shine"></div>'+bgTiles
+    +'<div class="pcard-avatar-wrap">'+avatarInner+'<span class="pcard-dot '+(a.online?'on':'off')+'"></span></div>'
+    +'<div class="pcard-body">'
+    +'<div class="pcard-name">'+a.username+'</div>'
+    +'<div class="pcard-team">'+teamIcon+' '+teamLabel+'</div>'
+    +'<div class="pcard-lvbar-wrap"><div class="pcard-lvbar-head"><span class="pcard-lvbar-label">Level</span><span class="pcard-lvbar-val">'+(a.level||0)+'</span></div><div class="pcard-lvbar"><div class="pcard-lvfill" style="width:'+lvPct+'%"></div></div></div>'
+    +'<div class="pcard-divider"></div>'
+    +'<div class="pcard-stat"><span class="pcard-stat-label">'+bountyLabel+'</span><span class="pcard-stat-val" style="color:'+bountyColor+'">'+fmt(a.bounty)+'</span></div>'
+    +'<div class="pcard-stat"><span class="pcard-stat-label">Beli</span><span class="pcard-stat-val" style="color:var(--green)">'+fmt(a.money)+'</span></div>'
+    +'<div class="pcard-stat"><span class="pcard-stat-label">Frags</span><span class="pcard-stat-val" style="color:var(--cyan)">'+fmt(a.fragments)+'</span></div>'
+    +'<div class="pcard-race-row">'+(a.race?'<span class="pcard-tag race" style="color:'+raceMeta.color+'">'+raceMeta.emoji+' '+a.race+'</span>':'')+(a.devil_fruit?'<span class="pcard-tag fruit">🍎 '+a.devil_fruit+'</span>':'')+'</div>'
+    +'</div></div>'
 }
 
-function renderTrack() {
-  var on = accounts.filter(function(a){ return a.online })
-  var maxLv = accounts.reduce(function(m,a){ return Math.max(m,a.level||0) }, 0)
-  var pcs = Array.from(new Set(accounts.map(function(a){ return a.pc }).filter(Boolean)))
-  var tot = accounts.reduce(function(s,a){ return s+(a.money||0) }, 0)
-  var pirates = accounts.filter(function(a){ return a.team === 'Pirates' })
-  var marines = accounts.filter(function(a){ return a.team === 'Marines' })
+function renderMoney(){
+  var on=accounts.filter(function(a){return a.online})
+  var off=accounts.filter(function(a){return !a.online})
+  var pirates=accounts.filter(function(a){return a.team==='Pirates'})
+  var marines=accounts.filter(function(a){return a.team==='Marines'})
+  var shown=filteredAccounts()
 
-  var pcHtml = ''
-  pcs.forEach(function(pc) {
-    var pa = accounts.filter(function(a){ return a.pc===pc })
-    var pon = pa.filter(function(a){ return a.online }).length
-    pcHtml += '<div class="pc-card" style="min-width:160px"><div class="pc-card-head"><div class="pc-card-name"><i class="fa-solid fa-display" style="color:var(--cyan);font-size:10px"></i> '+pc+'</div><span class="pc-led '+(pon>0?'on':'off')+'"></span></div><div class="pc-nums"><div class="pc-num"><div class="pc-nv on">'+pon+'</div><div class="pc-nl">ON</div></div><div class="pc-num"><div class="pc-nv off">'+(pa.length-pon)+'</div><div class="pc-nl">OFF</div></div><div class="pc-num"><div class="pc-nv tot">'+pa.length+'</div><div class="pc-nl">TOT</div></div></div></div>'
+  var onCards='',offCards=''
+  accounts.forEach(function(a,i){var c=buildCard(a,i);if(a.online)onCards+=c;else offCards+=c})
+
+  var carouselHtml=''
+  if(accounts.length===0){
+    carouselHtml='<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No players found</div><div class="empty-s">Run script then click Refresh</div></div>'
+  }else{
+    if(onCards)carouselHtml+='<div class="carousel-section"><div class="carousel-label"><i class="fa-solid fa-wifi" style="color:var(--green)"></i> Online — '+on.length+'</div><div class="carousel-oval-outer"><div class="carousel-track-outer"><div class="carousel-track">'+onCards+'</div></div></div></div>'
+    if(offCards)carouselHtml+='<div class="carousel-section"><div class="carousel-label"><i class="fa-solid fa-wifi" style="color:var(--muted)"></i> Offline — '+off.length+'</div><div class="carousel-oval-outer"><div class="carousel-track-outer"><div class="carousel-track">'+offCards+'</div></div></div></div>'
+  }
+
+  var rows=''
+  shown.forEach(function(a){
+    var bLabel=a.team==='Marines'?'Honor':'Bounty'
+    rows+='<tr>'
+      +'<td><div style="display:flex;align-items:center;gap:8px">'+avatarHtml(a,32)+'<div><div style="font-weight:800;color:#fff;font-size:13px">'+(a.username||'')+(a.pc?'<span class="pc-tag">'+a.pc+'</span>':'')+'</div>'+teamBadgeHtml(a.team)+'</div></div></td>'
+      +'<td><span class="badge '+(a.online?'on':'off')+'"><span class="bdot"></span>'+(a.online?'Online':'Offline')+'</span></td>'
+      +'<td class="td-money">'+fmtFull(a.money)+' C$</td>'
+      +'<td class="td-num">'+(a.level||'—')+'</td>'
+      +'<td><div style="display:flex;flex-direction:column;gap:3px"><span style="font-family:\'JetBrains Mono\';font-size:11px;color:'+(a.team==='Marines'?'#60a5fa':'#fb923c')+';font-weight:700">'+fmt(a.bounty)+'</span><span style="font-family:\'Poppins\';font-size:9px;font-weight:700;color:var(--muted)">'+bLabel+'</span></div></td>'
+      +'<td class="td-num">'+fmt(a.fragments)+'</td>'
+      +'<td>'+raceBadgeHtml(a.race)+'</td>'
+      +'<td>'+fruitTagHtml(a.devil_fruit)+'</td>'
+      +'<td><button class="del" onclick="openDel(\''+a.username+'\')"><i class="fa-solid fa-trash"></i></button></td>'
+    +'</tr>'
   })
-  if (!pcHtml) pcHtml = '<div class="empty" style="padding:24px"><i class="fa-solid fa-desktop"></i><div class="empty-t">No PCs</div></div>'
 
-  var accHtml = ''
-  accounts.forEach(function(a) {
-    var bountyColor = a.team === 'Marines' ? '#60a5fa' : '#fb923c'
-    var bountyLabel = a.team === 'Marines' ? 'HONOR' : 'BOUNTY'
-    accHtml += '<div class="acc-card">'
-      + '<div class="acc-card-top">'
-      + '<div style="display:flex;align-items:center;gap:10px">'
-      + avatarHtml(a, 40)
-      + '<div><div class="acc-card-name">'+a.username+(a.pc?'<span class="pc-tag">'+a.pc+'</span>':'')+'</div>'
-      + teamBadgeHtml(a.team)
-      + '</div></div>'
-      + '<button class="del" onclick="openDel(\''+a.username+'\')"><i class="fa-solid fa-trash"></i></button></div>'
-      + '<div class="acc-card-money">'+fmtFull(a.money)+' C$</div>'
-      + '<div class="prog-bar"><div class="prog-fill" style="width:'+Math.min(100,(a.level||0)/2000*100)+'%"></div></div>'
-      + '<div class="stat-row3">'
-      + '<div class="stat-box"><div class="stat-box-v" style="color:var(--purple)">'+(a.level||0)+'</div><div class="stat-box-l">LV</div></div>'
-      + '<div class="stat-box"><div class="stat-box-v" style="color:'+bountyColor+'">'+fmt(a.bounty)+'</div><div class="stat-box-l">'+bountyLabel+'</div></div>'
-      + '<div class="stat-box"><div class="stat-box-v" style="color:var(--cyan)">'+fmt(a.fragments)+'</div><div class="stat-box-l">FRAG</div></div>'
-      + '</div>'
-      + '<div class="acc-meta">'
-      + raceBadgeHtml(a.race)
-      + fruitTagHtml(a.devil_fruit)
-      + '</div>'
-    + '</div>'
+  var filterHtml='<div class="filter-tabs">'
+    +'<button class="ftab '+(teamFilter==='all'?'active-all':'')+'" onclick="setTeamFilter(\'all\')">All ('+accounts.length+')</button>'
+    +'<button class="ftab '+(teamFilter==='Pirates'?'active-pirate':'')+'" onclick="setTeamFilter(\'Pirates\')">☠️ Pirates ('+pirates.length+')</button>'
+    +'<button class="ftab '+(teamFilter==='Marines'?'active-marine':'')+'" onclick="setTeamFilter(\'Marines\')">⚓ Marines ('+marines.length+')</button>'
+    +'</div>'
+
+  var tableHtml=shown.length===0
+    ?'<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data found</div><div class="empty-s">Run script then click Refresh</div></div>'
+    :'<div class="tbl-scroll"><table><thead><tr><th>Player</th><th>Status</th><th>Money</th><th>Level</th><th>Bounty/Honor</th><th>Fragment</th><th>Race</th><th>Devil Fruit</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+
+  return '<div class="page-title">Player Monitor</div>'
+    +'<div class="stat-grid">'
+    +'<div class="stat-card"><div class="stat-icon" style="background:rgba(34,197,94,0.08)"><i class="fa-solid fa-wifi" style="color:var(--green)"></i></div><div><div class="stat-label">Online</div><div class="stat-val green">'+on.length+'</div></div></div>'
+    +'<div class="stat-card"><div class="stat-icon" style="background:rgba(239,68,68,0.08)"><i class="fa-solid fa-wifi" style="color:var(--red)"></i></div><div><div class="stat-label">Offline</div><div class="stat-val red">'+off.length+'</div></div></div>'
+    +'<div class="stat-card" onclick="setTeamFilter(teamFilter===\'Pirates\'?\'all\':\'Pirates\')"><div class="stat-icon" style="background:rgba(249,115,22,0.08)"><span style="font-size:18px">☠️</span></div><div><div class="stat-label">Pirates</div><div class="stat-val" style="color:#fb923c">'+pirates.length+'</div></div></div>'
+    +'<div class="stat-card" onclick="setTeamFilter(teamFilter===\'Marines\'?\'all\':\'Marines\')"><div class="stat-icon" style="background:rgba(59,130,246,0.08)"><span style="font-size:18px">⚓</span></div><div><div class="stat-label">Marines</div><div class="stat-val" style="color:#60a5fa">'+marines.length+'</div></div></div>'
+    +'</div>'
+    +carouselHtml
+    +'<div class="tbl-wrap"><div class="tbl-toolbar"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:900;color:#fff">Active Accounts</span><span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted)">'+shown.length+'</span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+filterHtml+'<input class="tbl-search" placeholder="Search..." id="search-input" oninput="render()"></div></div>'+tableHtml+'</div>'
+}
+
+function renderTrack(){
+  var on=accounts.filter(function(a){return a.online})
+  var maxLv=accounts.reduce(function(m,a){return Math.max(m,a.level||0)},0)
+  var pcs=Array.from(new Set(accounts.map(function(a){return a.pc}).filter(Boolean)))
+  var tot=accounts.reduce(function(s,a){return s+(a.money||0)},0)
+  var pirates=accounts.filter(function(a){return a.team==='Pirates'})
+  var marines=accounts.filter(function(a){return a.team==='Marines'})
+
+  var pcHtml=''
+  pcs.forEach(function(pc){
+    var pa=accounts.filter(function(a){return a.pc===pc})
+    var pon=pa.filter(function(a){return a.online}).length
+    pcHtml+='<div class="pc-card" style="min-width:150px"><div class="pc-card-head"><div class="pc-card-name"><i class="fa-solid fa-display" style="color:var(--cyan);font-size:10px"></i> '+pc+'</div><span class="pc-led '+(pon>0?'on':'off')+'"></span></div><div class="pc-nums"><div class="pc-num"><div class="pc-nv on">'+pon+'</div><div class="pc-nl">ON</div></div><div class="pc-num"><div class="pc-nv off">'+(pa.length-pon)+'</div><div class="pc-nl">OFF</div></div><div class="pc-num"><div class="pc-nv tot">'+pa.length+'</div><div class="pc-nl">TOT</div></div></div></div>'
+  })
+  if(!pcHtml)pcHtml='<div class="empty" style="padding:24px"><i class="fa-solid fa-desktop"></i><div class="empty-t">No PCs</div></div>'
+
+  var accHtml=''
+  accounts.forEach(function(a){
+    var bc=a.team==='Marines'?'#60a5fa':'#fb923c'
+    var bl=a.team==='Marines'?'HONOR':'BOUNTY'
+    accHtml+='<div class="acc-card"><div class="acc-card-top"><div style="display:flex;align-items:center;gap:10px">'+avatarHtml(a,40)+'<div><div class="acc-card-name">'+a.username+(a.pc?'<span class="pc-tag">'+a.pc+'</span>':'')+'</div>'+teamBadgeHtml(a.team)+'</div></div><button class="del" onclick="openDel(\''+a.username+'\')"><i class="fa-solid fa-trash"></i></button></div><div class="acc-card-money">'+fmtFull(a.money)+' C$</div><div class="prog-bar"><div class="prog-fill" style="width:'+Math.min(100,(a.level||0)/2000*100)+'%"></div></div><div class="stat-row3"><div class="stat-box"><div class="stat-box-v" style="color:var(--purple)">'+(a.level||0)+'</div><div class="stat-box-l">LV</div></div><div class="stat-box"><div class="stat-box-v" style="color:'+bc+'">'+fmt(a.bounty)+'</div><div class="stat-box-l">'+bl+'</div></div><div class="stat-box"><div class="stat-box-v" style="color:var(--cyan)">'+fmt(a.fragments)+'</div><div class="stat-box-l">FRAG</div></div></div><div class="acc-meta">'+raceBadgeHtml(a.race)+fruitTagHtml(a.devil_fruit)+'</div></div>'
   })
 
   return '<div class="page-title">Trackstat</div>'
-    + '<div class="track-grid">'
-    + '<div class="track-card" style="border-bottom:3px solid var(--purple)"><div class="track-label" style="color:var(--purple)">MAX LEVEL</div><div class="track-val" style="color:var(--purple)">'+maxLv+'</div><div class="track-sub">Highest Account</div></div>'
-    + '<div class="track-card" style="border-bottom:3px solid var(--cyan)"><div class="track-label" style="color:var(--cyan)">TOTAL ACCTS</div><div class="track-val" style="color:var(--cyan)">'+accounts.length+'</div><div class="track-sub">All Accounts</div></div>'
-    + '<div class="track-card" style="border-bottom:3px solid #fb923c"><div class="track-label" style="color:#fb923c">☠️ PIRATES</div><div class="track-val" style="color:#fb923c">'+pirates.length+'</div><div class="track-sub">vs ⚓ Marines: '+marines.length+'</div></div>'
-    + '<div class="track-card" style="border-bottom:3px solid var(--amber)"><div class="track-label" style="color:var(--amber)">TOTAL MONEY</div><div class="track-val" style="color:var(--amber);font-size:26px">'+fmt(tot)+' C$</div><div class="track-sub">Combined</div></div>'
-    + '</div>'
-    + '<div class="sec-card" style="margin-bottom:16px"><div class="sec-card-head"><div style="display:flex;align-items:center;gap:12px"><div class="sec-card-icon"><i class="fa-solid fa-desktop"></i></div><div><div class="sec-card-title">PC Monitor</div><div class="sec-card-sub">'+pcs.length+' PCs total</div></div></div><div style="display:flex;gap:8px"><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--green)">ON: '+on.length+'</span><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--red)">OFF: '+(accounts.length-on.length)+'</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap">'+pcHtml+'</div></div>'
-    + '<div style="font-size:14px;font-weight:900;color:#fff;margin-bottom:12px">Active Accounts <span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);margin-left:6px">'+accounts.length+'</span></div>'
-    + (accounts.length===0?'<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data</div></div>':'<div class="acc-grid">'+accHtml+'</div>')
+    +'<div class="track-grid">'
+    +'<div class="track-card" style="border-bottom:3px solid var(--purple)"><div class="track-label" style="color:var(--purple)">MAX LEVEL</div><div class="track-val" style="color:var(--purple)">'+maxLv+'</div><div class="track-sub">Highest Account</div></div>'
+    +'<div class="track-card" style="border-bottom:3px solid var(--cyan)"><div class="track-label" style="color:var(--cyan)">TOTAL ACCTS</div><div class="track-val" style="color:var(--cyan)">'+accounts.length+'</div><div class="track-sub">All Accounts</div></div>'
+    +'<div class="track-card" style="border-bottom:3px solid #fb923c"><div class="track-label" style="color:#fb923c">☠️ PIRATES</div><div class="track-val" style="color:#fb923c">'+pirates.length+'</div><div class="track-sub">vs ⚓ Marines: '+marines.length+'</div></div>'
+    +'<div class="track-card" style="border-bottom:3px solid var(--amber)"><div class="track-label" style="color:var(--amber)">TOTAL MONEY</div><div class="track-val" style="color:var(--amber);font-size:24px">'+fmt(tot)+' C$</div><div class="track-sub">Combined</div></div>'
+    +'</div>'
+    +'<div class="sec-card"><div class="sec-card-head"><div style="display:flex;align-items:center;gap:12px"><div class="sec-card-icon"><i class="fa-solid fa-desktop"></i></div><div><div class="sec-card-title">PC Monitor</div><div class="sec-card-sub">'+pcs.length+' PCs total</div></div></div><div style="display:flex;gap:8px"><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--green)">ON: '+on.length+'</span><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--red)">OFF: '+(accounts.length-on.length)+'</span></div></div><div style="display:flex;gap:8px;flex-wrap:wrap">'+pcHtml+'</div></div>'
+    +'<div style="font-size:14px;font-weight:900;color:#fff;margin-bottom:12px">Active Accounts <span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);margin-left:6px">'+accounts.length+'</span></div>'
+    +(accounts.length===0?'<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data</div></div>':'<div class="acc-grid">'+accHtml+'</div>')
 }
 
-function renderCS() {
+function renderCS(){
   return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:50vh;gap:14px">'
-    + '<div style="width:56px;height:56px;border-radius:14px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--muted)"><i class="fa-solid fa-shield-halved"></i></div>'
-    + '<div style="font-size:20px;font-weight:900;color:#fff">Block ID</div>'
-    + '<div style="font-family:\'JetBrains Mono\';font-size:11px;color:var(--muted)">coming soon</div>'
-    + '</div>'
+    +'<div style="width:56px;height:56px;border-radius:14px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--muted)"><i class="fa-solid fa-shield-halved"></i></div>'
+    +'<div style="font-size:20px;font-weight:900;color:#fff">Block ID</div>'
+    +'<div style="font-family:\'JetBrains Mono\';font-size:11px;color:var(--muted)">coming soon</div>'
+    +'</div>'
 }
 
-function openDel(u) {
-  toDelUser = u
-  document.getElementById('modal-s').innerHTML = 'Delete data for <strong>' + u + '</strong>?'
-  document.getElementById('modal').style.display = 'flex'
+function openDel(u){toDelUser=u;document.getElementById('modal-s').innerHTML='Delete data for <strong>'+u+'</strong>?';document.getElementById('modal').style.display='flex'}
+function closeModal(){document.getElementById('modal').style.display='none';toDelUser=null}
+async function confirmDelete(){
+  if(!toDelUser)return
+  await sb.from('blox_stats').delete().eq('username',toDelUser)
+  accounts=accounts.filter(function(a){return a.username!==toDelUser})
+  closeModal();render();toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> Deleted')
 }
-function closeModal() { document.getElementById('modal').style.display = 'none'; toDelUser = null }
-
-async function confirmDelete() {
-  if (!toDelUser) return
-  await sb.from('blox_stats').delete().eq('username', toDelUser)
-  accounts = accounts.filter(function(a){ return a.username !== toDelUser })
-  closeModal(); render()
-  toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> Deleted')
+async function deleteAll(){
+  if(!confirm('Delete ALL accounts?'))return
+  await sb.from('blox_stats').delete().neq('username','')
+  accounts=[];render();toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> All deleted')
 }
-
-async function deleteAll() {
-  if (!confirm('Delete ALL accounts?')) return
-  await sb.from('blox_stats').delete().neq('username', '')
-  accounts = []; render()
-  toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> All deleted')
-}
-
-function toast(msg) {
-  var t = document.getElementById('toast')
-  t.innerHTML = msg; t.style.display = 'flex'
-  setTimeout(function(){ t.style.display = 'none' }, 2500)
+function toast(msg){
+  var t=document.getElementById('toast')
+  t.innerHTML=msg;t.style.display='flex'
+  setTimeout(function(){t.style.display='none'},2500)
 }
 </script>
 </body>
