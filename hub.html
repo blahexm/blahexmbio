@@ -1,892 +1,904 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEVHIMLOG</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --bg: #050505;
-            --card: #131316;
-            --text: #e4e4e7;
-            --blue: #3b82f6;
-            --blue-dark: #1d4ed8;
-            --cyan: #06b6d4;
-            --blue-glow: rgba(59, 130, 246, 0.5);
-            --purple: #c084fc;
-            --red: #ef4444;
-            --green: #44ef4d;
-            --amber: #f59e0b;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEVHIMLOG</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Poppins',sans-serif;
+  background:#09090b;
+  color:#e4e4e7;
+  display:flex;
+  flex-direction:column;
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── TOKENS (hermanos dark theme) ── */
+:root{
+  --bg:#09090b;
+  --sidebar-bg:#09090b;
+  --card:#18181b;
+  --card-hover:#1f1f23;
+  --border:#27272a;
+  --border-hover:#3f3f46;
+  --muted:#71717a;
+  --muted-fg:#a1a1aa;
+  --primary:#3b82f6;
+  --primary-hover:#2563eb;
+  --green:#22c55e;
+  --red:#ef4444;
+  --purple:#a855f7;
+  --amber:#f59e0b;
+  --cyan:#06b6d4;
+  --text:#e4e4e7;
+  --text-dim:#a1a1aa;
+}
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Poppins', sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background-image: radial-gradient(circle at center, #0f172a 0%, #000 90%);
-        }
+/* ── LOGIN ── */
+#login-screen{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at 50% 40%, #0f172a 0%, #09090b 100%);
+  display:flex;justify-content:center;align-items:center;
+}
 
-        /* ─── LOGIN ─── */
-        #login-screen {
-            position: fixed; inset: 0;
-            background: #000; z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-            transition: opacity 0.5s;
-        }
+@keyframes breathe{
+  0%,100%{box-shadow:0 0 0 1px rgba(59,130,246,0.2), 0 0 30px rgba(59,130,246,0.08)}
+  50%{box-shadow:0 0 0 1px rgba(59,130,246,0.6), 0 0 50px rgba(59,130,246,0.2)}
+}
 
-        @keyframes blueBreath {
-            0%   { box-shadow: 0 0 15px rgba(59,130,246,0.1), inset 0 0 10px rgba(59,130,246,0.05); border-color: #1e3a8a; }
-            50%  { box-shadow: 0 0 30px rgba(59,130,246,0.4), inset 0 0 20px rgba(59,130,246,0.1); border-color: var(--blue); }
-            100% { box-shadow: 0 0 15px rgba(59,130,246,0.1), inset 0 0 10px rgba(59,130,246,0.05); border-color: #1e3a8a; }
-        }
+.login-card{
+  width:360px;padding:48px 40px;
+  background:#18181b;
+  border:1px solid #27272a;
+  border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;
+  animation:breathe 3s ease-in-out infinite;
+}
+.login-icon{
+  width:56px;height:56px;border-radius:14px;margin-bottom:20px;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:#fff;
+  box-shadow:0 0 24px rgba(59,130,246,0.4);
+}
+.login-title{font-size:20px;font-weight:700;color:#fff;letter-spacing:1px}
+.login-sub{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:1px}
+.login-input{
+  width:100%;margin:24px 0 12px;
+  padding:12px 16px;
+  background:#09090b;border:1px solid #27272a;border-radius:10px;
+  color:#fff;font-family:'JetBrains Mono';font-size:13px;
+  text-align:center;letter-spacing:3px;outline:none;transition:.25s;
+}
+.login-input::placeholder{color:#3f3f46;letter-spacing:1px;font-size:12px}
+.login-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(59,130,246,0.12)}
+.login-btn{
+  width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  color:#fff;font-family:'Poppins';font-size:14px;font-weight:700;
+  letter-spacing:2px;cursor:pointer;transition:.2s;
+  box-shadow:0 4px 16px rgba(37,99,235,0.4);
+}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,0.55)}
+.login-err{margin-top:12px;font-family:'JetBrains Mono';font-size:11px;color:var(--red);min-height:18px}
 
-        .login-box {
-            text-align: center;
-            width: 400px;
-            padding: 50px 40px;
-            background: rgba(15,23,42,0.95);
-            border: 1px solid #1e3a8a;
-            border-radius: 24px;
-            backdrop-filter: blur(20px);
-            animation: blueBreath 4s infinite ease-in-out;
-            display: flex; flex-direction: column; align-items: center;
-        }
+/* ── APP ── */
+#app{display:none;height:100vh;overflow:hidden}
 
-        .pass-input {
-            background: #020617; border: 1px solid #1e293b;
-            color: #fff; padding: 15px; width: 100%;
-            border-radius: 12px; text-align: center;
-            margin: 30px 0 20px 0; font-size: 16px;
-            outline: none; transition: 0.3s;
-            font-family: 'JetBrains Mono'; letter-spacing: 2px;
-        }
-        .pass-input:focus { border-color: var(--blue); box-shadow: 0 0 20px var(--blue-glow); }
+/* ── SIDEBAR (hermanos style) ── */
+.sb{
+  position:fixed;top:0;left:0;bottom:0;width:240px;
+  background:var(--sidebar-bg);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;z-index:50;
+}
+.sb::-webkit-scrollbar{width:0}
 
-        .btn-login {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: #fff; font-weight: 800; border: none;
-            padding: 15px; width: 100%; border-radius: 12px;
-            cursor: pointer; font-size: 16px; transition: 0.3s;
-            letter-spacing: 1px; box-shadow: 0 5px 15px rgba(37,99,235,0.3);
-            font-family: 'Poppins', sans-serif;
-        }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(37,99,235,0.5); }
+/* sidebar header */
+.sb-head{
+  display:flex;align-items:center;gap:10px;
+  padding:16px;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.sb-logo{
+  width:28px;height:28px;border-radius:7px;flex-shrink:0;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:#fff;
+}
+.sb-name{font-size:14px;font-weight:700;color:#fff}
+.sb-name span{color:var(--primary)}
 
-        /* ─── NAVBAR ─── */
-        .navbar {
-            padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(15,23,42,0.8);
-            border-bottom: 1px solid rgba(59,130,246,0.2);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
-            flex-shrink: 0;
-        }
+/* sidebar group label */
+.sb-glabel{
+  padding:20px 16px 6px;
+  font-size:11px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.8px;
+}
 
-        .hub-title {
-            font-size: 28px; font-weight: 900;
-            background: linear-gradient(to right, #fff, #3b82f6, #06b6d4);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
-        .hub-sub {
-            font-size: 10px; color: #64748b;
-            letter-spacing: 2px; font-weight: 600;
-            margin-top: 2px; text-transform: uppercase;
-        }
+/* sidebar item */
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;margin:1px 8px;border-radius:8px;
+  color:var(--muted-fg);font-size:13px;font-weight:500;
+  cursor:pointer;transition:.15s;
+  border:none;background:none;width:calc(100% - 16px);
+  text-align:left;text-decoration:none;font-family:'Poppins';
+}
+.sb-item i{width:16px;text-align:center;font-size:13px;flex-shrink:0}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,0.04)}
+.sb-item.active{color:#fff;background:rgba(255,255,255,0.06);font-weight:600}
+.sb-item.active i{color:var(--primary)}
 
-        .user-pill {
-            display: flex; align-items: center; gap: 15px;
-            background: rgba(30,41,59,0.5);
-            padding: 8px 20px; border-radius: 50px;
-            border: 1px solid rgba(59,130,246,0.3); transition: 0.3s;
-        }
-        .user-pill:hover { border-color: var(--blue); box-shadow: 0 0 15px rgba(59,130,246,0.2); }
-        .user-text { text-align: right; line-height: 1.2; }
-        .logout-btn { color: #94a3b8; cursor: pointer; transition: 0.3s; font-size: 18px; background: none; border: none; }
-        .logout-btn:hover { color: var(--red); transform: rotate(90deg); }
+/* game badge in sidebar */
+.sb-game-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;margin:1px 8px;
+  color:var(--muted-fg);font-size:13px;font-weight:600;
+}
+.sb-game-img{
+  width:20px;height:20px;border-radius:5px;overflow:hidden;
+  background:var(--card);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;
+}
 
-        /* ─── LAYOUT ─── */
-        #main-hub { display: none; flex-direction: row; height: calc(100vh - 73px); overflow: hidden; }
+/* sidebar footer */
+.sb-spacer{flex:1}
+.sb-footer{
+  padding:12px;border-top:1px solid var(--border);flex-shrink:0;
+}
+.sb-user-card{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  background:var(--card);border:1px solid var(--border);margin-bottom:8px;
+}
+.sb-avatar{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#3b82f6,#7c3aed);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:#fff;
+}
+.sb-uname{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
+.sb-ukey{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);letter-spacing:1px}
+.sb-logout{
+  width:100%;padding:9px;border:none;cursor:pointer;
+  background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12);
+  border-radius:9px;color:var(--red);
+  font-family:'JetBrains Mono';font-size:11px;font-weight:700;letter-spacing:2px;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;
+}
+.sb-logout:hover{background:rgba(239,68,68,0.12)}
 
-        /* ─── SIDEBAR ─── */
-        .sidebar {
-            width: 260px; flex-shrink: 0;
-            background: rgba(8,11,20,0.98);
-            border-right: 1px solid rgba(59,130,246,0.15);
-            display: flex; flex-direction: column;
-            overflow-y: auto;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.4);
-        }
+/* ── MAIN ── */
+.main{
+  margin-left:240px;height:100vh;
+  display:flex;flex-direction:column;overflow:hidden;
+}
 
-        /* Logo area */
-        .sb-logo {
-            display: flex; align-items: center; gap: 12px;
-            padding: 20px 20px 16px;
-            border-bottom: 1px solid rgba(59,130,246,0.1);
-        }
-        .sb-logo-icon {
-            width: 36px; height: 36px; border-radius: 10px;
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; color: #fff;
-            box-shadow: 0 0 14px rgba(59,130,246,0.4);
-        }
-        .sb-logo-text {
-            font-size: 16px; font-weight: 900; letter-spacing: 1px;
-            background: linear-gradient(to right, #fff, #3b82f6);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
+/* topbar (hermanos style — breadcrumb + actions) */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;height:56px;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.breadcrumb{font-size:13px;color:var(--muted)}
+.breadcrumb span{color:var(--text);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:8px}
 
-        .sb-section {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px; letter-spacing: 2px;
-            color: #1e3a5f; padding: 18px 20px 6px;
-            text-transform: uppercase;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .sb-section::after {
-            content: ''; flex: 1; height: 1px;
-            background: rgba(59,130,246,0.08);
-        }
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:8px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted-fg);font-family:'Poppins';font-size:12px;font-weight:500;
+  cursor:pointer;transition:.15s;
+}
+.btn:hover{border-color:var(--border-hover);color:#fff;background:rgba(255,255,255,0.04)}
+.btn.danger{border-color:rgba(239,68,68,0.2);color:var(--red);background:rgba(239,68,68,0.04)}
+.btn.danger:hover{background:rgba(239,68,68,0.1)}
+.btn i{font-size:11px}
 
-        .nav-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 20px; cursor: pointer;
-            color: #475569; font-size: 13px; font-weight: 600;
-            transition: 0.2s; border: none; background: none;
-            width: 100%; text-align: left;
-            font-family: 'Poppins', sans-serif;
-            border-left: 3px solid transparent;
-            text-decoration: none;
-        }
-        .nav-item:hover { color: #94a3b8; background: rgba(59,130,246,0.04); }
-        .nav-item.active {
-            color: #fff; background: rgba(59,130,246,0.1);
-            border-left-color: var(--blue);
-        }
-        .nav-item.active i { color: var(--blue); }
-        .nav-item i { width: 16px; text-align: center; font-size: 12px; color: #334155; transition: 0.2s; }
-        .nav-item:hover i { color: #64748b; }
+/* panel */
+.panel{flex:1;overflow-y:auto;padding:20px}
+.panel::-webkit-scrollbar{width:4px}
+.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-        .sb-spacer { flex: 1; }
+/* page title */
+.page-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:16px}
 
-        /* User card bottom */
-        .sb-user-card {
-            margin: 12px;
-            background: rgba(15,23,42,0.9);
-            border: 1px solid rgba(59,130,246,0.15);
-            border-radius: 14px;
-            overflow: hidden;
-        }
-        .sb-user-top {
-            padding: 14px 16px 10px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .sb-avatar {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'JetBrains Mono'; font-size: 13px; color: #fff;
-            font-weight: 700; flex-shrink: 0;
-        }
-        .sb-name { font-size: 13px; font-weight: 700; color: #fff; }
-        .sb-key { font-family: 'JetBrains Mono'; font-size: 10px; color: #334155; margin-top: 2px; letter-spacing: 1px; }
-        .sb-logout {
-            width: 100%; padding: 11px;
-            background: rgba(239,68,68,0.06);
-            border: none; border-top: 1px solid rgba(239,68,68,0.15);
-            color: var(--red);
-            font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 700; letter-spacing: 2px;
-            cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .sb-logout:hover { background: rgba(239,68,68,0.12); }
+/* ── STAT CARDS (hermanos: icon square + label + number) ── */
+.stat-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  margin-bottom:20px;
+}
+.stat-card{
+  display:flex;align-items:center;gap:14px;
+  padding:16px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);
+  transition:.2s;
+}
+.stat-card:hover{border-color:var(--border-hover);background:var(--card-hover)}
+.stat-icon{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.stat-label{font-size:12px;color:var(--muted-fg);margin-bottom:2px}
+.stat-val{font-size:22px;font-weight:700;color:#fff}
+.stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}
 
-        /* ─── MAIN PANEL ─── */
-        .panel {
-            flex: 1; overflow-y: auto; padding: 28px 32px;
-        }
-        .panel::-webkit-scrollbar { width: 4px; }
-        .panel::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+/* ── GRID 2-COL (item monitor + pc monitor) ── */
+.monitor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 
-        /* ─── TOPBAR ─── */
-        .topbar {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 28px;
-        }
-        .topbar-title {
-            font-size: 22px; font-weight: 800; color: #fff;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .topbar-title i { color: var(--blue); }
-        .topbar-right { display: flex; align-items: center; gap: 10px; }
+/* ── SECTION CARD ── */
+.sec-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;
+}
+.sec-card-head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sec-card-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--muted-fg);flex-shrink:0;
+}
+.sec-card-title{font-size:14px;font-weight:600;color:#fff}
+.sec-card-sub{font-size:12px;color:var(--muted)}
+.sec-label{
+  font-family:'JetBrains Mono';font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:6px;
+}
+.sec-label.on{color:var(--green)}.sec-label.off{color:var(--red)}
 
-        .filter-select {
-            background: rgba(15,23,42,0.8); border: 1px solid #1e293b;
-            color: #fff; padding: 8px 14px; border-radius: 10px;
-            font-family: 'JetBrains Mono'; font-size: 11px;
-            cursor: pointer; outline: none; transition: 0.2s;
-        }
-        .filter-select:hover { border-color: var(--blue); }
+/* ── PC CARD ── */
+.pc-card{
+  background:rgba(255,255,255,0.02);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+}
+.pc-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+}
+.pc-card-name{
+  display:flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:#fff;
+}
+.pc-led{width:8px;height:8px;border-radius:50%}
+.pc-led.on{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.8);animation:pulse 1.5s infinite}
+.pc-led.off{background:#3f3f46}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pc-nums{display:flex}
+.pc-num{flex:1;text-align:center;padding:12px 6px;border-right:1px solid var(--border)}
+.pc-num:last-child{border-right:none}
+.pc-nv{font-family:'JetBrains Mono';font-size:20px;font-weight:700}
+.pc-nv.on{color:var(--green)}.pc-nv.off{color:var(--red)}.pc-nv.tot{color:#52525b}
+.pc-nl{font-family:'JetBrains Mono';font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-        .tb-btn {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; border-radius: 10px;
-            border: 1px solid #1e293b; background: rgba(15,23,42,0.8);
-            color: #94a3b8; font-family: 'JetBrains Mono'; font-size: 11px;
-            cursor: pointer; transition: 0.2s;
-        }
-        .tb-btn:hover { border-color: var(--blue); color: #fff; }
-        .tb-btn.danger { color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05); }
-        .tb-btn.danger:hover { background: rgba(239,68,68,0.12); }
-        .spin { animation: spin 0.7s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+/* ── ACCOUNT TABLE (hermanos data table style) ── */
+.tbl-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+}
+.tbl-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;
+}
+.tbl-toolbar-left{display:flex;align-items:center;gap:8px}
+.tbl-search{
+  padding:7px 12px;border-radius:8px;
+  background:var(--bg);border:1px solid var(--border);
+  color:#fff;font-family:'Poppins';font-size:12px;outline:none;
+  width:180px;transition:.2s;
+}
+.tbl-search:focus{border-color:var(--primary)}
+.tbl-search::placeholder{color:var(--muted)}
 
-        /* ─── BALANCE CARDS (BIG) ─── */
-        .balance-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{border-bottom:1px solid var(--border)}
+thead th{
+  padding:10px 14px;text-align:left;
+  font-family:'JetBrains Mono';font-size:10px;letter-spacing:1px;
+  color:var(--muted);font-weight:600;text-transform:uppercase;
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:.15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,0.02)}
+tbody td{padding:12px 14px;color:var(--muted-fg);vertical-align:middle}
+tbody td.td-name{color:#fff;font-weight:600}
 
-        .balance-card {
-            border-radius: 16px; padding: 24px 28px;
-            position: relative; overflow: hidden;
-            border: 1px solid transparent;
-        }
-        .balance-card.gross {
-            background: linear-gradient(135deg, rgba(0,217,126,0.08), rgba(0,217,126,0.03));
-            border-color: rgba(0,217,126,0.25);
-            grid-column: 1 / -1;
-        }
-        .balance-card.net {
-            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.03));
-            border-color: rgba(139,92,246,0.25);
-        }
-        .balance-card.thb {
-            background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.03));
-            border-color: rgba(245,158,11,0.25);
-        }
+/* pc tag */
+.pc-tag{
+  display:inline-block;margin-left:6px;
+  font-family:'JetBrains Mono';font-size:9px;
+  padding:1px 6px;border-radius:4px;
+  background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--primary);
+}
 
-        .bc-label {
-            font-family: 'JetBrains Mono'; font-size: 10px;
-            letter-spacing: 2px; text-transform: uppercase;
-            margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
-        }
-        .bc-label.green { color: #00d97e; }
-        .bc-label.purple { color: var(--purple); }
-        .bc-label.amber { color: var(--amber); }
+/* status badge */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:6px;
+  font-family:'JetBrains Mono';font-size:10px;font-weight:600;white-space:nowrap;
+}
+.badge.on{background:rgba(22,163,74,0.12);border:1px solid rgba(34,197,94,0.25);color:var(--green)}
+.badge.off{background:rgba(39,39,42,0.5);border:1px solid var(--border);color:#52525b}
+.bdot{width:5px;height:5px;border-radius:50%}
+.badge.on .bdot{background:var(--green);animation:pulse 1.5s infinite}
+.badge.off .bdot{background:#3f3f46}
 
-        .bc-value {
-            font-family: 'JetBrains Mono'; font-weight: 700;
-            line-height: 1;
-        }
-        .bc-value.green { font-size: 42px; color: #00d97e; }
-        .bc-value.purple { font-size: 36px; color: var(--purple); }
-        .bc-value.amber { font-size: 36px; color: var(--amber); }
+/* money cell */
+.td-money{font-family:'JetBrains Mono';font-size:12px;color:var(--green);font-weight:600}
+.td-num{font-family:'JetBrains Mono';font-size:12px;color:var(--muted-fg)}
 
-        .bc-sub { font-size: 11px; color: #475569; margin-top: 6px; }
+/* delete btn */
+.del{
+  background:none;border:none;padding:6px;border-radius:6px;
+  color:#3f3f46;cursor:pointer;transition:.15s;
+}
+.del:hover{background:rgba(239,68,68,0.08);color:var(--red)}
 
-        .bc-img {
-            position: absolute; right: 24px; top: 50%;
-            transform: translateY(-50%);
-            font-size: 64px; opacity: 0.12;
-        }
+/* ── EMPTY STATE ── */
+.empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px;gap:10px;color:var(--muted);text-align:center;
+}
+.empty i{font-size:28px;color:#27272a}
+.empty-t{font-size:13px;font-weight:600;color:#52525b}
+.empty-s{font-family:'JetBrains Mono';font-size:10px;color:#3f3f46}
 
-        /* ─── PC MONITOR ─── */
-        .section-head {
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 14px; margin-top: 24px;
-        }
-        .section-head i { color: #475569; font-size: 13px; }
-        .section-title { font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; font-family: 'JetBrains Mono'; }
+/* ── TRACKSTAT CARDS ── */
+.track-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.track-card{
+  padding:16px;border-radius:12px;
+  background:var(--card);border:1px solid var(--border);
+  transition:.2s;position:relative;overflow:hidden;
+}
+.track-card:hover{border-color:var(--border-hover)}
+.track-label{font-family:'JetBrains Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.track-val{font-family:'JetBrains Mono';font-size:28px;font-weight:700}
+.track-sub{font-size:11px;color:var(--muted);margin-top:4px}
 
-        .pc-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
-        .pc-card {
-            background: rgba(15,23,42,0.6); border: 1px solid #1e293b;
-            border-radius: 12px; padding: 14px 20px;
-            display: flex; align-items: center; gap: 20px;
-            min-width: 200px;
-        }
-        .pc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-        .pc-name { font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 700; color: #fff; }
-        .pc-stats { display: flex; gap: 16px; }
-        .pc-stat { text-align: center; }
-        .pc-val { font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 700; }
-        .pc-val.on { color: var(--green); }
-        .pc-val.off { color: var(--red); }
-        .pc-val.tot { color: #64748b; }
-        .pc-lbl { font-size: 9px; font-family: 'JetBrains Mono'; color: #334155; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+/* account grid cards */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.acc-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:14px;transition:.2s;
+}
+.acc-card:hover{border-color:var(--border-hover);background:var(--card-hover)}
+.acc-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.acc-card-name{font-size:13px;font-weight:700;color:#fff}
+.acc-card-money{font-family:'JetBrains Mono';font-size:12px;color:var(--green);font-weight:600;margin-bottom:10px}
+.prog-bar{background:var(--border);border-radius:4px;height:3px;margin-bottom:10px;overflow:hidden}
+.prog-fill{height:3px;border-radius:4px;background:linear-gradient(90deg,var(--amber),var(--primary))}
+.stat-row3{display:flex;gap:6px}
+.stat-box{
+  flex:1;text-align:center;padding:8px 4px;
+  border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.02);
+}
+.stat-box-v{font-family:'JetBrains Mono';font-size:14px;font-weight:700}
+.stat-box-l{font-family:'JetBrains Mono';font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
 
-        /* ─── ACCOUNT LIST ─── */
-        .account-list { display: flex; flex-direction: column; gap: 8px; }
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+}
+.modal{
+  background:#18181b;border:1px solid #27272a;
+  border-radius:14px;padding:24px;width:290px;text-align:center;
+}
+.modal-ico{
+  width:42px;height:42px;border-radius:10px;margin:0 auto 12px;
+  background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);
+  display:flex;align-items:center;justify-content:center;color:var(--red);font-size:16px;
+}
+.modal-t{font-size:14px;font-weight:700;margin-bottom:5px}
+.modal-s{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.modal-btns{display:flex;gap:8px}
+.mbtn{
+  flex:1;padding:10px;border-radius:8px;
+  border:1px solid var(--border);background:none;
+  color:var(--muted-fg);font-family:'Poppins';font-size:12px;cursor:pointer;transition:.15s;
+}
+.mbtn:hover{color:#fff;border-color:var(--border-hover)}
+.mbtn.danger{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.15);color:var(--red)}
+.mbtn.danger:hover{background:rgba(239,68,68,0.12)}
 
-        .account-row {
-            background: rgba(15,23,42,0.5); border: 1px solid #1e293b;
-            border-radius: 14px; padding: 14px 20px;
-            display: flex; align-items: center; gap: 16px;
-            transition: 0.2s;
-            animation: rowIn 0.3s cubic-bezier(.16,1,.3,1) both;
-        }
-        @keyframes rowIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
-        .account-row:hover { border-color: #1e40af; background: rgba(15,23,42,0.8); }
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#18181b;border:1px solid #27272a;border-radius:10px;
+  padding:9px 20px;font-size:12px;color:#fff;
+  z-index:9999;display:flex;align-items:center;gap:8px;
+  animation:toastIn .2s ease;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 
-        .acc-avatar {
-            width: 40px; height: 40px; border-radius: 10px;
-            background: linear-gradient(135deg, #1e3a8a, #0f172a);
-            border: 1px solid #1e293b;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--blue); font-size: 16px; flex-shrink: 0;
-        }
-        .acc-name { font-size: 14px; font-weight: 700; color: #fff; }
-        .acc-pc { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--blue); margin-top: 2px; }
-
-        .badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 4px 12px; border-radius: 20px;
-            font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 600;
-            white-space: nowrap;
-        }
-        .badge-on { background: rgba(0,217,126,0.08); border: 1px solid rgba(0,217,126,0.2); color: #00d97e; }
-        .badge-off { background: rgba(100,116,139,0.1); border: 1px solid #1e293b; color: #64748b; }
-        .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
-        .badge-on .badge-dot { background: #00d97e; animation: pulse 1.5s infinite; }
-        .badge-off .badge-dot { background: #334155; }
-
-        .acc-money {
-            font-family: 'JetBrains Mono'; font-size: 15px;
-            font-weight: 700; color: #00d97e;
-        }
-        .acc-money-label { font-family: 'JetBrains Mono'; font-size: 9px; color: #334155; letter-spacing: 1px; text-transform: uppercase; }
-
-        .acc-stat { text-align: center; }
-        .acc-stat-val { font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 600; color: #94a3b8; }
-        .acc-stat-lbl { font-family: 'JetBrains Mono'; font-size: 9px; color: #334155; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-
-        .acc-time { font-family: 'JetBrains Mono'; font-size: 11px; color: #334155; margin-left: auto; white-space: nowrap; }
-
-        .del-btn {
-            background: none; border: none; padding: 6px 8px;
-            border-radius: 8px; color: #334155; cursor: pointer; transition: 0.2s;
-        }
-        .del-btn:hover { background: rgba(239,68,68,0.08); color: var(--red); }
-
-        /* ─── EMPTY ─── */
-        .empty {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; padding: 60px; gap: 14px;
-            background: rgba(15,23,42,0.3); border: 1px dashed #1e293b;
-            border-radius: 16px; text-align: center;
-        }
-        .empty i { font-size: 32px; color: #1e293b; }
-        .empty p { font-family: 'JetBrains Mono'; font-size: 12px; color: #334155; line-height: 2; }
-
-        /* ─── MODAL ─── */
-        .overlay {
-            position: fixed; inset: 0; z-index: 500;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            animation: fadeIn 0.15s ease both;
-        }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-        .modal {
-            background: #0f172a; border: 1px solid #1e293b;
-            border-radius: 20px; padding: 32px; width: 320px; text-align: center;
-            animation: fadeUp 0.2s ease both;
-        }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-        .modal-icon {
-            width: 48px; height: 48px; border-radius: 12px;
-            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px; color: var(--red); font-size: 18px;
-        }
-        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-        .modal-sub { font-family: 'JetBrains Mono'; font-size: 11px; color: #64748b; line-height: 1.8; margin-bottom: 24px; }
-        .modal-btns { display: flex; gap: 10px; }
-        .m-btn {
-            flex: 1; padding: 12px; border-radius: 10px;
-            border: 1px solid #1e293b; background: none; color: #64748b;
-            font-family: 'JetBrains Mono'; font-size: 11px; cursor: pointer; transition: 0.2s;
-        }
-        .m-btn:hover { color: #fff; }
-        .m-danger { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); color: var(--red); }
-        .m-danger:hover { background: rgba(239,68,68,0.15); }
-
-        /* ─── TOAST ─── */
-        .toast {
-            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-            background: #0f172a; border: 1px solid #1e293b;
-            border-radius: 10px; padding: 12px 24px;
-            font-family: 'JetBrains Mono'; font-size: 12px; color: #fff;
-            z-index: 9999; animation: toastIn 0.2s ease both;
-            display: flex; align-items: center; gap: 8px;
-        }
-        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-
-        /* ─── COMING SOON ─── */
-        .coming-soon {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 60vh; gap: 16px;
-        }
-        .cs-icon {
-            width: 64px; height: 64px; border-radius: 16px;
-            background: rgba(15,23,42,0.8); border: 1px solid #1e293b;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: #334155;
-        }
-        .cs-title { font-size: 18px; font-weight: 800; color: #fff; }
-        .cs-sub { font-family: 'JetBrains Mono'; font-size: 12px; color: #334155; }
-    </style>
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{animation:spin .6s linear infinite}
+</style>
 </head>
 <body>
 
-<!-- ═══ LOGIN ═══ -->
+<!-- LOGIN -->
 <div id="login-screen">
-    <div class="login-box">
-        <i class="fa-solid fa-dragon" style="font-size:60px; color:var(--blue); margin-bottom:25px; filter:drop-shadow(0 0 20px var(--blue));"></i>
-        <h2 style="margin:0; color:#fff; font-size:22px; letter-spacing:1px;">SYSTEM ACCESS</h2>
-        <div style="color:#64748b; font-size:12px; margin-top:6px; font-family:'JetBrains Mono';">Authorization Required</div>
-        <input type="password" id="key-input" class="pass-input" placeholder="ENTER ACCESS KEY"
-            onkeydown="if(event.key==='Enter') login()">
-        <button class="btn-login" onclick="login()">INITIALIZE</button>
-        <div id="error-msg" style="color:var(--red); margin-top:16px; font-size:12px; font-family:'JetBrains Mono'; min-height:20px;"></div>
-    </div>
+  <div class="login-card">
+    <div class="login-icon"><i class="fa-solid fa-dragon"></i></div>
+    <div class="login-title">SYSTEM ACCESS</div>
+    <div class="login-sub">Authorization Required</div>
+    <input class="login-input" id="key-input" type="password" placeholder="ENTER ACCESS KEY"
+      onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">INITIALIZE</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
 </div>
 
-<!-- ═══ NAVBAR ═══ -->
-<nav class="navbar" id="navbar" style="display:none;">
-    <div>
-        <div class="hub-title"><i class="fa-solid fa-dragon" style="font-size:24px;"></i> DEVHIMLOG</div>
-        <div class="hub-sub">ROBLOX BOT DASHBOARD · BLOX FRUITS TRACKSTAT</div>
+<!-- APP -->
+<div id="app" style="display:flex;flex-direction:row">
+
+  <!-- SIDEBAR -->
+  <aside class="sb">
+    <div class="sb-head">
+      <div class="sb-logo"><i class="fa-solid fa-dragon" style="font-size:11px"></i></div>
+      <div class="sb-name">DEVHIM<span>LOG</span></div>
     </div>
-    <div class="user-pill">
-        <div class="user-text">
-            <div style="font-weight:700; color:#fff; font-size:14px;" id="u-name">...</div>
-            <div style="font-size:10px; color:var(--cyan);" id="u-rank">Connecting...</div>
-        </div>
-        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-power-off"></i></button>
+
+    <div class="sb-glabel">Games</div>
+    <div class="sb-game-row">
+      <div class="sb-game-img"><i class="fa-solid fa-dragon" style="color:#ef4444;font-size:9px"></i></div>
+      <span style="font-size:12px;color:#71717a;font-weight:600">BLOX FRUITS</span>
     </div>
-</nav>
+    <button class="sb-item active" id="nav-money" onclick="setTab('money',this)">
+      <i class="fa-solid fa-coins"></i> Money Monitor
+    </button>
+    <button class="sb-item" id="nav-track" onclick="setTab('track',this)">
+      <i class="fa-solid fa-chart-line"></i> Trackstat
+    </button>
 
-<!-- ═══ MAIN ═══ -->
-<div id="main-hub">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <!-- Logo -->
-        <div class="sb-logo">
-            <div class="sb-logo-icon"><i class="fa-solid fa-dragon"></i></div>
-            <div class="sb-logo-text">DEVHIMLOG</div>
+    <div class="sb-glabel" style="margin-top:8px">Tools</div>
+    <button class="sb-item" onclick="setTab('block',this)">
+      <i class="fa-solid fa-shield-halved"></i> Block ID
+    </button>
+
+    <div class="sb-spacer"></div>
+    <div class="sb-footer">
+      <div class="sb-user-card">
+        <div class="sb-avatar" id="sb-ava">?</div>
+        <div>
+          <div class="sb-uname" id="sb-name">...</div>
+          <div class="sb-ukey" id="sb-key">KEY: ••••••••</div>
         </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">
+        <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
+      </button>
+    </div>
+  </aside>
 
-        <div class="sb-section">BLOX FRUITS</div>
-        <button class="nav-item active" onclick="setTab('dashboard', event)">
-            <i class="fa-solid fa-gauge"></i> Dashboard
-        </button>
-        <button class="nav-item" onclick="setTab('monitor', event)">
-            <i class="fa-solid fa-desktop"></i> Money Monitor
-        </button>
-        <button class="nav-item" onclick="setTab('trackstat', event)">
-            <i class="fa-solid fa-chart-line"></i> Trackstat
-        </button>
-
-        <div class="sb-section">TOOLS</div>
-        <a class="nav-item" href="index.html">
-            <i class="fa-solid fa-house"></i> Home Hub
-        </a>
-
-        <div class="sb-spacer"></div>
-
-        <!-- User card -->
-        <div class="sb-user-card">
-            <div class="sb-user-top">
-                <div class="sb-avatar" id="sb-avatar">?</div>
-                <div>
-                    <div class="sb-name" id="sb-name">...</div>
-                    <div class="sb-key" id="sb-key">KEY: ••••••••</div>
-                </div>
-            </div>
-            <button class="sb-logout" onclick="logout()">
-                <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
-            </button>
+  <!-- MAIN -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="breadcrumb">Dashboard &rsaquo; <span id="tb-title">Money Monitor</span></span>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-family:'JetBrains Mono';font-size:11px;color:var(--muted-fg)">
+          <i class="fa-solid fa-display" style="font-size:10px;color:var(--primary)"></i>
+          <span>All Devices</span>
+          <span id="device-count" style="color:var(--green);font-weight:700"></span>
         </div>
-    </aside>
+        <button class="btn" onclick="loadAccounts()">
+          <i class="fa-solid fa-arrows-rotate" id="refresh-ico"></i> Refresh
+        </button>
+        <button class="btn danger" onclick="deleteAll()">
+          <i class="fa-solid fa-trash"></i> All
+        </button>
+      </div>
+    </div>
 
     <!-- Panel -->
-    <div class="panel" id="panel">
-        <!-- content injected by JS -->
-    </div>
+    <div class="panel" id="panel"></div>
+  </div>
 </div>
 
-<!-- Delete Modal -->
-<div class="overlay" id="modal" style="display:none;" onclick="closeModal()">
-    <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-icon"><i class="fa-solid fa-trash"></i></div>
-        <div class="modal-title">Delete account?</div>
-        <div class="modal-sub" id="modal-sub">Data will be permanently removed.</div>
-        <div class="modal-btns">
-            <button class="m-btn" onclick="closeModal()">Cancel</button>
-            <button class="m-btn m-danger" onclick="confirmDelete()">Delete</button>
-        </div>
+<!-- MODAL -->
+<div class="overlay" id="modal" style="display:none" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-ico"><i class="fa-solid fa-trash"></i></div>
+    <div class="modal-t">Delete account?</div>
+    <div class="modal-s" id="modal-s"></div>
+    <div class="modal-btns">
+      <button class="mbtn" onclick="closeModal()">Cancel</button>
+      <button class="mbtn danger" onclick="confirmDelete()">Delete</button>
     </div>
+  </div>
 </div>
-
-<!-- Toast -->
-<div class="toast" id="toast" style="display:none;"></div>
+<div class="toast" id="toast" style="display:none"></div>
 
 <script>
-    // ─── CONFIG ───
-    const SUPABASE_URL = 'https://zwavwijmgjgpaembmpnl.supabase.co'
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU'
-    const { createClient } = supabase
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+const SUPA_URL = 'https://zwavwijmgjgpaembmpnl.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU'
+const { createClient } = supabase
+const sb = createClient(SUPA_URL, SUPA_KEY)
 
-    let accounts = []
-    let currentTab = 'dashboard'
-    let toDeleteUsername = null
-    let realtimeChannel = null
-    let refreshInterval = null
+let accounts = [], currentTab = 'money', toDelUser = null, rtCh = null
 
-    // ─── AUTH ───
-    window.onload = async () => {
-        const savedKey = localStorage.getItem('hexz_key')
-        if (savedKey) {
-            const cached = {
-                label: localStorage.getItem('hexz_label') || '...',
-                rank: localStorage.getItem('hexz_rank') || 'User'
-            }
-            showUI(savedKey, cached.label, cached.rank)
-            await verifyKey(savedKey, true)
-        }
-    }
+/* AUTH */
+window.onload = async () => {
+  const k = localStorage.getItem('hexz_key')
+  if (k) { showUI(k, localStorage.getItem('hexz_label') || '...'); await verifyKey(k, true) }
+}
+async function login() {
+  const k = document.getElementById('key-input').value.trim()
+  if (!k) return
+  setErr('Authenticating...')
+  await verifyKey(k, false)
+}
+async function verifyKey(k, isAuto) {
+  const { data, error } = await sb.from('access_keys').select('key_value,label,rank,active')
+    .eq('key_value', k).eq('active', true).single()
+  if (error || !data) {
+    if (!isAuto) setErr('Access Denied')
+    else { localStorage.clear(); location.reload() }
+    return
+  }
+  localStorage.setItem('hexz_key', k)
+  localStorage.setItem('hexz_label', data.label || 'User')
+  showUI(k, data.label || 'User')
+}
+function showUI(key, label) {
+  document.getElementById('login-screen').style.display = 'none'
+  document.getElementById('app').style.display = 'flex'
+  document.getElementById('sb-name').textContent = label
+  document.getElementById('sb-key').textContent = 'KEY: ' + key.slice(0,4) + '••••'
+  document.getElementById('sb-ava').textContent = label.charAt(0).toUpperCase()
+  loadAccounts()
+  rtCh = sb.channel('rt-blox')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'blox_stats' }, loadAccounts)
+    .subscribe()
+}
+function logout() { localStorage.clear(); if(rtCh) sb.removeChannel(rtCh); location.reload() }
+function setErr(m) { document.getElementById('login-err').textContent = m }
 
-    async function login() {
-        const k = document.getElementById('key-input').value.trim()
-        if (!k) return
-        setError('Authenticating...')
-        await verifyKey(k, false)
-    }
+/* DATA */
+async function loadAccounts() {
+  const ico = document.getElementById('refresh-ico')
+  ico.classList.add('spinning')
+  const { data } = await sb.from('blox_stats').select('*').order('updated_at', { ascending: false })
+  if (data) accounts = data
+  const tot = accounts.length
+  document.getElementById('device-count').textContent = '(' + tot + ')'
+  ico.classList.remove('spinning')
+  render()
+}
 
-    async function verifyKey(k, isAuto) {
-        const { data, error } = await sb
-            .from('access_keys')
-            .select('key_value,label,rank,active')
-            .eq('key_value', k)
-            .eq('active', true)
-            .single()
+/* TABS */
+function setTab(tab, el) {
+  currentTab = tab
+  document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'))
+  if (el) el.classList.add('active')
+  const titles = { money: 'Money Monitor', track: 'Trackstat', block: 'Block ID' }
+  document.getElementById('tb-title').textContent = titles[tab] || tab
+  render()
+}
 
-        if (error || !data) {
-            if (!isAuto) setError('Access Denied')
-            else { localStorage.clear(); location.reload() }
-            return
-        }
+/* HELPERS */
+function fmt(n) {
+  if (n == null) return '—'
+  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B'
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M'
+  if (n >= 1e3) return (n/1e3).toFixed(0) + 'K'
+  return n.toLocaleString()
+}
+function fmtFull(n) { return n == null ? '—' : n.toLocaleString() }
 
-        localStorage.setItem('hexz_key', k)
-        localStorage.setItem('hexz_label', data.label || 'User')
-        localStorage.setItem('hexz_rank', data.rank || 'Member')
-        showUI(k, data.label || 'User', data.rank || 'Member')
-    }
+/* RENDER */
+function render() {
+  document.getElementById('panel').innerHTML =
+    currentTab === 'money' ? renderMoney() :
+    currentTab === 'track' ? renderTrack() : renderCS()
+}
 
-    function showUI(key, label, rank) {
-        document.getElementById('login-screen').style.display = 'none'
-        document.getElementById('navbar').style.display = 'flex'
-        document.getElementById('main-hub').style.display = 'flex'
+/* ── MONEY MONITOR ── */
+function renderMoney() {
+  const on = accounts.filter(a => a.online)
+  const off = accounts.filter(a => !a.online)
+  const tot = accounts.reduce((s,a) => s + (a.money||0), 0)
+  const net = Math.floor(tot * 0.9)
+  const thb = (net / 1258).toFixed(2)
+  const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
 
-        document.getElementById('u-name').textContent = label
-        document.getElementById('u-rank').textContent = rank
-        document.getElementById('sb-name').textContent = label
-        document.getElementById('sb-rank').textContent = rank
-        document.getElementById('sb-avatar').textContent = label.charAt(0).toUpperCase()
-        document.getElementById('sb-key').textContent = 'KEY: ' + key.slice(0,4) + '••••'
+  return \`
+  <div class="page-title">Money Monitor</div>
 
-        loadAccounts()
-        startRealtime()
-        refreshInterval = setInterval(loadAccounts, 30000)
-    }
+  <!-- stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(34,197,94,0.08)">
+        <i class="fa-solid fa-wifi" style="color:var(--green)"></i>
+      </div>
+      <div>
+        <div class="stat-label">Online</div>
+        <div class="stat-val green">\${on.length}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(239,68,68,0.08)">
+        <i class="fa-solid fa-wifi" style="color:var(--red);text-decoration:line-through"></i>
+      </div>
+      <div>
+        <div class="stat-label">Offline</div>
+        <div class="stat-val red">\${off.length}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(168,85,247,0.08)">
+        <i class="fa-solid fa-users" style="color:var(--purple)"></i>
+      </div>
+      <div>
+        <div class="stat-label">Total Accounts</div>
+        <div class="stat-val" style="color:var(--purple)">\${accounts.length}</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:rgba(245,158,11,0.08)">
+        <i class="fa-solid fa-coins" style="color:var(--amber)"></i>
+      </div>
+      <div>
+        <div class="stat-label">Total Money</div>
+        <div class="stat-val" style="color:var(--amber);font-size:16px">\${fmt(tot)} C$</div>
+      </div>
+    </div>
+  </div>
 
-    function logout() {
-        localStorage.clear()
-        if (realtimeChannel) sb.removeChannel(realtimeChannel)
-        clearInterval(refreshInterval)
-        location.reload()
-    }
+  <!-- monitor grid -->
+  <div class="monitor-grid">
+    <!-- Item Monitor (balance) -->
+    <div class="sec-card">
+      <div class="sec-card-head">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sec-card-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+          <div>
+            <div class="sec-card-title">Balance Monitor</div>
+            <div class="sec-card-sub">\${accounts.length} accounts total</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:12px;background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.15);border-radius:10px">
+          <div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:6px">
+            <i class="fa-solid fa-coins"></i> GROSS BALANCE
+          </div>
+          <div style="font-family:'JetBrains Mono';font-size:22px;font-weight:700;color:var(--green)">\${fmtFull(tot)} C$</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Total Pre-Tax Amount</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="padding:12px;background:rgba(168,85,247,0.04);border:1px solid rgba(168,85,247,0.15);border-radius:10px">
+            <div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--purple);margin-bottom:6px">NET (TAX 10%)</div>
+            <div style="font-family:'JetBrains Mono';font-size:16px;font-weight:700;color:var(--purple)">\${fmtFull(net)} C$</div>
+          </div>
+          <div style="padding:12px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:10px">
+            <div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:6px">THB VALUE</div>
+            <div style="font-family:'JetBrains Mono';font-size:16px;font-weight:700;color:var(--amber)">\${thb} ฿</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    function setError(msg) {
-        document.getElementById('error-msg').textContent = msg
-    }
-
-    // ─── DATA ───
-    async function loadAccounts() {
-        const { data } = await sb
-            .from('blox_stats')
-            .select('*')
-            .order('updated_at', { ascending: false })
-        if (data) {
-            accounts = data
-            renderPanel()
-        }
-    }
-
-    function startRealtime() {
-        realtimeChannel = sb.channel('rt-blox')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'blox_stats' }, () => {
-                loadAccounts()
-            }).subscribe()
-    }
-
-    // ─── TABS ───
-    function setTab(tab, e) {
-        currentTab = tab
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
-        if (e) e.currentTarget.classList.add('active')
-        renderPanel()
-    }
-
-    // ─── RENDER ───
-    function fmt(n) {
-        if (n == null) return '—'
-        if (n >= 1e6) return (n/1e6).toFixed(1)+'M'
-        if (n >= 1e3) return (n/1e3).toFixed(1)+'K'
-        return n.toLocaleString()
-    }
-
-    function renderPanel() {
-        const panel = document.getElementById('panel')
-        if (currentTab === 'dashboard') panel.innerHTML = renderDashboard()
-        else if (currentTab === 'monitor') panel.innerHTML = renderMonitor()
-        else panel.innerHTML = renderComingSoon('fa-chart-line', 'Trackstat')
-    }
-
-    function renderDashboard() {
-        const online = accounts.filter(a => a.online)
-        const offline = accounts.filter(a => !a.online)
-        const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
-
-        return `
-        <div class="topbar">
-            <div class="topbar-title"><i class="fa-solid fa-gauge"></i> Blox Fruits — Dashboard</div>
-            <div class="topbar-right">
-                <div style="font-family:'JetBrains Mono';font-size:11px;color:#334155;padding:8px 14px;background:rgba(15,23,42,0.6);border:1px solid #1e293b;border-radius:10px;display:flex;align-items:center;gap:6px;">
-                    <span style="width:6px;height:6px;border-radius:50%;background:${online.length>0?'#00d97e':'#334155'};display:inline-block;${online.length>0?'animation:pulse 1.5s infinite':''}"></span>
-                    ${online.length} Online
+    <!-- PC Monitor -->
+    <div class="sec-card">
+      <div class="sec-card-head">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sec-card-icon"><i class="fa-solid fa-desktop"></i></div>
+          <div>
+            <div class="sec-card-title">PC Monitor</div>
+            <div class="sec-card-sub">\${pcs.length} PCs total</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--green)">ON: \${on.length}</span>
+          <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--red)">OFF: \${off.length}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        \${pcs.length === 0
+          ? '<div class="empty"><i class="fa-solid fa-desktop"></i><div class="empty-t">No PCs found</div></div>'
+          : pcs.map(pc => {
+              const pa = accounts.filter(a => a.pc === pc)
+              const pon = pa.filter(a => a.online).length
+              return \`<div class="pc-card">
+                <div class="pc-card-head">
+                  <div class="pc-card-name"><i class="fa-solid fa-display" style="color:var(--cyan);font-size:10px"></i> \${pc}</div>
+                  <span class="pc-led \${pon > 0 ? 'on' : 'off'}"></span>
                 </div>
-                <button class="tb-btn" onclick="loadAccounts()">
-                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
-                </button>
-            </div>
+                <div class="pc-nums">
+                  <div class="pc-num"><div class="pc-nv on">\${pon}</div><div class="pc-nl">ON</div></div>
+                  <div class="pc-num"><div class="pc-nv off">\${pa.length - pon}</div><div class="pc-nl">OFF</div></div>
+                  <div class="pc-num"><div class="pc-nv tot">\${pa.length}</div><div class="pc-nl">TOT</div></div>
+                </div>
+              </div>\`
+            }).join('')
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Table -->
+  <div class="tbl-wrap">
+    <div class="tbl-toolbar">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;font-weight:600;color:#fff">Active Accounts</span>
+        <span style="font-family:'JetBrains Mono';font-size:11px;padding:2px 8px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted)">\${accounts.length}</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <input class="tbl-search" placeholder="Search..." id="search-input" oninput="render()">
+      </div>
+    </div>
+    \${accounts.length === 0
+      ? '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data found</div><div class="empty-s">Run script then click Refresh</div></div>'
+      : \`<table>
+          <thead><tr>
+            <th>Status</th><th>Username</th><th>PC</th>
+            <th>Money</th><th>Level</th><th>Bounty</th><th>Fragment</th><th></th>
+          </tr></thead>
+          <tbody>\${filteredAccounts().map(a => \`
+            <tr>
+              <td><span class="badge \${a.online?'on':'off'}"><span class="bdot"></span>\${a.online?'Online':'Offline'}</span></td>
+              <td class="td-name">\${a.username}\${a.pc ? \`<span class="pc-tag">\${a.pc}</span>\` : ''}</td>
+              <td class="td-num">\${a.pc || '—'}</td>
+              <td class="td-money">\${fmtFull(a.money)} C$</td>
+              <td class="td-num">\${a.level || '—'}</td>
+              <td class="td-num">\${fmt(a.bounty)}</td>
+              <td class="td-num">\${fmt(a.fragments)}</td>
+              <td><button class="del" onclick="openDel('\${a.username}')"><i class="fa-solid fa-trash"></i></button></td>
+            </tr>\`).join('')}
+          </tbody>
+        </table>\`
+    }
+  </div>\`
+}
+
+function filteredAccounts() {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase()
+  return q ? accounts.filter(a => a.username?.toLowerCase().includes(q)) : accounts
+}
+
+/* ── TRACKSTAT ── */
+function renderTrack() {
+  const on = accounts.filter(a => a.online)
+  const maxLv = accounts.reduce((m,a) => Math.max(m, a.level||0), 0)
+  const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
+
+  return \`
+  <div class="page-title">Trackstat</div>
+  <div class="track-grid">
+    <div class="track-card" style="border-bottom:2px solid var(--purple)">
+      <div class="track-label" style="color:var(--purple)">MAX LEVEL</div>
+      <div class="track-val" style="color:var(--purple)">\${maxLv}</div>
+      <div class="track-sub">Highest Account</div>
+    </div>
+    <div class="track-card" style="border-bottom:2px solid var(--cyan)">
+      <div class="track-label" style="color:var(--cyan)">TOTAL ACCTS</div>
+      <div class="track-val" style="color:var(--cyan)">\${accounts.length}</div>
+      <div class="track-sub">All Accounts</div>
+    </div>
+    <div class="track-card" style="border-bottom:2px solid var(--green)">
+      <div class="track-label" style="color:var(--green)">ONLINE</div>
+      <div class="track-val" style="color:var(--green)">\${on.length}</div>
+      <div class="track-sub">Active Now</div>
+    </div>
+    <div class="track-card" style="border-bottom:2px solid var(--amber)">
+      <div class="track-label" style="color:var(--amber)">TOTAL MONEY</div>
+      <div class="track-val" style="color:var(--amber);font-size:20px">\${fmt(accounts.reduce((s,a)=>s+(a.money||0),0))} C$</div>
+      <div class="track-sub">Combined</div>
+    </div>
+  </div>
+
+  <!-- PC Monitor -->
+  <div class="sec-card" style="margin-bottom:14px">
+    <div class="sec-card-head">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="sec-card-icon"><i class="fa-solid fa-desktop"></i></div>
+        <div>
+          <div class="sec-card-title">PC Monitor</div>
+          <div class="sec-card-sub">\${pcs.length} PCs total</div>
         </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--green)">ON: \${on.length}</span>
+        <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--red)">OFF: \${accounts.length - on.length}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      \${pcs.map(pc => {
+        const pa = accounts.filter(a => a.pc === pc)
+        const pon = pa.filter(a => a.online).length
+        return \`<div class="pc-card" style="min-width:160px">
+          <div class="pc-card-head">
+            <div class="pc-card-name"><i class="fa-solid fa-display" style="color:var(--cyan);font-size:10px"></i> \${pc}</div>
+            <span class="pc-led \${pon > 0 ? 'on' : 'off'}"></span>
+          </div>
+          <div class="pc-nums">
+            <div class="pc-num"><div class="pc-nv on">\${pon}</div><div class="pc-nl">ON</div></div>
+            <div class="pc-num"><div class="pc-nv off">\${pa.length-pon}</div><div class="pc-nl">OFF</div></div>
+            <div class="pc-num"><div class="pc-nv tot">\${pa.length}</div><div class="pc-nl">TOT</div></div>
+          </div>
+        </div>\`
+      }).join('') || '<div class="empty" style="padding:24px"><i class="fa-solid fa-desktop"></i><div class="empty-t">No PCs</div></div>'}
+    </div>
+  </div>
 
-        <!-- Stat Cards -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;">
-            ${statCard('fa-users','Total','#64748b', accounts.length, '')}
-            ${statCard('fa-circle-dot','Online','#00d97e', online.length, 'color:#00d97e')}
-            ${statCard('fa-circle-xmark','Offline','#ef4444', offline.length, 'color:#ef4444')}
-            ${statCard('fa-clock','Last Sync','#334155', new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'}), 'font-size:14px;color:#64748b')}
+  <!-- Account Cards Grid -->
+  <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px">Active Accounts <span style="font-family:'JetBrains Mono';font-size:10px;padding:2px 8px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);margin-left:6px">\${accounts.length}</span></div>
+  \${accounts.length === 0
+    ? '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data</div></div>'
+    : \`<div class="acc-grid">\${accounts.map(a => \`
+      <div class="acc-card">
+        <div class="acc-card-top">
+          <div>
+            <span class="acc-card-name">\${a.username}</span>
+            \${a.pc ? \`<span class="pc-tag">\${a.pc}</span>\` : ''}
+          </div>
+          <button class="del" onclick="openDel('\${a.username}')"><i class="fa-solid fa-trash"></i></button>
         </div>
-
-        <!-- PC Monitor -->
-        <div class="section-head"><i class="fa-solid fa-desktop"></i><span class="section-title">PC Monitor</span>
-            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#00d97e;">ON: ${online.length}</span>
-            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#ef4444;">OFF: ${offline.length}</span>
+        <div class="acc-card-money">\${fmtFull(a.money)} C$</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:\${Math.min(100,(a.level||0)/2000*100)}%"></div></div>
+        <div class="stat-row3">
+          <div class="stat-box"><div class="stat-box-v" style="color:var(--purple)">\${a.level||0}</div><div class="stat-box-l">LV</div></div>
+          <div class="stat-box"><div class="stat-box-v" style="color:var(--amber)">\${fmt(a.bounty)}</div><div class="stat-box-l">BNTY</div></div>
+          <div class="stat-box"><div class="stat-box-v" style="color:var(--cyan)">\${fmt(a.fragments)}</div><div class="stat-box-l">FRAG</div></div>
         </div>
-        <div class="pc-grid" style="margin-bottom:24px;">
-            ${pcs.length > 0 ? pcs.map(pc => {
-                const pcAccs = accounts.filter(a => a.pc === pc)
-                const pcOn = pcAccs.filter(a => a.online).length
-                return `<div class="pc-card">
-                    <span class="pc-dot" style="${pcOn===0?'background:#ef4444;animation:none':''}"></span>
-                    <div class="pc-name">${pc}</div>
-                    <div class="pc-stats">
-                        <div class="pc-stat"><div class="pc-val on">${pcOn}</div><div class="pc-lbl">ON</div></div>
-                        <div class="pc-stat"><div class="pc-val off">${pcAccs.length-pcOn}</div><div class="pc-lbl">OFF</div></div>
-                        <div class="pc-stat"><div class="pc-val tot">${pcAccs.length}</div><div class="pc-lbl">TOT</div></div>
-                    </div>
-                </div>`
-            }).join('') : '<div class="pc-card"><span style="font-family:JetBrains Mono;font-size:11px;color:#334155;">No PC data</span></div>'}
-        </div>
+      </div>\`).join('')}</div>\`
+  }\`
+}
 
-        <!-- Accounts -->
-        <div class="section-head"><i class="fa-solid fa-list"></i><span class="section-title">Active Accounts</span></div>
-        ${accounts.length === 0
-            ? `<div class="empty"><i class="fa-solid fa-inbox"></i><p>No data yet<br><span style="opacity:.5">Run script then click Refresh</span></p></div>`
-            : `<div class="account-list">${accounts.map(acc => renderAccountRow(acc)).join('')}</div>`
-        }`
-    }
+/* ── COMING SOON ── */
+function renderCS() {
+  return \`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:50vh;gap:12px">
+    <div style="width:52px;height:52px;border-radius:12px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted)">
+      <i class="fa-solid fa-shield-halved"></i>
+    </div>
+    <div style="font-size:17px;font-weight:700;color:#fff">Block ID</div>
+    <div style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">coming soon</div>
+  </div>\`
+}
 
-    function statCard(icon, label, iconColor, val, valStyle) {
-        return `<div style="background:rgba(15,23,42,0.5);border:1px solid #1e293b;border-radius:14px;padding:20px 22px;">
-            <div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#334155;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                <i class="fa-solid ${icon}" style="color:${iconColor}"></i> ${label}
-            </div>
-            <div style="font-family:'JetBrains Mono';font-size:28px;font-weight:700;${valStyle}">${val}</div>
-        </div>`
-    }
+/* DELETE */
+function openDel(u) {
+  toDelUser = u
+  document.getElementById('modal-s').innerHTML = \`Delete data for <strong>\${u}</strong>?\`
+  document.getElementById('modal').style.display = 'flex'
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; toDelUser = null }
+async function confirmDelete() {
+  if (!toDelUser) return
+  await sb.from('blox_stats').delete().eq('username', toDelUser)
+  accounts = accounts.filter(a => a.username !== toDelUser)
+  closeModal(); render()
+  toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> Deleted')
+}
+async function deleteAll() {
+  if (!confirm('Delete ALL accounts?')) return
+  await sb.from('blox_stats').delete().neq('username', '')
+  accounts = []; render()
+  toast('<i class="fa-solid fa-check" style="color:var(--green)"></i> All deleted')
+}
 
-    function renderAccountRow(acc) {
-        const time = new Date(acc.updated_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
-        return `<div class="account-row">
-            <div class="acc-avatar"><i class="fa-solid fa-dragon"></i></div>
-            <div style="min-width:160px;">
-                <div class="acc-name">${acc.username}</div>
-                ${acc.pc ? `<div class="acc-pc">${acc.pc}</div>` : ''}
-            </div>
-            <span class="badge ${acc.online ? 'badge-on' : 'badge-off'}">
-                <span class="badge-dot"></span>${acc.online ? 'Online' : 'Offline'}
-            </span>
-            <div>
-                <div class="acc-money-label"><i class="fa-solid fa-coins" style="color:#00d97e;margin-right:4px;"></i>MONEY</div>
-                <div class="acc-money">${fmt(acc.money)} C$</div>
-            </div>
-            <div class="acc-stat">
-                <div class="acc-stat-val" style="color:#06b6d4">${fmt(acc.level)}</div>
-                <div class="acc-stat-lbl">LEVEL</div>
-            </div>
-            <div class="acc-stat">
-                <div class="acc-stat-val" style="color:#3b82f6">${fmt(acc.bounty)}</div>
-                <div class="acc-stat-lbl">BOUNTY</div>
-            </div>
-            <div class="acc-stat">
-                <div class="acc-stat-val" style="color:#8b5cf6">${fmt(acc.fragments)}</div>
-                <div class="acc-stat-lbl">FRAG</div>
-            </div>
-            <div class="acc-time">${time}</div>
-            <button class="del-btn" onclick="openDelete('${acc.username}')"><i class="fa-solid fa-trash"></i></button>
-        </div>`
-    }
-
-    function renderMonitor() {
-        const online = accounts.filter(a => a.online)
-        const totalMoney = accounts.reduce((s,a) => s + (a.money||0), 0)
-        const netMoney = totalMoney * 0.9
-        const thbRate = 1258
-        const thbVal = (netMoney / thbRate).toFixed(2)
-        const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
-
-        return `
-        <div class="topbar">
-            <div class="topbar-title"><i class="fa-solid fa-desktop"></i> Money Monitor</div>
-            <div class="topbar-right">
-                <button class="tb-btn" onclick="loadAccounts()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
-                <button class="tb-btn danger" onclick="deleteAll()"><i class="fa-solid fa-trash"></i> All</button>
-            </div>
-        </div>
-
-        <!-- Balance Cards -->
-        <div class="balance-grid">
-            <div class="balance-card gross">
-                <div class="bc-label green"><i class="fa-solid fa-coins"></i> GROSS BALANCE</div>
-                <div class="bc-value green">${totalMoney.toLocaleString()} C$</div>
-                <div class="bc-sub">Total Pre-Tax Amount</div>
-                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
-            </div>
-            <div class="balance-card net">
-                <div class="bc-label purple"><i class="fa-solid fa-percent"></i> NET BALANCE (TAX 10%)</div>
-                <div class="bc-value purple">${netMoney.toLocaleString()} C$</div>
-                <div class="bc-sub">Transferable Amount</div>
-                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
-            </div>
-            <div class="balance-card thb">
-                <div class="bc-label amber"><i class="fa-brands fa-bitcoin"></i> THB VALUE</div>
-                <div class="bc-value amber">${thbVal} ฿</div>
-                <div class="bc-sub">Rate: 1B = ${thbRate.toLocaleString()}฿</div>
-                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
-            </div>
-        </div>
-
-        <!-- PC Monitor -->
-        <div class="section-head">
-            <i class="fa-solid fa-desktop"></i>
-            <span class="section-title">PC Monitor</span>
-            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#00d97e;">ON: ${online.length}</span>
-            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#ef4444;">OFF: ${accounts.length - online.length}</span>
-        </div>
-        <div class="pc-grid" style="margin-bottom:24px;">
-            ${pcs.length > 0 ? pcs.map(pc => {
-                const pcAccs = accounts.filter(a => a.pc === pc)
-                const pcOn = pcAccs.filter(a => a.online).length
-                return `<div class="pc-card">
-                    <span class="pc-dot" style="${pcOn===0?'background:#ef4444;animation:none':''}"></span>
-                    <div class="pc-name">${pc}</div>
-                    <div class="pc-stats">
-                        <div class="pc-stat"><div class="pc-val on">${pcOn}</div><div class="pc-lbl">ON</div></div>
-                        <div class="pc-stat"><div class="pc-val off">${pcAccs.length-pcOn}</div><div class="pc-lbl">OFF</div></div>
-                        <div class="pc-stat"><div class="pc-val tot">${pcAccs.length}</div><div class="pc-lbl">TOT</div></div>
-                    </div>
-                </div>`
-            }).join('') : '<div class="pc-card"><span style="font-family:JetBrains Mono;font-size:11px;color:#334155;">No PC data</span></div>'}
-        </div>
-
-        <!-- Account List (money focused) -->
-        <div class="section-head"><i class="fa-solid fa-list"></i><span class="section-title">Active Accounts</span></div>
-        ${accounts.length === 0
-            ? `<div class="empty"><i class="fa-solid fa-inbox"></i><p>No data yet</p></div>`
-            : `<div class="account-list">${accounts.map(acc => `
-                <div class="account-row">
-                    <div class="acc-avatar"><i class="fa-solid fa-dragon"></i></div>
-                    <div style="flex:1;min-width:140px;">
-                        <div class="acc-name">${acc.username}</div>
-                        ${acc.pc ? `<div class="acc-pc">${acc.pc}</div>` : ''}
-                    </div>
-                    <span class="badge ${acc.online?'badge-on':'badge-off'}">
-                        <span class="badge-dot"></span>${acc.online?'Online':'Offline'}
-                    </span>
-                    <div style="flex:1;">
-                        <div class="acc-money">${fmt(acc.money)} C$</div>
-                    </div>
-                    <div class="acc-time">${new Date(acc.updated_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>
-                    <button class="del-btn" onclick="openDelete('${acc.username}')"><i class="fa-solid fa-trash"></i></button>
-                </div>`).join('')}</div>`
-        }`
-    }
-
-    function renderComingSoon(icon, title) {
-        return `<div class="coming-soon">
-            <div class="cs-icon"><i class="fa-solid ${icon}"></i></div>
-            <div class="cs-title">${title}</div>
-            <div class="cs-sub">coming soon</div>
-        </div>`
-    }
-
-    // ─── DELETE ───
-    function openDelete(username) {
-        toDeleteUsername = username
-        document.getElementById('modal-sub').innerHTML = `Data for <strong>${username}</strong> will be permanently removed.`
-        document.getElementById('modal').style.display = 'flex'
-    }
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none'
-        toDeleteUsername = null
-    }
-    async function confirmDelete() {
-        if (!toDeleteUsername) return
-        await sb.from('blox_stats').delete().eq('username', toDeleteUsername)
-        accounts = accounts.filter(a => a.username !== toDeleteUsername)
-        closeModal()
-        renderPanel()
-        showToast('<i class="fa-solid fa-check" style="color:#00d97e"></i> Deleted')
-    }
-    async function deleteAll() {
-        if (!confirm('Delete ALL accounts?')) return
-        await sb.from('blox_stats').delete().neq('username', '')
-        accounts = []
-        renderPanel()
-        showToast('<i class="fa-solid fa-check" style="color:#00d97e"></i> All deleted')
-    }
-
-    // ─── TOAST ───
-    function showToast(msg) {
-        const t = document.getElementById('toast')
-        t.innerHTML = msg
-        t.style.display = 'flex'
-        setTimeout(() => t.style.display = 'none', 2200)
-    }
+/* TOAST */
+function toast(msg) {
+  const t = document.getElementById('toast')
+  t.innerHTML = msg; t.style.display = 'flex'
+  setTimeout(() => t.style.display = 'none', 2500)
+}
 </script>
 </body>
 </html>
