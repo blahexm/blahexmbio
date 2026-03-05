@@ -193,12 +193,16 @@ tbody td.td-name{color:#fff;font-weight:800;}
 <div id="app" style="display:flex;flex-direction:row">
   <aside class="sb">
     <div class="sb-head">
-      <div class="sb-log-title">LOG</div>
+      <div class="sb-head-avatar"><i class="fa-solid fa-dragon" style="font-size:14px"></i></div>
+      <div class="sb-head-info">
+        <div class="sb-head-name">DEVHIMLOG</div>
+        <div class="sb-head-sub">Free monitoring for all items</div>
+      </div>
     </div>
     <div class="sb-glabel">Games</div>
     <div class="sb-game-row">
-      <img src="https://img5.pic.in.th/file/secure-sv1/latestdf46ad559c43906f.png" style="height:22px;width:auto;object-fit:contain;filter:drop-shadow(0 0 6px rgba(239,68,68,0.5))" onerror="this.style.display='none'">
-      <span>BLOX FRUITS</span>
+      <img src="https://img5.pic.in.th/file/secure-sv1/latestdf46ad559c43906f.png" style="height:22px;width:auto;object-fit:contain" onerror="this.style.display='none'">
+      <span>Blox Fruit</span>
     </div>
     <button class="sb-item active" id="nav-money" onclick="setTab('money',this)">
       <i class="fa-solid fa-user"></i> Player Monitor
@@ -206,22 +210,22 @@ tbody td.td-name{color:#fff;font-weight:800;}
     <button class="sb-item" id="nav-track" onclick="setTab('track',this)">
       <i class="fa-solid fa-chart-line"></i> Trackstat
     </button>
-    <div class="sb-glabel" style="margin-top:8px">Tools</div>
+    <div class="sb-glabel" style="margin-top:4px">Tools</div>
     <button class="sb-item" onclick="setTab('block',this)">
       <i class="fa-solid fa-shield-halved"></i> Block ID
     </button>
     <div class="sb-spacer"></div>
     <div class="sb-footer">
       <div class="sb-user-card">
-        <div class="sb-avatar" id="sb-ava">?</div>
-        <div>
-          <div class="sb-uname" id="sb-name">...</div>
-          <div class="sb-ukey" id="sb-key">KEY: ••••••••</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="sb-avatar" id="sb-ava">?</div>
+          <div>
+            <div class="sb-uname" id="sb-name">...</div>
+            <div class="sb-ukey" id="sb-key">Starter</div>
+          </div>
         </div>
+        <button onclick="logout()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px;transition:.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-chevron-up-down" style="font-size:11px"></i></button>
       </div>
-      <button class="sb-logout" onclick="logout()">
-        <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
-      </button>
     </div>
   </aside>
 
