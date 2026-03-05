@@ -102,7 +102,7 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
 /* THE CARD */
 .pcard{
-  width:160px;flex-shrink:0;border-radius:18px;
+  width:200px;flex-shrink:0;border-radius:18px;
   position:relative;overflow:hidden;
   background:#111318;
   border:1px solid rgba(255,255,255,0.07);
@@ -136,7 +136,7 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
 /* avatar area */
 .pcard-avatar-wrap{
-  position:relative;height:150px;overflow:hidden;
+  position:relative;height:180px;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
   background:linear-gradient(180deg,#1a1d25 0%,#0e1016 100%);
 }
@@ -145,14 +145,14 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
   background:linear-gradient(to bottom,transparent,#111318);
 }
 .pcard-avatar-img{
-  width:110px;height:110px;border-radius:50%;object-fit:cover;
+  width:120px;height:120px;border-radius:50%;object-fit:cover;
   border:3px solid rgba(255,255,255,0.1);
   transition:transform .3s ease;
   position:relative;z-index:1;
 }
 .pcard:hover .pcard-avatar-img{transform:scale(1.08);}
 .pcard-avatar-fb{
-  width:110px;height:110px;border-radius:50%;
+  width:120px;height:120px;border-radius:50%;
   background:rgba(59,130,246,0.1);border:3px solid rgba(59,130,246,0.2);
   display:flex;align-items:center;justify-content:center;
   font-family:'Poppins';font-size:36px;font-weight:900;color:var(--primary);
@@ -161,7 +161,7 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
 /* online dot on avatar */
 .pcard-dot{
-  position:absolute;bottom:8px;right:calc(50% - 63px);
+  position:absolute;bottom:10px;right:calc(50% - 70px);
   width:12px;height:12px;border-radius:50%;
   border:2px solid #111318;z-index:2;
 }
@@ -199,6 +199,52 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 .pcard-lvbar{height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;}
 .pcard-lvfill{height:3px;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--primary));transition:width .6s ease;}
 
+
+
+/* PCARD TILE & LINE EFFECT (from CSS reference) */
+.pcard-bg{border-radius:inherit;position:absolute;inset:0;overflow:hidden;-webkit-mask-image:radial-gradient(circle at 60% 5%,black 0%,black 15%,transparent 60%);mask-image:radial-gradient(circle at 60% 5%,black 0%,black 15%,transparent 60%);}
+.pcard-tiles{opacity:0;transition:opacity .25s;}
+.pcard:hover .pcard-tiles{opacity:1;transition-delay:.25s;}
+.ptile{position:absolute;background-color:rgba(249,115,22,0.06);animation-duration:8s;animation-iteration-count:infinite;opacity:0;}
+.pcard.marine .ptile{background-color:rgba(59,130,246,0.06);}
+.pcard:hover .ptile{animation-name:ptile;}
+.ptile.t4,.ptile.t6,.ptile.t10{animation-delay:-2s;}
+.ptile.t3,.ptile.t5,.ptile.t8{animation-delay:-4s;}
+.ptile.t2,.ptile.t9{animation-delay:-6s;}
+.ptile.t1{top:0;left:0;height:10%;width:22.5%}
+.ptile.t2{top:0;left:22.5%;height:10%;width:27.5%}
+.ptile.t3{top:0;left:50%;height:10%;width:27.5%}
+.ptile.t4{top:0;left:77.5%;height:10%;width:22.5%}
+.ptile.t5{top:10%;left:0;height:22.5%;width:22.5%}
+.ptile.t6{top:10%;left:22.5%;height:22.5%;width:27.5%}
+.ptile.t7{top:10%;left:50%;height:22.5%;width:27.5%}
+.ptile.t8{top:10%;left:77.5%;height:22.5%;width:22.5%}
+.ptile.t9{top:32.5%;left:50%;height:22.5%;width:27.5%}
+.ptile.t10{top:32.5%;left:77.5%;height:22.5%;width:22.5%}
+@keyframes ptile{0%,12.5%,100%{opacity:1}25%,82.5%{opacity:0}}
+.pcard-lines{position:absolute;inset:0;}
+.pline{position:absolute;inset:0;opacity:0;transition:opacity .35s;}
+.pcard:hover .pline{opacity:1;transition-duration:.15s;}
+.pline::before,.pline::after{content:'';position:absolute;transition:transform .35s;}
+.pline::before{left:0;right:0;height:1px;transform-origin:0 50%;transform:scaleX(0);}
+.pline::after{top:0;bottom:0;width:1px;transform-origin:50% 0;transform:scaleY(0);}
+.pcard:hover .pline::before{transform:scaleX(1);}
+.pcard:hover .pline::after{transform:scaleY(1);}
+.pline.pl1::before{top:10%;background:rgba(249,115,22,0.15);}.pline.pl1::after{left:22.5%;background:rgba(249,115,22,0.15);}
+.pline.pl2::before{top:32.5%;background:rgba(249,115,22,0.1);}.pline.pl2::after{left:50%;background:rgba(249,115,22,0.1);}
+.pline.pl3::before{top:55%;background:rgba(249,115,22,0.07);}.pline.pl3::after{right:22.5%;left:auto;background:rgba(249,115,22,0.07);}
+.pcard.marine .pline.pl1::before,.pcard.marine .pline.pl1::after{background:rgba(59,130,246,0.15);}
+.pcard.marine .pline.pl2::before,.pcard.marine .pline.pl2::after{background:rgba(59,130,246,0.1);}
+.pcard.marine .pline.pl3::before,.pcard.marine .pline.pl3::after{background:rgba(59,130,246,0.07);}
+.pline.pl1::before,.pline.pl1::after{transition-delay:.3s;}
+.pcard:hover .pline.pl1::before,.pcard:hover .pline.pl1::after{transition-delay:0s;}
+.pline.pl2::before,.pline.pl2::after{transition-delay:.15s;}
+.pcard:hover .pline.pl2::before,.pcard:hover .pline.pl2::after{transition-delay:.15s;}
+.pcard:hover .pline.pl3::before,.pcard:hover .pline.pl3::after{transition-delay:.3s;}
+/* enhanced shine */
+.pcard-shine::before{content:'';width:150%;padding-bottom:150%;border-radius:50%;position:absolute;left:50%;bottom:55%;filter:blur(35px);opacity:.12;transform:translateX(-50%);background-image:conic-gradient(from 205deg at 50% 50%,rgba(249,115,22,0) 0deg,#f97316 25deg,rgba(251,146,60,0.18) 295deg,rgba(249,115,22,0) 360deg);transition:opacity .5s;}
+.pcard.marine .pcard-shine::before{background-image:conic-gradient(from 205deg at 50% 50%,rgba(59,130,246,0) 0deg,#3b82f6 25deg,rgba(96,165,250,0.18) 295deg,rgba(59,130,246,0) 360deg);}
+.pcard:hover .pcard-shine::before{opacity:.2;}
 
 /* PC CARD */
 .pc-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
@@ -610,15 +656,27 @@ function renderMoney() {
     var lvPct = Math.min(100, ((a.level||0)/2800*100)).toFixed(1)
     var delay = (i * 0.06).toFixed(2)
 
-    var avatarInner = a.avatar_url
-      ? '<img class="pcard-avatar-img" src="'+a.avatar_url+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
-        + '<div class="pcard-avatar-fb" style="display:none">'+(a.username||'?')[0].toUpperCase()+'</div>'
-      : '<div class="pcard-avatar-fb">'+(a.username||'?')[0].toUpperCase()+'</div>'
+    // proxy to bypass Roblox CORS
+    var proxySrc = a.avatar_url ? 'https://wsrv.nl/?url=' + encodeURIComponent(a.avatar_url) + '&w=120&h=120&fit=cover' : ''
+    var fbInit = (a.username||'?')[0].toUpperCase()
+    var avatarInner = proxySrc
+      ? '<img class="pcard-avatar-img" src="'+proxySrc+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        + '<div class="pcard-avatar-fb" style="display:none">'+fbInit+'</div>'
+      : '<div class="pcard-avatar-fb">'+fbInit+'</div>'
+
+    var bgTiles = '<div class="pcard-bg"><div class="pcard-tiles">'
+      + '<div class="ptile t1"></div><div class="ptile t2"></div><div class="ptile t3"></div><div class="ptile t4"></div>'
+      + '<div class="ptile t5"></div><div class="ptile t6"></div><div class="ptile t7"></div><div class="ptile t8"></div>'
+      + '<div class="ptile t9"></div><div class="ptile t10"></div>'
+      + '</div><div class="pcard-lines">'
+      + '<div class="pline pl1"></div><div class="pline pl2"></div><div class="pline pl3"></div>'
+      + '</div></div>'
 
     var card = '<div class="pcard '+teamClass+'" style="animation-delay:'+delay+'s">'
       + '<div class="pcard-stripe"></div>'
       + '<div class="pcard-glow"></div>'
       + '<div class="pcard-shine"></div>'
+      + bgTiles
       + '<div class="pcard-avatar-wrap">'
       +   avatarInner
       +   '<span class="pcard-dot '+(a.online?'on':'off')+'"></span>'
