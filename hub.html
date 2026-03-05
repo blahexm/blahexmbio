@@ -277,6 +277,28 @@ tbody td{padding:11px 14px;color:var(--muted-fg);vertical-align:middle}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}.spinning{animation:spin .6s linear infinite}
 
+/* ===== LOADING SCREEN ===== */
+#loading-screen{
+  position:fixed;inset:0;z-index:8888;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
+  transition:opacity .5s ease,visibility .5s ease;
+}
+#loading-screen.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.ld-logo{font-size:18px;font-weight:900;color:#fff;letter-spacing:3px;}
+.ld-logo span{color:var(--primary)}
+.ld-spinner-wrap{position:relative;width:90px;height:90px;}
+.ld-ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;}
+.ld-ring.r1{border-top-color:var(--primary);animation:ldSpin 1.1s linear infinite;}
+.ld-ring.r2{inset:10px;border-top-color:var(--pirate);animation:ldSpin .8s linear infinite reverse;}
+.ld-ring.r3{inset:20px;border-top-color:var(--cyan);animation:ldSpin 1.4s linear infinite;}
+.ld-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;animation:ldPulse 1.5s ease-in-out infinite;}
+@keyframes ldSpin{to{transform:rotate(360deg)}}
+@keyframes ldPulse{0%,100%{opacity:.5;transform:scale(.88)}50%{opacity:1;transform:scale(1.08)}}
+.ld-text{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);letter-spacing:3px;}
+.ld-dots{display:inline-block;width:24px;text-align:left;animation:ldDots 1.4s steps(4,end) infinite;}
+@keyframes ldDots{0%{content:'';width:0}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
 /* ===== MOBILE BREAKPOINTS ===== */
 @media(max-width:768px){
   /* Show mobile topbar */
@@ -321,8 +343,20 @@ tbody td{padding:11px 14px;color:var(--muted-fg);vertical-align:middle}
 </head>
 <body>
 
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="ld-spinner-wrap">
+    <div class="ld-ring r1"></div>
+    <div class="ld-ring r2"></div>
+    <div class="ld-ring r3"></div>
+    <div class="ld-icon">🐉</div>
+  </div>
+  <div class="ld-logo">DEV<span>HIM</span>LOG</div>
+  <div class="ld-text">LOADING<span class="ld-dots" id="ld-dots">...</span></div>
+</div>
+
 <!-- LOGIN -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
   <div class="login-card">
     <div class="login-icon"><i class="fa-solid fa-dragon"></i></div>
     <div class="login-title">SYSTEM ACCESS</div>
@@ -456,15 +490,43 @@ function avatarHtml(a,size){
   return fb
 }
 
-window.onload=async function(){var k=localStorage.getItem('hexz_key');if(k){showUI(k,localStorage.getItem('hexz_label')||'...');await verifyKey(k,true)}}
+// animated dots
+var _dotState=0
+setInterval(function(){
+  var el=document.getElementById('ld-dots')
+  if(!el)return
+  _dotState=(_dotState+1)%4
+  el.textContent=['.','..','...',''][_dotState]
+},400)
+
+function hideLoading(){
+  var el=document.getElementById('loading-screen')
+  if(el){el.classList.add('hide');setTimeout(function(){el.style.display='none'},520)}
+}
+
+window.onload=async function(){
+  var k=localStorage.getItem('hexz_key')
+  if(k){
+    showUI(k,localStorage.getItem('hexz_label')||'...')
+    await verifyKey(k,true)
+  } else {
+    hideLoading()
+    document.getElementById('login-screen').style.display='flex'
+  }
+}
 async function login(){var k=document.getElementById('key-input').value.trim();if(!k)return;setErr('Authenticating...');await verifyKey(k,false)}
 async function verifyKey(k,isAuto){
   var res=await sb.from('access_keys').select('key_value,label,rank,active').eq('key_value',k).eq('active',true).single()
-  if(res.error||!res.data){if(!isAuto)setErr('Access Denied');else{localStorage.clear();location.reload()}return}
+  if(res.error||!res.data){
+    if(!isAuto)setErr('Access Denied')
+    else{localStorage.clear();hideLoading();document.getElementById('login-screen').style.display='flex'}
+    return
+  }
   localStorage.setItem('hexz_key',k);localStorage.setItem('hexz_label',res.data.label||'User')
   showUI(k,res.data.label||'User')
 }
 function showUI(key,label){
+  hideLoading()
   document.getElementById('login-screen').style.display='none'
   document.getElementById('app').style.display='flex'
   document.getElementById('sb-name').textContent=label
