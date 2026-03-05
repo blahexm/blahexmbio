@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEVHIMLOG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg: #050505;
+            --card: #131316;
+            --text: #e4e4e7;
+            --blue: #3b82f6;
+            --blue-dark: #1d4ed8;
+            --cyan: #06b6d4;
+            --blue-glow: rgba(59, 130, 246, 0.5);
+            --purple: #c084fc;
+            --red: #ef4444;
+            --green: #44ef4d;
+            --amber: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #0f172a 0%, #000 90%);
+        }
+
+        /* ─── LOGIN ─── */
+        #login-screen {
+            position: fixed; inset: 0;
+            background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s;
+        }
+
+        @keyframes blueBreath {
+            0%   { box-shadow: 0 0 15px rgba(59,130,246,0.1), inset 0 0 10px rgba(59,130,246,0.05); border-color: #1e3a8a; }
+            50%  { box-shadow: 0 0 30px rgba(59,130,246,0.4), inset 0 0 20px rgba(59,130,246,0.1); border-color: var(--blue); }
+            100% { box-shadow: 0 0 15px rgba(59,130,246,0.1), inset 0 0 10px rgba(59,130,246,0.05); border-color: #1e3a8a; }
+        }
+
+        .login-box {
+            text-align: center;
+            width: 400px;
+            padding: 50px 40px;
+            background: rgba(15,23,42,0.95);
+            border: 1px solid #1e3a8a;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            animation: blueBreath 4s infinite ease-in-out;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .pass-input {
+            background: #020617; border: 1px solid #1e293b;
+            color: #fff; padding: 15px; width: 100%;
+            border-radius: 12px; text-align: center;
+            margin: 30px 0 20px 0; font-size: 16px;
+            outline: none; transition: 0.3s;
+            font-family: 'JetBrains Mono'; letter-spacing: 2px;
+        }
+        .pass-input:focus { border-color: var(--blue); box-shadow: 0 0 20px var(--blue-glow); }
+
+        .btn-login {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff; font-weight: 800; border: none;
+            padding: 15px; width: 100%; border-radius: 12px;
+            cursor: pointer; font-size: 16px; transition: 0.3s;
+            letter-spacing: 1px; box-shadow: 0 5px 15px rgba(37,99,235,0.3);
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(37,99,235,0.5); }
+
+        /* ─── NAVBAR ─── */
+        .navbar {
+            padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15,23,42,0.8);
+            border-bottom: 1px solid rgba(59,130,246,0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+
+        .hub-title {
+            font-size: 28px; font-weight: 900;
+            background: linear-gradient(to right, #fff, #3b82f6, #06b6d4);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        .hub-sub {
+            font-size: 10px; color: #64748b;
+            letter-spacing: 2px; font-weight: 600;
+            margin-top: 2px; text-transform: uppercase;
+        }
+
+        .user-pill {
+            display: flex; align-items: center; gap: 15px;
+            background: rgba(30,41,59,0.5);
+            padding: 8px 20px; border-radius: 50px;
+            border: 1px solid rgba(59,130,246,0.3); transition: 0.3s;
+        }
+        .user-pill:hover { border-color: var(--blue); box-shadow: 0 0 15px rgba(59,130,246,0.2); }
+        .user-text { text-align: right; line-height: 1.2; }
+        .logout-btn { color: #94a3b8; cursor: pointer; transition: 0.3s; font-size: 18px; background: none; border: none; }
+        .logout-btn:hover { color: var(--red); transform: rotate(90deg); }
+
+        /* ─── LAYOUT ─── */
+        #main-hub { display: none; flex-direction: row; height: calc(100vh - 73px); overflow: hidden; }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: 220px; flex-shrink: 0;
+            background: rgba(10,13,24,0.95);
+            border-right: 1px solid rgba(59,130,246,0.1);
+            display: flex; flex-direction: column;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .sb-section {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; letter-spacing: 2px;
+            color: #334155; padding: 16px 20px 8px;
+            text-transform: uppercase;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 20px; cursor: pointer;
+            color: #64748b; font-size: 13px; font-weight: 600;
+            transition: 0.2s; border: none; background: none;
+            width: 100%; text-align: left;
+            font-family: 'Poppins', sans-serif;
+            border-left: 3px solid transparent;
+            text-decoration: none;
+        }
+        .nav-item:hover { color: #fff; background: rgba(59,130,246,0.05); }
+        .nav-item.active {
+            color: var(--blue); background: rgba(59,130,246,0.1);
+            border-left-color: var(--blue);
+        }
+        .nav-item i { width: 16px; text-align: center; font-size: 12px; }
+
+        .sb-spacer { flex: 1; }
+
+        .sb-user-card {
+            margin: 12px; padding: 14px;
+            background: rgba(15,23,42,0.8);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 14px;
+        }
+        .sb-avatar {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono'; font-size: 14px; color: #fff;
+            font-weight: 700; margin-bottom: 8px;
+        }
+        .sb-name { font-size: 13px; font-weight: 700; color: #fff; }
+        .sb-key { font-family: 'JetBrains Mono'; font-size: 10px; color: #475569; margin-top: 2px; }
+        .sb-rank { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--cyan); margin-top: 2px; }
+        .sb-logout {
+            width: 100%; margin-top: 10px; padding: 8px;
+            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 8px; color: var(--red);
+            font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 1px;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .sb-logout:hover { background: rgba(239,68,68,0.15); }
+
+        /* ─── MAIN PANEL ─── */
+        .panel {
+            flex: 1; overflow-y: auto; padding: 28px 32px;
+        }
+        .panel::-webkit-scrollbar { width: 4px; }
+        .panel::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+
+        /* ─── TOPBAR ─── */
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .topbar-title {
+            font-size: 22px; font-weight: 800; color: #fff;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .topbar-title i { color: var(--blue); }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        .filter-select {
+            background: rgba(15,23,42,0.8); border: 1px solid #1e293b;
+            color: #fff; padding: 8px 14px; border-radius: 10px;
+            font-family: 'JetBrains Mono'; font-size: 11px;
+            cursor: pointer; outline: none; transition: 0.2s;
+        }
+        .filter-select:hover { border-color: var(--blue); }
+
+        .tb-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 10px;
+            border: 1px solid #1e293b; background: rgba(15,23,42,0.8);
+            color: #94a3b8; font-family: 'JetBrains Mono'; font-size: 11px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .tb-btn:hover { border-color: var(--blue); color: #fff; }
+        .tb-btn.danger { color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05); }
+        .tb-btn.danger:hover { background: rgba(239,68,68,0.12); }
+        .spin { animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── BALANCE CARDS (BIG) ─── */
+        .balance-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+        .balance-card {
+            border-radius: 16px; padding: 24px 28px;
+            position: relative; overflow: hidden;
+            border: 1px solid transparent;
+        }
+        .balance-card.gross {
+            background: linear-gradient(135deg, rgba(0,217,126,0.08), rgba(0,217,126,0.03));
+            border-color: rgba(0,217,126,0.25);
+            grid-column: 1 / -1;
+        }
+        .balance-card.net {
+            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.03));
+            border-color: rgba(139,92,246,0.25);
+        }
+        .balance-card.thb {
+            background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.03));
+            border-color: rgba(245,158,11,0.25);
+        }
+
+        .bc-label {
+            font-family: 'JetBrains Mono'; font-size: 10px;
+            letter-spacing: 2px; text-transform: uppercase;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+        }
+        .bc-label.green { color: #00d97e; }
+        .bc-label.purple { color: var(--purple); }
+        .bc-label.amber { color: var(--amber); }
+
+        .bc-value {
+            font-family: 'JetBrains Mono'; font-weight: 700;
+            line-height: 1;
+        }
+        .bc-value.green { font-size: 42px; color: #00d97e; }
+        .bc-value.purple { font-size: 36px; color: var(--purple); }
+        .bc-value.amber { font-size: 36px; color: var(--amber); }
+
+        .bc-sub { font-size: 11px; color: #475569; margin-top: 6px; }
+
+        .bc-img {
+            position: absolute; right: 24px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 64px; opacity: 0.12;
+        }
+
+        /* ─── PC MONITOR ─── */
+        .section-head {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 14px; margin-top: 24px;
+        }
+        .section-head i { color: #475569; font-size: 13px; }
+        .section-title { font-size: 13px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; font-family: 'JetBrains Mono'; }
+
+        .pc-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+        .pc-card {
+            background: rgba(15,23,42,0.6); border: 1px solid #1e293b;
+            border-radius: 12px; padding: 14px 20px;
+            display: flex; align-items: center; gap: 20px;
+            min-width: 200px;
+        }
+        .pc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+        .pc-name { font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 700; color: #fff; }
+        .pc-stats { display: flex; gap: 16px; }
+        .pc-stat { text-align: center; }
+        .pc-val { font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 700; }
+        .pc-val.on { color: var(--green); }
+        .pc-val.off { color: var(--red); }
+        .pc-val.tot { color: #64748b; }
+        .pc-lbl { font-size: 9px; font-family: 'JetBrains Mono'; color: #334155; letter-spacing: 1px; margin-top: 2px; text-transform: uppercase; }
+
+        /* ─── ACCOUNT LIST ─── */
+        .account-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .account-row {
+            background: rgba(15,23,42,0.5); border: 1px solid #1e293b;
+            border-radius: 14px; padding: 14px 20px;
+            display: flex; align-items: center; gap: 16px;
+            transition: 0.2s;
+            animation: rowIn 0.3s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes rowIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+        .account-row:hover { border-color: #1e40af; background: rgba(15,23,42,0.8); }
+
+        .acc-avatar {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            border: 1px solid #1e293b;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--blue); font-size: 16px; flex-shrink: 0;
+        }
+        .acc-name { font-size: 14px; font-weight: 700; color: #fff; }
+        .acc-pc { font-family: 'JetBrains Mono'; font-size: 10px; color: var(--blue); margin-top: 2px; }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 12px; border-radius: 20px;
+            font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-on { background: rgba(0,217,126,0.08); border: 1px solid rgba(0,217,126,0.2); color: #00d97e; }
+        .badge-off { background: rgba(100,116,139,0.1); border: 1px solid #1e293b; color: #64748b; }
+        .badge-dot { width: 5px; height: 5px; border-radius: 50%; }
+        .badge-on .badge-dot { background: #00d97e; animation: pulse 1.5s infinite; }
+        .badge-off .badge-dot { background: #334155; }
+
+        .acc-money {
+            font-family: 'JetBrains Mono'; font-size: 15px;
+            font-weight: 700; color: #00d97e;
+        }
+        .acc-money-label { font-family: 'JetBrains Mono'; font-size: 9px; color: #334155; letter-spacing: 1px; text-transform: uppercase; }
+
+        .acc-stat { text-align: center; }
+        .acc-stat-val { font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 600; color: #94a3b8; }
+        .acc-stat-lbl { font-family: 'JetBrains Mono'; font-size: 9px; color: #334155; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+        .acc-time { font-family: 'JetBrains Mono'; font-size: 11px; color: #334155; margin-left: auto; white-space: nowrap; }
+
+        .del-btn {
+            background: none; border: none; padding: 6px 8px;
+            border-radius: 8px; color: #334155; cursor: pointer; transition: 0.2s;
+        }
+        .del-btn:hover { background: rgba(239,68,68,0.08); color: var(--red); }
+
+        /* ─── EMPTY ─── */
+        .empty {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 60px; gap: 14px;
+            background: rgba(15,23,42,0.3); border: 1px dashed #1e293b;
+            border-radius: 16px; text-align: center;
+        }
+        .empty i { font-size: 32px; color: #1e293b; }
+        .empty p { font-family: 'JetBrains Mono'; font-size: 12px; color: #334155; line-height: 2; }
+
+        /* ─── MODAL ─── */
+        .overlay {
+            position: fixed; inset: 0; z-index: 500;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            animation: fadeIn 0.15s ease both;
+        }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .modal {
+            background: #0f172a; border: 1px solid #1e293b;
+            border-radius: 20px; padding: 32px; width: 320px; text-align: center;
+            animation: fadeUp 0.2s ease both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+        .modal-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; color: var(--red); font-size: 18px;
+        }
+        .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+        .modal-sub { font-family: 'JetBrains Mono'; font-size: 11px; color: #64748b; line-height: 1.8; margin-bottom: 24px; }
+        .modal-btns { display: flex; gap: 10px; }
+        .m-btn {
+            flex: 1; padding: 12px; border-radius: 10px;
+            border: 1px solid #1e293b; background: none; color: #64748b;
+            font-family: 'JetBrains Mono'; font-size: 11px; cursor: pointer; transition: 0.2s;
+        }
+        .m-btn:hover { color: #fff; }
+        .m-danger { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); color: var(--red); }
+        .m-danger:hover { background: rgba(239,68,68,0.15); }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+            background: #0f172a; border: 1px solid #1e293b;
+            border-radius: 10px; padding: 12px 24px;
+            font-family: 'JetBrains Mono'; font-size: 12px; color: #fff;
+            z-index: 9999; animation: toastIn 0.2s ease both;
+            display: flex; align-items: center; gap: 8px;
+        }
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+        /* ─── COMING SOON ─── */
+        .coming-soon {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 60vh; gap: 16px;
+        }
+        .cs-icon {
+            width: 64px; height: 64px; border-radius: 16px;
+            background: rgba(15,23,42,0.8); border: 1px solid #1e293b;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #334155;
+        }
+        .cs-title { font-size: 18px; font-weight: 800; color: #fff; }
+        .cs-sub { font-family: 'JetBrains Mono'; font-size: 12px; color: #334155; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen">
+    <div class="login-box">
+        <i class="fa-solid fa-dragon" style="font-size:60px; color:var(--blue); margin-bottom:25px; filter:drop-shadow(0 0 20px var(--blue));"></i>
+        <h2 style="margin:0; color:#fff; font-size:22px; letter-spacing:1px;">SYSTEM ACCESS</h2>
+        <div style="color:#64748b; font-size:12px; margin-top:6px; font-family:'JetBrains Mono';">Authorization Required</div>
+        <input type="password" id="key-input" class="pass-input" placeholder="ENTER ACCESS KEY"
+            onkeydown="if(event.key==='Enter') login()">
+        <button class="btn-login" onclick="login()">INITIALIZE</button>
+        <div id="error-msg" style="color:var(--red); margin-top:16px; font-size:12px; font-family:'JetBrains Mono'; min-height:20px;"></div>
+    </div>
+</div>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="navbar" id="navbar" style="display:none;">
+    <div>
+        <div class="hub-title"><i class="fa-solid fa-dragon" style="font-size:24px;"></i> DEVHIMLOG</div>
+        <div class="hub-sub">ROBLOX BOT DASHBOARD · BLOX FRUITS TRACKSTAT</div>
+    </div>
+    <div class="user-pill">
+        <div class="user-text">
+            <div style="font-weight:700; color:#fff; font-size:14px;" id="u-name">...</div>
+            <div style="font-size:10px; color:var(--cyan);" id="u-rank">Connecting...</div>
+        </div>
+        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-power-off"></i></button>
+    </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main-hub">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sb-section">BLOX FRUITS</div>
+        <button class="nav-item active" onclick="setTab('dashboard')">
+            <i class="fa-solid fa-gauge"></i> Dashboard
+        </button>
+        <button class="nav-item" onclick="setTab('monitor')">
+            <i class="fa-solid fa-desktop"></i> Money Monitor
+        </button>
+        <button class="nav-item" onclick="setTab('trackstat')">
+            <i class="fa-solid fa-chart-line"></i> Trackstat
+        </button>
+
+        <div class="sb-section">TOOLS</div>
+        <a class="nav-item" href="https://blahexm.vercel.app/" target="_blank">
+            <i class="fa-solid fa-arrow-left"></i> Back to Hub
+        </a>
+
+        <div class="sb-spacer"></div>
+
+        <div class="sb-user-card">
+            <div class="sb-avatar" id="sb-avatar">?</div>
+            <div class="sb-name" id="sb-name">...</div>
+            <div class="sb-key" id="sb-key">KEY: ••••••••</div>
+            <div class="sb-rank" id="sb-rank">...</div>
+            <button class="sb-logout" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
+            </button>
+        </div>
+    </aside>
+
+    <!-- Panel -->
+    <div class="panel" id="panel">
+        <!-- content injected by JS -->
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="overlay" id="modal" style="display:none;" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-icon"><i class="fa-solid fa-trash"></i></div>
+        <div class="modal-title">Delete account?</div>
+        <div class="modal-sub" id="modal-sub">Data will be permanently removed.</div>
+        <div class="modal-btns">
+            <button class="m-btn" onclick="closeModal()">Cancel</button>
+            <button class="m-btn m-danger" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" style="display:none;"></div>
+
+<script>
+    // ─── CONFIG ───
+    const SUPABASE_URL = 'https://zwavwijmgjgpaembmpnl.supabase.co'
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU'
+    const { createClient } = supabase
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+    let accounts = []
+    let currentTab = 'dashboard'
+    let toDeleteUsername = null
+    let realtimeChannel = null
+    let refreshInterval = null
+
+    // ─── AUTH ───
+    window.onload = async () => {
+        const savedKey = localStorage.getItem('hexz_key')
+        if (savedKey) {
+            const cached = {
+                label: localStorage.getItem('hexz_label') || '...',
+                rank: localStorage.getItem('hexz_rank') || 'User'
+            }
+            showUI(savedKey, cached.label, cached.rank)
+            await verifyKey(savedKey, true)
+        }
+    }
+
+    async function login() {
+        const k = document.getElementById('key-input').value.trim()
+        if (!k) return
+        setError('Authenticating...')
+        await verifyKey(k, false)
+    }
+
+    async function verifyKey(k, isAuto) {
+        const { data, error } = await sb
+            .from('access_keys')
+            .select('key_value,label,rank,active')
+            .eq('key_value', k)
+            .eq('active', true)
+            .single()
+
+        if (error || !data) {
+            if (!isAuto) setError('Access Denied')
+            else { localStorage.clear(); location.reload() }
+            return
+        }
+
+        localStorage.setItem('hexz_key', k)
+        localStorage.setItem('hexz_label', data.label || 'User')
+        localStorage.setItem('hexz_rank', data.rank || 'Member')
+        showUI(k, data.label || 'User', data.rank || 'Member')
+    }
+
+    function showUI(key, label, rank) {
+        document.getElementById('login-screen').style.display = 'none'
+        document.getElementById('navbar').style.display = 'flex'
+        document.getElementById('main-hub').style.display = 'flex'
+
+        document.getElementById('u-name').textContent = label
+        document.getElementById('u-rank').textContent = rank
+        document.getElementById('sb-name').textContent = label
+        document.getElementById('sb-rank').textContent = rank
+        document.getElementById('sb-avatar').textContent = label.charAt(0).toUpperCase()
+        document.getElementById('sb-key').textContent = 'KEY: ' + key.slice(0,4) + '••••'
+
+        loadAccounts()
+        startRealtime()
+        refreshInterval = setInterval(loadAccounts, 30000)
+    }
+
+    function logout() {
+        localStorage.clear()
+        if (realtimeChannel) sb.removeChannel(realtimeChannel)
+        clearInterval(refreshInterval)
+        location.reload()
+    }
+
+    function setError(msg) {
+        document.getElementById('error-msg').textContent = msg
+    }
+
+    // ─── DATA ───
+    async function loadAccounts() {
+        const { data } = await sb
+            .from('blox_stats')
+            .select('*')
+            .order('updated_at', { ascending: false })
+        if (data) {
+            accounts = data
+            renderPanel()
+        }
+    }
+
+    function startRealtime() {
+        realtimeChannel = sb.channel('rt-blox')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'blox_stats' }, () => {
+                loadAccounts()
+            }).subscribe()
+    }
+
+    // ─── TABS ───
+    function setTab(tab) {
+        currentTab = tab
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
+        event.currentTarget.classList.add('active')
+        renderPanel()
+    }
+
+    // ─── RENDER ───
+    function fmt(n) {
+        if (n == null) return '—'
+        if (n >= 1e6) return (n/1e6).toFixed(1)+'M'
+        if (n >= 1e3) return (n/1e3).toFixed(1)+'K'
+        return n.toLocaleString()
+    }
+
+    function renderPanel() {
+        const panel = document.getElementById('panel')
+        if (currentTab === 'dashboard') panel.innerHTML = renderDashboard()
+        else if (currentTab === 'monitor') panel.innerHTML = renderMonitor()
+        else panel.innerHTML = renderComingSoon('fa-chart-line', 'Trackstat')
+    }
+
+    function renderDashboard() {
+        const online = accounts.filter(a => a.online)
+        const offline = accounts.filter(a => !a.online)
+        const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
+
+        return `
+        <div class="topbar">
+            <div class="topbar-title"><i class="fa-solid fa-gauge"></i> Blox Fruits — Dashboard</div>
+            <div class="topbar-right">
+                <div style="font-family:'JetBrains Mono';font-size:11px;color:#334155;padding:8px 14px;background:rgba(15,23,42,0.6);border:1px solid #1e293b;border-radius:10px;display:flex;align-items:center;gap:6px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:${online.length>0?'#00d97e':'#334155'};display:inline-block;${online.length>0?'animation:pulse 1.5s infinite':''}"></span>
+                    ${online.length} Online
+                </div>
+                <button class="tb-btn" onclick="loadAccounts()">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;">
+            ${statCard('fa-users','Total','#64748b', accounts.length, '')}
+            ${statCard('fa-circle-dot','Online','#00d97e', online.length, 'color:#00d97e')}
+            ${statCard('fa-circle-xmark','Offline','#ef4444', offline.length, 'color:#ef4444')}
+            ${statCard('fa-clock','Last Sync','#334155', new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'}), 'font-size:14px;color:#64748b')}
+        </div>
+
+        <!-- PC Monitor -->
+        <div class="section-head"><i class="fa-solid fa-desktop"></i><span class="section-title">PC Monitor</span>
+            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#00d97e;">ON: ${online.length}</span>
+            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#ef4444;">OFF: ${offline.length}</span>
+        </div>
+        <div class="pc-grid" style="margin-bottom:24px;">
+            ${pcs.length > 0 ? pcs.map(pc => {
+                const pcAccs = accounts.filter(a => a.pc === pc)
+                const pcOn = pcAccs.filter(a => a.online).length
+                return `<div class="pc-card">
+                    <span class="pc-dot" style="${pcOn===0?'background:#ef4444;animation:none':''}"></span>
+                    <div class="pc-name">${pc}</div>
+                    <div class="pc-stats">
+                        <div class="pc-stat"><div class="pc-val on">${pcOn}</div><div class="pc-lbl">ON</div></div>
+                        <div class="pc-stat"><div class="pc-val off">${pcAccs.length-pcOn}</div><div class="pc-lbl">OFF</div></div>
+                        <div class="pc-stat"><div class="pc-val tot">${pcAccs.length}</div><div class="pc-lbl">TOT</div></div>
+                    </div>
+                </div>`
+            }).join('') : '<div class="pc-card"><span style="font-family:JetBrains Mono;font-size:11px;color:#334155;">No PC data</span></div>'}
+        </div>
+
+        <!-- Accounts -->
+        <div class="section-head"><i class="fa-solid fa-list"></i><span class="section-title">Active Accounts</span></div>
+        ${accounts.length === 0
+            ? `<div class="empty"><i class="fa-solid fa-inbox"></i><p>No data yet<br><span style="opacity:.5">Run script then click Refresh</span></p></div>`
+            : `<div class="account-list">${accounts.map(acc => renderAccountRow(acc)).join('')}</div>`
+        }`
+    }
+
+    function statCard(icon, label, iconColor, val, valStyle) {
+        return `<div style="background:rgba(15,23,42,0.5);border:1px solid #1e293b;border-radius:14px;padding:20px 22px;">
+            <div style="font-family:'JetBrains Mono';font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#334155;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid ${icon}" style="color:${iconColor}"></i> ${label}
+            </div>
+            <div style="font-family:'JetBrains Mono';font-size:28px;font-weight:700;${valStyle}">${val}</div>
+        </div>`
+    }
+
+    function renderAccountRow(acc) {
+        const time = new Date(acc.updated_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+        return `<div class="account-row">
+            <div class="acc-avatar"><i class="fa-solid fa-dragon"></i></div>
+            <div style="min-width:160px;">
+                <div class="acc-name">${acc.username}</div>
+                ${acc.pc ? `<div class="acc-pc">${acc.pc}</div>` : ''}
+            </div>
+            <span class="badge ${acc.online ? 'badge-on' : 'badge-off'}">
+                <span class="badge-dot"></span>${acc.online ? 'Online' : 'Offline'}
+            </span>
+            <div>
+                <div class="acc-money-label"><i class="fa-solid fa-coins" style="color:#00d97e;margin-right:4px;"></i>MONEY</div>
+                <div class="acc-money">${fmt(acc.money)} C$</div>
+            </div>
+            <div class="acc-stat">
+                <div class="acc-stat-val" style="color:#06b6d4">${fmt(acc.level)}</div>
+                <div class="acc-stat-lbl">LEVEL</div>
+            </div>
+            <div class="acc-stat">
+                <div class="acc-stat-val" style="color:#3b82f6">${fmt(acc.bounty)}</div>
+                <div class="acc-stat-lbl">BOUNTY</div>
+            </div>
+            <div class="acc-stat">
+                <div class="acc-stat-val" style="color:#8b5cf6">${fmt(acc.fragments)}</div>
+                <div class="acc-stat-lbl">FRAG</div>
+            </div>
+            <div class="acc-time">${time}</div>
+            <button class="del-btn" onclick="openDelete('${acc.username}')"><i class="fa-solid fa-trash"></i></button>
+        </div>`
+    }
+
+    function renderMonitor() {
+        const online = accounts.filter(a => a.online)
+        const totalMoney = accounts.reduce((s,a) => s + (a.money||0), 0)
+        const netMoney = totalMoney * 0.9
+        const thbRate = 1258
+        const thbVal = (netMoney / thbRate).toFixed(2)
+        const pcs = [...new Set(accounts.map(a => a.pc).filter(Boolean))]
+
+        return `
+        <div class="topbar">
+            <div class="topbar-title"><i class="fa-solid fa-desktop"></i> Money Monitor</div>
+            <div class="topbar-right">
+                <button class="tb-btn" onclick="loadAccounts()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                <button class="tb-btn danger" onclick="deleteAll()"><i class="fa-solid fa-trash"></i> All</button>
+            </div>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="balance-grid">
+            <div class="balance-card gross">
+                <div class="bc-label green"><i class="fa-solid fa-coins"></i> GROSS BALANCE</div>
+                <div class="bc-value green">${totalMoney.toLocaleString()} C$</div>
+                <div class="bc-sub">Total Pre-Tax Amount</div>
+                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+            <div class="balance-card net">
+                <div class="bc-label purple"><i class="fa-solid fa-percent"></i> NET BALANCE (TAX 10%)</div>
+                <div class="bc-value purple">${netMoney.toLocaleString()} C$</div>
+                <div class="bc-sub">Transferable Amount</div>
+                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+            <div class="balance-card thb">
+                <div class="bc-label amber"><i class="fa-brands fa-bitcoin"></i> THB VALUE</div>
+                <div class="bc-value amber">${thbVal} ฿</div>
+                <div class="bc-sub">Rate: 1B = ${thbRate.toLocaleString()}฿</div>
+                <div class="bc-img"><i class="fa-solid fa-sack-dollar"></i></div>
+            </div>
+        </div>
+
+        <!-- PC Monitor -->
+        <div class="section-head">
+            <i class="fa-solid fa-desktop"></i>
+            <span class="section-title">PC Monitor</span>
+            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#00d97e;">ON: ${online.length}</span>
+            <span style="margin-left:8px;font-family:'JetBrains Mono';font-size:10px;color:#ef4444;">OFF: ${accounts.length - online.length}</span>
+        </div>
+        <div class="pc-grid" style="margin-bottom:24px;">
+            ${pcs.length > 0 ? pcs.map(pc => {
+                const pcAccs = accounts.filter(a => a.pc === pc)
+                const pcOn = pcAccs.filter(a => a.online).length
+                return `<div class="pc-card">
+                    <span class="pc-dot" style="${pcOn===0?'background:#ef4444;animation:none':''}"></span>
+                    <div class="pc-name">${pc}</div>
+                    <div class="pc-stats">
+                        <div class="pc-stat"><div class="pc-val on">${pcOn}</div><div class="pc-lbl">ON</div></div>
+                        <div class="pc-stat"><div class="pc-val off">${pcAccs.length-pcOn}</div><div class="pc-lbl">OFF</div></div>
+                        <div class="pc-stat"><div class="pc-val tot">${pcAccs.length}</div><div class="pc-lbl">TOT</div></div>
+                    </div>
+                </div>`
+            }).join('') : '<div class="pc-card"><span style="font-family:JetBrains Mono;font-size:11px;color:#334155;">No PC data</span></div>'}
+        </div>
+
+        <!-- Account List (money focused) -->
+        <div class="section-head"><i class="fa-solid fa-list"></i><span class="section-title">Active Accounts</span></div>
+        ${accounts.length === 0
+            ? `<div class="empty"><i class="fa-solid fa-inbox"></i><p>No data yet</p></div>`
+            : `<div class="account-list">${accounts.map(acc => `
+                <div class="account-row">
+                    <div class="acc-avatar"><i class="fa-solid fa-dragon"></i></div>
+                    <div style="flex:1;min-width:140px;">
+                        <div class="acc-name">${acc.username}</div>
+                        ${acc.pc ? `<div class="acc-pc">${acc.pc}</div>` : ''}
+                    </div>
+                    <span class="badge ${acc.online?'badge-on':'badge-off'}">
+                        <span class="badge-dot"></span>${acc.online?'Online':'Offline'}
+                    </span>
+                    <div style="flex:1;">
+                        <div class="acc-money">${fmt(acc.money)} C$</div>
+                    </div>
+                    <div class="acc-time">${new Date(acc.updated_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>
+                    <button class="del-btn" onclick="openDelete('${acc.username}')"><i class="fa-solid fa-trash"></i></button>
+                </div>`).join('')}</div>`
+        }`
+    }
+
+    function renderComingSoon(icon, title) {
+        return `<div class="coming-soon">
+            <div class="cs-icon"><i class="fa-solid ${icon}"></i></div>
+            <div class="cs-title">${title}</div>
+            <div class="cs-sub">coming soon</div>
+        </div>`
+    }
+
+    // ─── DELETE ───
+    function openDelete(username) {
+        toDeleteUsername = username
+        document.getElementById('modal-sub').innerHTML = `Data for <strong>${username}</strong> will be permanently removed.`
+        document.getElementById('modal').style.display = 'flex'
+    }
+    function closeModal() {
+        document.getElementById('modal').style.display = 'none'
+        toDeleteUsername = null
+    }
+    async function confirmDelete() {
+        if (!toDeleteUsername) return
+        await sb.from('blox_stats').delete().eq('username', toDeleteUsername)
+        accounts = accounts.filter(a => a.username !== toDeleteUsername)
+        closeModal()
+        renderPanel()
+        showToast('<i class="fa-solid fa-check" style="color:#00d97e"></i> Deleted')
+    }
+    async function deleteAll() {
+        if (!confirm('Delete ALL accounts?')) return
+        await sb.from('blox_stats').delete().neq('username', '')
+        accounts = []
+        renderPanel()
+        showToast('<i class="fa-solid fa-check" style="color:#00d97e"></i> All deleted')
+    }
+
+    // ─── TOAST ───
+    function showToast(msg) {
+        const t = document.getElementById('toast')
+        t.innerHTML = msg
+        t.style.display = 'flex'
+        setTimeout(() => t.style.display = 'none', 2200)
+    }
+</script>
+</body>
+</html>
