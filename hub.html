@@ -84,13 +84,121 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 .stat-val{font-size:24px;font-weight:900;color:#fff;line-height:1.1;}
 .stat-val.green{color:var(--green)}.stat-val.red{color:var(--red)}
 
-/* MONITOR GRID */
-.monitor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+/* MONITOR GRID - replaced by player cards */
 .sec-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;}
 .sec-card-head{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .sec-card-icon{width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--muted-fg);flex-shrink:0;}
 .sec-card-title{font-size:15px;font-weight:800;color:#fff}
 .sec-card-sub{font-size:12px;font-weight:600;color:var(--muted)}
+
+/* PLAYER CARD CAROUSEL */
+.carousel-wrap{position:relative;margin-bottom:20px;}
+.carousel-label{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.carousel-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.carousel-track-outer{overflow-x:auto;overflow-y:visible;padding:8px 4px 16px;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.carousel-track-outer::-webkit-scrollbar{display:none}
+.carousel-track-outer.grabbing{cursor:grabbing;}
+.carousel-track{display:flex;gap:14px;width:max-content;}
+
+/* THE CARD */
+.pcard{
+  width:160px;flex-shrink:0;border-radius:18px;
+  position:relative;overflow:hidden;
+  background:#111318;
+  border:1px solid rgba(255,255,255,0.07);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease;
+  cursor:pointer;
+  animation: cardIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+.pcard:hover{transform:translateY(-8px) scale(1.03);z-index:10;}
+.pcard.pirate:hover{box-shadow:0 20px 40px rgba(249,115,22,0.35);}
+.pcard.marine:hover{box-shadow:0 20px 40px rgba(59,130,246,0.35);}
+@keyframes cardIn{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* card bg glow layer */
+.pcard-glow{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  transition:opacity .3s;
+}
+.pcard.pirate .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(249,115,22,0.18) 0%,transparent 70%);}
+.pcard.marine .pcard-glow{background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.18) 0%,transparent 70%);}
+.pcard:hover .pcard-glow{opacity:1;}
+
+/* shimmer scan line */
+.pcard-shine{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.06) 50%,transparent 60%);
+  background-size:200% 100%;
+  background-position:200% 0;
+  transition:background-position .5s ease;
+}
+.pcard:hover .pcard-shine{background-position:-200% 0;}
+
+/* avatar area */
+.pcard-avatar-wrap{
+  position:relative;height:150px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#1a1d25 0%,#0e1016 100%);
+}
+.pcard-avatar-wrap::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:50px;
+  background:linear-gradient(to bottom,transparent,#111318);
+}
+.pcard-avatar-img{
+  width:110px;height:110px;border-radius:50%;object-fit:cover;
+  border:3px solid rgba(255,255,255,0.1);
+  transition:transform .3s ease;
+  position:relative;z-index:1;
+}
+.pcard:hover .pcard-avatar-img{transform:scale(1.08);}
+.pcard-avatar-fb{
+  width:110px;height:110px;border-radius:50%;
+  background:rgba(59,130,246,0.1);border:3px solid rgba(59,130,246,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Poppins';font-size:36px;font-weight:900;color:var(--primary);
+  position:relative;z-index:1;
+}
+
+/* online dot on avatar */
+.pcard-dot{
+  position:absolute;bottom:8px;right:calc(50% - 63px);
+  width:12px;height:12px;border-radius:50%;
+  border:2px solid #111318;z-index:2;
+}
+.pcard-dot.on{background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.9);animation:pulse 1.5s infinite;}
+.pcard-dot.off{background:#3f3f46;}
+
+/* team stripe top */
+.pcard-stripe{height:3px;width:100%;}
+.pcard.pirate .pcard-stripe{background:linear-gradient(90deg,#ea580c,#f97316,#fb923c);}
+.pcard.marine .pcard-stripe{background:linear-gradient(90deg,#1d4ed8,#3b82f6,#60a5fa);}
+
+/* body */
+.pcard-body{padding:10px 12px 14px;position:relative;z-index:1;}
+.pcard-name{font-family:'Poppins';font-size:13px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.pcard-team{display:inline-flex;align-items:center;gap:3px;font-family:'Poppins';font-size:9px;font-weight:800;letter-spacing:.5px;padding:2px 7px;border-radius:5px;margin-bottom:8px;}
+.pcard.pirate .pcard-team{background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.3);color:#fb923c;}
+.pcard.marine .pcard-team{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;}
+
+.pcard-divider{height:1px;background:rgba(255,255,255,0.05);margin-bottom:8px;}
+
+.pcard-stat{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.pcard-stat-label{font-family:'Poppins';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.pcard-stat-val{font-family:'JetBrains Mono';font-size:11px;font-weight:700;color:#e4e4e7;}
+
+.pcard-race-row{margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;}
+.pcard-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.pcard-tag.race{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--muted-fg);}
+.pcard-tag.fruit{background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);color:var(--cyan);}
+
+/* level bar */
+.pcard-lvbar-wrap{margin-bottom:8px;}
+.pcard-lvbar-head{display:flex;justify-content:space-between;margin-bottom:3px;}
+.pcard-lvbar-label{font-family:'Poppins';font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.pcard-lvbar-val{font-family:'JetBrains Mono';font-size:9px;font-weight:700;color:var(--amber);}
+.pcard-lvbar{height:3px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;}
+.pcard-lvfill{height:3px;border-radius:99px;background:linear-gradient(90deg,var(--amber),var(--primary));transition:width .6s ease;}
+
 
 /* PC CARD */
 .pc-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
@@ -421,6 +529,15 @@ function render() {
   document.getElementById('panel').innerHTML =
     currentTab === 'money' ? renderMoney() :
     currentTab === 'track' ? renderTrack() : renderCS()
+  setTimeout(function() {
+    document.querySelectorAll('.carousel-track-outer').forEach(function(el) {
+      var isDown=false, startX, scrollLeft
+      el.addEventListener('mousedown',function(e){isDown=true;el.classList.add('grabbing');startX=e.pageX-el.offsetLeft;scrollLeft=el.scrollLeft})
+      el.addEventListener('mouseleave',function(){isDown=false;el.classList.remove('grabbing')})
+      el.addEventListener('mouseup',function(){isDown=false;el.classList.remove('grabbing')})
+      el.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();var x=e.pageX-el.offsetLeft;el.scrollLeft=scrollLeft-(x-startX)*1.2})
+    })
+  }, 50)
 }
 
 function filteredAccounts() {
@@ -480,6 +597,62 @@ function renderMoney() {
     ? '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No data found</div><div class="empty-s">Run script then click Refresh</div></div>'
     : '<table><thead><tr><th>Player</th><th>Status</th><th>Money</th><th>Level</th><th>Bounty/Honor</th><th>Fragment</th><th>Race</th><th>Devil Fruit</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>'
 
+  // build carousel cards
+  var onCards = '', offCards = ''
+  accounts.forEach(function(a, i) {
+    var isPirate = a.team === 'Pirates'
+    var teamClass = isPirate ? 'pirate' : (a.team === 'Marines' ? 'marine' : 'pirate')
+    var teamIcon  = isPirate ? '☠️' : '⚓'
+    var teamLabel = isPirate ? 'PIRATE' : 'MARINE'
+    var bountyLabel = isPirate ? 'BOUNTY' : 'HONOR'
+    var bountyColor = isPirate ? '#fb923c' : '#60a5fa'
+    var raceMeta = getRaceMeta(a.race)
+    var lvPct = Math.min(100, ((a.level||0)/2800*100)).toFixed(1)
+    var delay = (i * 0.06).toFixed(2)
+
+    var avatarInner = a.avatar_url
+      ? '<img class="pcard-avatar-img" src="'+a.avatar_url+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        + '<div class="pcard-avatar-fb" style="display:none">'+(a.username||'?')[0].toUpperCase()+'</div>'
+      : '<div class="pcard-avatar-fb">'+(a.username||'?')[0].toUpperCase()+'</div>'
+
+    var card = '<div class="pcard '+teamClass+'" style="animation-delay:'+delay+'s">'
+      + '<div class="pcard-stripe"></div>'
+      + '<div class="pcard-glow"></div>'
+      + '<div class="pcard-shine"></div>'
+      + '<div class="pcard-avatar-wrap">'
+      +   avatarInner
+      +   '<span class="pcard-dot '+(a.online?'on':'off')+'"></span>'
+      + '</div>'
+      + '<div class="pcard-body">'
+      +   '<div class="pcard-name">'+a.username+'</div>'
+      +   '<div class="pcard-team">'+teamIcon+' '+teamLabel+'</div>'
+      +   '<div class="pcard-lvbar-wrap">'
+      +     '<div class="pcard-lvbar-head"><span class="pcard-lvbar-label">Level</span><span class="pcard-lvbar-val">'+(a.level||0)+'</span></div>'
+      +     '<div class="pcard-lvbar"><div class="pcard-lvfill" style="width:'+lvPct+'%"></div></div>'
+      +   '</div>'
+      +   '<div class="pcard-divider"></div>'
+      +   '<div class="pcard-stat"><span class="pcard-stat-label">'+bountyLabel+'</span><span class="pcard-stat-val" style="color:'+bountyColor+'">'+fmt(a.bounty)+'</span></div>'
+      +   '<div class="pcard-stat"><span class="pcard-stat-label">Beli</span><span class="pcard-stat-val" style="color:var(--green)">'+fmt(a.money)+'</span></div>'
+      +   '<div class="pcard-stat"><span class="pcard-stat-label">Frags</span><span class="pcard-stat-val" style="color:var(--cyan)">'+fmt(a.fragments)+'</span></div>'
+      +   '<div class="pcard-race-row">'
+      +     (a.race ? '<span class="pcard-tag race" style="color:'+raceMeta.color+'">'+raceMeta.emoji+' '+a.race+'</span>' : '')
+      +     (a.devil_fruit ? '<span class="pcard-tag fruit">🍎 '+a.devil_fruit+'</span>' : '')
+      +   '</div>'
+      + '</div>'
+    + '</div>'
+
+    if (a.online) onCards += card
+    else offCards += card
+  })
+
+  var carouselHtml = ''
+  if (accounts.length === 0) {
+    carouselHtml = '<div class="empty"><i class="fa-solid fa-inbox"></i><div class="empty-t">No players found</div><div class="empty-s">Run script then click Refresh</div></div>'
+  } else {
+    if (onCards) carouselHtml += '<div class="carousel-label"><i class="fa-solid fa-wifi" style="color:var(--green)"></i> Online — ' + on.length + '</div><div class="carousel-wrap"><div class="carousel-track-outer" id="ct-on"><div class="carousel-track">' + onCards + '</div></div></div>'
+    if (offCards) carouselHtml += '<div class="carousel-label" style="margin-top:4px"><i class="fa-solid fa-wifi" style="color:var(--muted)"></i> Offline — ' + off.length + '</div><div class="carousel-wrap"><div class="carousel-track-outer" id="ct-off"><div class="carousel-track">' + offCards + '</div></div></div>'
+  }
+
   return '<div class="page-title">Player Monitor</div>'
     + '<div class="stat-grid">'
     + '<div class="stat-card"><div class="stat-icon" style="background:rgba(34,197,94,0.08)"><i class="fa-solid fa-wifi" style="color:var(--green)"></i></div><div><div class="stat-label">Online</div><div class="stat-val green">' + on.length + '</div></div></div>'
@@ -487,15 +660,8 @@ function renderMoney() {
     + '<div class="stat-card" style="cursor:pointer" onclick="setTeamFilter(teamFilter===\'Pirates\'?\'all\':\'Pirates\')"><div class="stat-icon" style="background:rgba(249,115,22,0.08)"><span style="font-size:20px">☠️</span></div><div><div class="stat-label">Pirates</div><div class="stat-val" style="color:#fb923c">' + pirates.length + '</div></div></div>'
     + '<div class="stat-card" style="cursor:pointer" onclick="setTeamFilter(teamFilter===\'Marines\'?\'all\':\'Marines\')"><div class="stat-icon" style="background:rgba(59,130,246,0.08)"><span style="font-size:20px">⚓</span></div><div><div class="stat-label">Marines</div><div class="stat-val" style="color:#60a5fa">' + marines.length + '</div></div></div>'
     + '</div>'
-    + '<div class="monitor-grid">'
-    + '<div class="sec-card"><div class="sec-card-head"><div style="display:flex;align-items:center;gap:12px"><div class="sec-card-icon"><i class="fa-solid fa-money-bill-wave"></i></div><div><div class="sec-card-title">Balance Monitor</div><div class="sec-card-sub">' + accounts.length + ' accounts total</div></div></div></div>'
-    + '<div style="display:flex;flex-direction:column;gap:10px">'
-    + '<div style="padding:14px;background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.15);border-radius:11px"><div style="font-family:\'Poppins\';font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px"><i class="fa-solid fa-coins"></i> GROSS BALANCE</div><div style="font-family:\'JetBrains Mono\';font-size:24px;font-weight:700;color:var(--green)">' + fmtFull(tot) + ' C$</div><div style="font-size:11px;font-weight:600;color:var(--muted);margin-top:4px">Total Pre-Tax Amount</div></div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="padding:14px;background:rgba(168,85,247,0.04);border:1px solid rgba(168,85,247,0.15);border-radius:11px"><div style="font-family:\'Poppins\';font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--purple);margin-bottom:8px">NET (TAX 10%)</div><div style="font-family:\'JetBrains Mono\';font-size:17px;font-weight:700;color:var(--purple)">' + fmtFull(net) + ' C$</div></div><div style="padding:14px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.15);border-radius:11px"><div style="font-family:\'Poppins\';font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:8px">THB VALUE</div><div style="font-family:\'JetBrains Mono\';font-size:17px;font-weight:700;color:var(--amber)">' + thb + ' ฿</div></div></div>'
-    + '</div></div>'
-    + '<div class="sec-card"><div class="sec-card-head"><div style="display:flex;align-items:center;gap:12px"><div class="sec-card-icon"><i class="fa-solid fa-desktop"></i></div><div><div class="sec-card-title">PC Monitor</div><div class="sec-card-sub">' + pcs.length + ' PCs total</div></div></div><div style="display:flex;gap:8px"><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--green)">ON: ' + on.length + '</span><span style="font-family:\'Poppins\';font-size:10px;font-weight:800;color:var(--red)">OFF: ' + off.length + '</span></div></div><div style="display:flex;flex-direction:column;gap:8px">' + pcHtml + '</div></div>'
-    + '</div>'
-    + '<div class="tbl-wrap"><div class="tbl-toolbar"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:900;color:#fff">Active Accounts</span><span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted)">' + shown.length + '</span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + filterHtml + '<input class="tbl-search" placeholder="Search..." id="search-input" oninput="render()"></div></div>' + tableHtml + '</div>'
+    + carouselHtml
+    + '<div class="tbl-wrap" style="margin-top:20px"><div class="tbl-toolbar"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:900;color:#fff">Active Accounts</span><span style="font-family:\'Poppins\';font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted)">' + shown.length + '</span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + filterHtml + '<input class="tbl-search" placeholder="Search..." id="search-input" oninput="render()"></div></div>' + tableHtml + '</div>'
 }
 
 function renderTrack() {
