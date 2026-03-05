@@ -8,7 +8,7 @@ const C = {
   /* ──────────────────────────────
      👤  โปรไฟล์
   ────────────────────────────── */
-  name:      "BLAHEXM",
+  name:      "HIM",
   bio:       "NO BIO YET",
   avatarUrl: "https://img2.pic.in.th/642388454_18080909531578593_3604.png",        // URL รูป — ปล่อยว่าง = ดึงจาก Discord อัตโนมัติ
   footerText:"blahexm · WITH AI 2026",
