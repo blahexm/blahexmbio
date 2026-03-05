@@ -237,3 +237,9 @@ footer{width:100%;padding:14px;border-top:1px solid var(--border);display:flex;a
   .tab-btn{padding:6px 10px;font-size:.6rem}
   .stat-card-val{font-size:1rem}
 }
+
+/* icon buttons (refresh / lock) */
+.icon-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.icon-btn:hover{border-color:var(--a);color:var(--a)}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.icon-btn.spinning svg{animation:spin .7s linear infinite}
