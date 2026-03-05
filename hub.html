@@ -3,243 +3,377 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>HIM · HUB</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<title>HIM HUB</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0a0e1a;
-  --navy2:#0d1120;
-  --navy3:#111827;
-  --card:#0f1623;
-  --border:rgba(255,255,255,.07);
-  --bh:rgba(99,179,237,.25);
-  --text:#e2e8f0;
-  --dim:#64748b;
-  --dim2:#475569;
-  --cyan:#38bdf8;
-  --cyan2:#0ea5e9;
-  --green:#22c55e;
-  --red:#ef4444;
-  --amber:#f59e0b;
+  --bg:#060c18;--bg2:#08101e;--card:#0b1424;--card2:#0d1830;
+  --border:rgba(56,189,248,.1);--bh:rgba(56,189,248,.3);
+  --text:#e2e8f0;--dim:#4a6080;--dim2:#2a3a52;
+  --cyan:#38bdf8;--cyan2:#0ea5e9;--cyan3:#0284c7;
+  --green:#22c55e;--red:#ef4444;--amber:#f59e0b;
 }
-html,body{height:100%;background:var(--navy);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
 
-/* noise overlay */
+/* subtle grid bg */
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:.025;
+  background-image:
+    linear-gradient(rgba(56,189,248,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(56,189,248,.025) 1px,transparent 1px);
+  background-size:60px 60px;
 }
-
-/* radial glow */
+/* radial glow center */
 body::after{
   content:'';position:fixed;
-  width:800px;height:800px;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  background:radial-gradient(circle,rgba(56,189,248,.06) 0%,transparent 70%);
+  width:900px;height:900px;
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  background:radial-gradient(circle,rgba(56,189,248,.07) 0%,transparent 65%);
   pointer-events:none;z-index:0;
 }
 
-/* ── TOPBAR ── */
+/* ══ KEY GATE ══ */
+#keygate{
+  position:fixed;inset:0;z-index:200;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .4s ease;
+}
+#keygate.gone{opacity:0;pointer-events:none}
+.kg-wrap{animation:kgIn .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes kgIn{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.kg-card{
+  width:340px;
+  background:linear-gradient(145deg,#0c1626,#07101e);
+  border:1px solid rgba(56,189,248,.22);
+  border-radius:22px;padding:36px 32px 30px;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(56,189,248,.06),0 0 70px rgba(56,189,248,.1),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.kg-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:23px;
+  background:linear-gradient(135deg,rgba(56,189,248,.35),transparent 40%,transparent 60%,rgba(56,189,248,.15));
+  z-index:-1;animation:bGlow 4s ease-in-out infinite;
+}
+@keyframes bGlow{0%,100%{opacity:.5}50%{opacity:1}}
+.kg-card::after{
+  content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(56,189,248,.55),transparent);
+}
+
+/* 3D cube */
+.kg-icon{width:70px;height:70px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
+.kg-icon svg{width:54px;height:54px;filter:drop-shadow(0 0 18px rgba(56,189,248,.55)) drop-shadow(0 0 36px rgba(56,189,248,.25))}
+
+.kg-title{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:.1em;text-align:center;text-transform:uppercase;margin-bottom:4px;color:#fff}
+.kg-sub{font-size:.6rem;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;text-align:center;margin-bottom:24px;font-family:'Space Mono',monospace}
+
+.kg-input-wrap{position:relative;margin-bottom:10px}
+.kg-input{
+  width:100%;padding:13px 44px 13px 16px;
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(56,189,248,.18);
+  border-radius:10px;color:var(--text);
+  font-family:'Space Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;
+  outline:none;transition:all .2s;
+}
+.kg-input::placeholder{color:var(--dim);letter-spacing:.14em}
+.kg-input:focus{border-color:rgba(56,189,248,.45);box-shadow:0 0 0 3px rgba(56,189,248,.08),0 0 20px rgba(56,189,248,.08)}
+.kg-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--dim);cursor:pointer;padding:2px}
+.kg-eye svg{width:15px;height:15px;transition:color .2s}
+.kg-eye:hover svg{color:var(--cyan)}
+
+.kg-btn{
+  width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--cyan2),var(--cyan3));
+  color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  transition:all .25s;margin-bottom:12px;
+  box-shadow:0 4px 22px rgba(14,165,233,.3),0 0 40px rgba(14,165,233,.12);
+  position:relative;overflow:hidden;
+}
+.kg-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);pointer-events:none}
+.kg-btn:hover{transform:translateY(-1px);box-shadow:0 6px 30px rgba(14,165,233,.45),0 0 50px rgba(14,165,233,.18)}
+.kg-btn:active{transform:translateY(0)}
+.kg-btn.loading{opacity:.65;pointer-events:none}
+
+.kg-err{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--red);text-align:center;min-height:16px;opacity:0;transition:opacity .2s;letter-spacing:.06em}
+.kg-err.show{opacity:1}
+.kg-remember{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;cursor:pointer;user-select:none}
+.kg-remember input{accent-color:var(--cyan);width:13px;height:13px}
+.kg-remember span{font-size:.6rem;color:var(--dim);font-family:'Space Mono',monospace}
+
+/* ══ TOPBAR ══ */
 .topbar{
   position:relative;z-index:10;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;height:64px;
-  background:rgba(10,14,26,.9);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(20px);
+  padding:0 28px;height:60px;
+  background:rgba(6,12,24,.92);
+  border-bottom:1px solid rgba(56,189,248,.08);
+  backdrop-filter:blur(24px);
 }
-.logo{display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:11px}
 .logo-icon{
-  width:34px;height:34px;border-radius:8px;
+  width:36px;height:36px;border-radius:10px;
   background:linear-gradient(135deg,var(--cyan2),#1d4ed8);
   display:flex;align-items:center;justify-content:center;
-  font-size:.9rem;box-shadow:0 0 16px rgba(56,189,248,.3);
+  box-shadow:0 0 18px rgba(56,189,248,.28);
 }
-.logo-text{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:.08em}
-.logo-text span{color:var(--cyan)}
-.logo-sub{font-size:.6rem;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;margin-top:-2px}
+.logo-icon svg{width:18px;height:18px;color:#fff}
+.logo-texts{}
+.logo-name{font-family:'Barlow Condensed',sans-serif;font-size:1.15rem;font-weight:800;letter-spacing:.1em;line-height:1}
+.logo-name span{color:var(--cyan)}
+.logo-sub{font-size:.5rem;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;font-family:'Space Mono',monospace}
 
-.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-right{display:flex;align-items:center;gap:8px}
 .user-pill{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:9px;
   background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:40px;padding:6px 14px 6px 8px;
+  border:1px solid rgba(56,189,248,.1);
+  border-radius:40px;padding:5px 13px 5px 7px;
 }
 .user-av{
   width:28px;height:28px;border-radius:50%;
   background:linear-gradient(135deg,var(--cyan2),#6366f1);
   display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;font-weight:700;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;color:#fff;
 }
-.user-info{display:flex;flex-direction:column;line-height:1.2}
-.user-name{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.04em}
-.user-role{font-size:.55rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
-.logout-btn{
-  width:30px;height:30px;border-radius:50%;
-  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
+.user-name-text{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.06em}
+.user-role-text{font-size:.5rem;color:var(--cyan);letter-spacing:.12em;text-transform:uppercase;font-family:'Space Mono',monospace;margin-top:1px}
+.logout-pill{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all .2s;color:#ef4444;
+  cursor:pointer;transition:all .2s;color:var(--red);
 }
-.logout-btn:hover{background:rgba(239,68,68,.2);box-shadow:0 0 12px rgba(239,68,68,.25)}
-.logout-btn svg{width:13px;height:13px}
+.logout-pill:hover{background:rgba(239,68,68,.18);box-shadow:0 0 14px rgba(239,68,68,.2)}
+.logout-pill svg{width:13px;height:13px}
 
-/* ── MAIN ── */
-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:40px 24px}
+/* ══ MAIN ══ */
+main{position:relative;z-index:1;min-height:calc(100vh - 60px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
 
 .hero-label{
-  font-family:'Rajdhani',sans-serif;font-size:.7rem;letter-spacing:.3em;
+  font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.3em;
   text-transform:uppercase;color:var(--cyan);margin-bottom:10px;
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:center;gap:10px;
 }
-.hero-label::before,.hero-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.3))}
-.hero-label::after{background:linear-gradient(90deg,rgba(56,189,248,.3),transparent)}
+.hero-label::before,.hero-label::after{content:'';flex:1;max-width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.35))}
+.hero-label::after{background:linear-gradient(90deg,rgba(56,189,248,.35),transparent)}
 
 .hero-title{
-  font-family:'Rajdhani',sans-serif;font-size:2.8rem;font-weight:700;
-  text-align:center;letter-spacing:.04em;margin-bottom:8px;
-  background:linear-gradient(135deg,#fff 40%,var(--cyan));
+  font-family:'Barlow Condensed',sans-serif;font-size:3.2rem;font-weight:800;
+  text-align:center;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;
+  background:linear-gradient(135deg,#fff 30%,var(--cyan) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
-.hero-sub{font-size:.8rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:48px;text-align:center}
+.hero-sub{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:50px;text-align:center}
 
-/* ── GAME CARDS ── */
-.cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;width:100%;max-width:1060px}
+/* ══ CARDS ══ */
+.cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;width:100%;max-width:1020px}
 
 .game-card{
-  position:relative;width:320px;border-radius:18px;overflow:hidden;
+  position:relative;width:305px;border-radius:18px;overflow:hidden;
   background:var(--card);
-  border:1px solid var(--border);
+  border:1px solid rgba(56,189,248,.08);
   cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1);
-  animation:cardIn .6s cubic-bezier(.16,1,.3,1) both;
+  animation:cardIn .55s cubic-bezier(.16,1,.3,1) both;
 }
 .game-card:nth-child(1){animation-delay:.05s}
-.game-card:nth-child(2){animation-delay:.15s}
-.game-card:nth-child(3){animation-delay:.25s}
-@keyframes cardIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.game-card:nth-child(2){animation-delay:.14s}
+.game-card:nth-child(3){animation-delay:.22s}
+@keyframes cardIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+.game-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.game-card.is-active{
+  border-color:rgba(56,189,248,.4);
+  box-shadow:0 0 0 1px rgba(56,189,248,.25),0 20px 50px rgba(56,189,248,.12);
+}
 
-.game-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.game-card.active-card{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 24px 60px rgba(56,189,248,.15)}
-.game-card.active-card:hover{box-shadow:0 0 0 1px var(--cyan),0 28px 70px rgba(56,189,248,.2)}
-
-/* card image area */
+/* image area */
 .card-img{
-  height:200px;overflow:hidden;position:relative;
-  background:linear-gradient(180deg,#0a1628 0%,#051020 100%);
+  height:190px;overflow:hidden;position:relative;
+  background:linear-gradient(180deg,#0a1628 0%,#040e1a 100%);
+  display:flex;align-items:center;justify-content:center;
 }
-.card-img img{width:100%;height:100%;object-fit:cover;opacity:.75;transition:transform .4s,opacity .3s}
-.game-card:hover .card-img img{transform:scale(1.05);opacity:.9}
-.card-img-placeholder{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-size:4rem;opacity:.15;
+.card-img img{width:100%;height:100%;object-fit:cover;opacity:.7;transition:transform .4s,opacity .3s}
+.game-card:hover .card-img img{transform:scale(1.06);opacity:.85}
+/* placeholder icon */
+.card-img-icon{
+  display:flex;align-items:center;justify-content:center;
+  opacity:.25;transition:opacity .3s;
 }
-
-/* gradient overlay on image */
-.card-img::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(0deg,var(--card) 0%,transparent 55%);
-}
-/* glow border on active */
-.game-card.active-card .card-img::before{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:linear-gradient(180deg,rgba(56,189,248,.08) 0%,transparent 60%);
-}
+.card-img-icon svg{width:72px;height:72px;color:var(--cyan)}
+.game-card:hover .card-img-icon{opacity:.35}
+/* gradient overlay */
+.card-img::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,var(--card) 0%,transparent 55%)}
+/* active top glow */
+.game-card.is-active .card-img::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(56,189,248,.07) 0%,transparent 60%)}
 
 /* card body */
-.card-body{padding:20px 22px 22px}
-.card-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.card-body{padding:18px 20px 20px}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .card-icon{
-  width:34px;height:34px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-  flex-shrink:0;
+  width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.card-name{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.card-desc{font-size:.76rem;color:var(--dim);line-height:1.6;margin-bottom:18px;min-height:38px}
+.card-icon svg{width:17px;height:17px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.card-desc{font-size:.75rem;color:var(--dim);line-height:1.65;margin-bottom:16px;min-height:36px}
 
-/* open btn */
 .card-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:12px;border-radius:10px;
-  font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  width:100%;padding:11px;border-radius:9px;
+  font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
   text-decoration:none;border:none;cursor:pointer;transition:all .25s;
 }
 .card-btn.primary{
-  background:linear-gradient(135deg,var(--cyan2),#1d4ed8);
-  color:#fff;box-shadow:0 4px 18px rgba(56,189,248,.25);
+  background:linear-gradient(135deg,var(--cyan2),var(--cyan3));
+  color:#fff;box-shadow:0 4px 18px rgba(14,165,233,.28);
 }
-.card-btn.primary:hover{box-shadow:0 6px 24px rgba(56,189,248,.4);filter:brightness(1.1)}
+.card-btn.primary:hover{box-shadow:0 6px 26px rgba(14,165,233,.42);filter:brightness(1.08)}
 .card-btn.secondary{
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);color:var(--text);
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(56,189,248,.1);color:var(--dim);
 }
-.card-btn.secondary:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.14)}
+.card-btn.secondary:hover{background:rgba(255,255,255,.07)}
 .card-btn svg{width:14px;height:14px}
 
-/* coming soon badge */
 .badge-soon{
-  position:absolute;top:14px;right:14px;z-index:2;
-  background:rgba(10,14,26,.8);border:1px solid var(--border);
-  border-radius:20px;padding:4px 10px;
-  font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2);
+  position:absolute;top:13px;right:13px;z-index:2;
+  background:rgba(6,12,24,.85);border:1px solid rgba(56,189,248,.15);
+  border-radius:20px;padding:3px 9px;
+  font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2);
   backdrop-filter:blur(8px);
 }
 
-/* ── FOOTER ── */
-footer{position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid var(--border);font-size:.6rem;color:var(--dim2);letter-spacing:.14em;text-transform:uppercase}
+/* footer */
+footer{position:relative;z-index:1;text-align:center;padding:20px;border-top:1px solid rgba(56,189,248,.06);font-family:'Space Mono',monospace;font-size:.55rem;color:var(--dim2);letter-spacing:.12em;text-transform:uppercase}
 footer strong{color:var(--dim)}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--card2);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:10px 20px;font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text);z-index:500;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
+<!-- KEY GATE -->
+<div id="keygate">
+  <div class="kg-wrap">
+    <div class="kg-card">
+      <div class="kg-icon">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="ct" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+            <linearGradient id="cl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#0284c7"/></linearGradient>
+            <linearGradient id="cr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
+          </defs>
+          <polygon points="32,8 54,20 32,32 10,20" fill="url(#ct)" opacity=".95"/>
+          <polygon points="10,20 32,32 32,54 10,42" fill="url(#cl)" opacity=".9"/>
+          <polygon points="54,20 54,42 32,54 32,32" fill="url(#cr)" opacity=".85"/>
+          <polygon points="32,8 54,20 32,32 10,20" fill="none" stroke="rgba(255,255,255,.2)" stroke-width=".8"/>
+          <polygon points="10,20 32,32 32,54 10,42" fill="none" stroke="rgba(255,255,255,.12)" stroke-width=".8"/>
+          <polygon points="54,20 54,42 32,54 32,32" fill="none" stroke="rgba(255,255,255,.12)" stroke-width=".8"/>
+        </svg>
+      </div>
+      <div class="kg-title">System Access</div>
+      <div class="kg-sub">Authorization Required</div>
+      <div class="kg-input-wrap">
+        <input class="kg-input" id="kg-input" type="password" placeholder="Enter API Key" autocomplete="off"
+          onkeydown="if(event.key==='Enter')doKeyAuth()"/>
+        <div class="kg-eye" onclick="toggleEye()">
+          <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+      </div>
+      <button class="kg-btn" id="kg-btn" onclick="doKeyAuth()">Initialize</button>
+      <div class="kg-err" id="kg-err">Invalid API Key</div>
+      <label class="kg-remember">
+        <input type="checkbox" id="kg-remember"/>
+        <span>Remember on this device</span>
+      </label>
+    </div>
+  </div>
+</div>
+
 <!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">
-    <div class="logo-icon">🎮</div>
-    <div>
-      <div class="logo-text">HIM <span>HUB</span></div>
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+      </svg>
+    </div>
+    <div class="logo-texts">
+      <div class="logo-name">HIM <span>HUB</span></div>
       <div class="logo-sub">Roblox Bot Dashboard</div>
     </div>
   </div>
   <div class="topbar-right">
     <div class="user-pill">
-      <div class="user-av">H</div>
-      <div class="user-info">
-        <div class="user-name">HIM</div>
-        <div class="user-role">Developer</div>
+      <div class="user-av" id="top-av">H</div>
+      <div>
+        <div class="user-name-text" id="top-name">HIM</div>
+        <div class="user-role-text">Developer</div>
       </div>
     </div>
-    <div class="logout-btn" title="Logout">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <div class="logout-pill" onclick="doLogout()" title="Logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
     </div>
   </div>
 </div>
 
 <!-- MAIN -->
 <main>
-  <div class="hero-label">select game</div>
+  <div class="hero-label">Select Game</div>
   <div class="hero-title">HIM HUB TRACKSTAT</div>
   <div class="hero-sub">Roblox Bot Dashboard · Made by HIM</div>
 
   <div class="cards">
 
     <!-- BLOX FRUIT -->
-    <div class="game-card active-card">
+    <div class="game-card is-active">
       <div class="card-img">
-        <img src="https://tr.rbxcdn.com/180DAY-6d13e58b4f8e9e8e9e8e9e8e9e8e9e8e/768/432/Image/Png/noFilter" 
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-             alt="Blox Fruit"/>
-        <div class="card-img-placeholder" style="display:none">🏝️</div>
+        <!-- island/tropical svg placeholder matching screenshot style -->
+        <div class="card-img-icon">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="40" cy="62" rx="22" ry="6" fill="#1e3a5f" opacity=".6"/>
+            <rect x="37" y="36" width="6" height="26" rx="3" fill="#5c3d1e"/>
+            <!-- palm left -->
+            <path d="M40 38 C28 30 20 20 25 14 C30 8 38 18 40 38Z" fill="#2d6a2d"/>
+            <path d="M40 38 C52 28 58 16 52 12 C46 8 40 22 40 38Z" fill="#3a8a3a"/>
+            <!-- coconuts -->
+            <circle cx="30" cy="22" r="3" fill="#8b4513"/>
+            <circle cx="35" cy="18" r="3" fill="#8b4513"/>
+            <!-- island base -->
+            <ellipse cx="40" cy="62" rx="18" ry="5" fill="#2d4a1e"/>
+            <ellipse cx="40" cy="60" rx="14" ry="4" fill="#8b6914"/>
+          </svg>
+        </div>
       </div>
       <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)">🍎</div>
-          <div class="card-name" style="color:var(--cyan)">Blox Fruit</div>
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.25)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div class="card-title" style="color:var(--cyan)">Blox Fruit</div>
         </div>
         <div class="card-desc">Advanced monitoring system. Track Level, Bounty, Beli, Fragments and account status in real-time.</div>
         <a href="stats-dashboard.html" class="card-btn primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
           Open Dashboard
         </a>
       </div>
@@ -248,18 +382,40 @@ footer strong{color:var(--dim)}
     <!-- FISCH -->
     <div class="game-card">
       <div class="card-img">
-        <div class="card-img-placeholder">🎣</div>
+        <div class="card-img-icon">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="30" r="14" fill="#1a3a5c" stroke="#2a5a8c" stroke-width="1.5"/>
+            <path d="M34 24 C34 24 36 20 40 20 C44 20 46 24 46 24" stroke="#4a8abf" stroke-width="2" fill="none"/>
+            <circle cx="36" cy="27" r="3" fill="#2a5a8c"/>
+            <circle cx="44" cy="27" r="3" fill="#2a5a8c"/>
+            <circle cx="36" cy="27" r="1.5" fill="#7ab8e8"/>
+            <circle cx="44" cy="27" r="1.5" fill="#7ab8e8"/>
+            <path d="M33 33 C36 37 44 37 47 33" stroke="#4a8abf" stroke-width="1.5" fill="none"/>
+            <path d="M38 44 L40 56 L42 44" fill="#3a6a9c" stroke="#2a5a8c" stroke-width="1"/>
+            <path d="M30 52 L40 58 L50 52" fill="#2a4a7c" opacity=".5"/>
+          </svg>
+        </div>
       </div>
       <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">🐟</div>
-          <div class="card-name" style="color:#4ade80">Fisch</div>
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+              <line x1="6" y1="1" x2="6" y2="4"/>
+              <line x1="10" y1="1" x2="10" y2="4"/>
+              <line x1="14" y1="1" x2="14" y2="4"/>
+            </svg>
+          </div>
+          <div class="card-title" style="color:#4ade80">Fisch</div>
         </div>
         <div class="card-desc">Auto fishing monitor. Track catches, inventory value and earnings per session.</div>
-        <a href="#" class="card-btn secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <button class="card-btn secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
           Coming Soon
-        </a>
+        </button>
       </div>
       <div class="badge-soon">soon</div>
     </div>
@@ -267,18 +423,37 @@ footer strong{color:var(--dim)}
     <!-- BLOCK SPINS -->
     <div class="game-card">
       <div class="card-img">
-        <div class="card-img-placeholder">🎰</div>
+        <div class="card-img-icon">
+          <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="12" y="20" width="56" height="40" rx="6" fill="#1a2a1a" stroke="#2a4a2a" stroke-width="1.5"/>
+            <rect x="20" y="28" width="12" height="24" rx="3" fill="#0a1a0a" stroke="#3a6a2a" stroke-width="1"/>
+            <rect x="34" y="28" width="12" height="24" rx="3" fill="#0a1a0a" stroke="#3a6a2a" stroke-width="1"/>
+            <rect x="48" y="28" width="12" height="24" rx="3" fill="#0a1a0a" stroke="#3a6a2a" stroke-width="1"/>
+            <text x="26" y="44" text-anchor="middle" font-size="10" fill="#f59e0b">7</text>
+            <text x="40" y="44" text-anchor="middle" font-size="10" fill="#22c55e">7</text>
+            <text x="54" y="44" text-anchor="middle" font-size="10" fill="#ef4444">7</text>
+            <circle cx="40" cy="16" r="4" fill="#f59e0b" opacity=".7"/>
+            <path d="M28 62 L40 68 L52 62" stroke="#3a6a2a" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
       </div>
       <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">🎲</div>
-          <div class="card-name" style="color:#fbbf24">Block Spins</div>
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
+            </svg>
+          </div>
+          <div class="card-title" style="color:#fbbf24">Block Spins</div>
         </div>
         <div class="card-desc">Auto Spin & Rewards Manager. Maximize your gains with automated spin tracking tools.</div>
-        <a href="#" class="card-btn secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <button class="card-btn secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
           Coming Soon
-        </a>
+        </button>
       </div>
       <div class="badge-soon">soon</div>
     </div>
@@ -286,7 +461,75 @@ footer strong{color:var(--dim)}
   </div>
 </main>
 
-<footer>© 2026 HIM. All rights reserved. &nbsp;<strong>PRIVATE PROPERTY. DO NOT DISTRIBUTE SOURCE CODE.</strong></footer>
+<footer>© 2026 HIM. All rights reserved. &nbsp;<strong>Private Property. Do Not Distribute.</strong></footer>
+<div id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const CFG = {
+  supabaseUrl: "https://zwavwijmgjgpaembmpnl.supabase.co",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3YXZ3aWptZ2pncGFlbWJtcG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NTU5MDIsImV4cCI6MjA4ODIzMTkwMn0.fAqRlMP6COBxT0v1wgvvW7NSxn6jv93Ah1d42C_GKMU",
+};
+
+let _db;
+const getDB = () => _db || (_db = supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey));
+const $ = id => document.getElementById(id);
+
+/* eye toggle */
+function toggleEye() {
+  const inp = $('kg-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+/* init */
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('bf_access_key');
+  if(saved) verifyKey(saved, true);
+});
+
+async function doKeyAuth() {
+  const key = $('kg-input').value.trim();
+  if(!key) return;
+  const btn = $('kg-btn');
+  btn.textContent = 'Verifying...';
+  btn.classList.add('loading');
+  await verifyKey(key, false);
+  btn.textContent = 'Initialize';
+  btn.classList.remove('loading');
+}
+
+async function verifyKey(key, silent) {
+  try {
+    const { data, error } = await getDB()
+      .from('access_keys')
+      .select('key_value, label, active')
+      .eq('key_value', key)
+      .eq('active', true)
+      .single();
+    if(error || !data) { if(!silent) showErr('Invalid API Key'); return; }
+    if($('kg-remember')?.checked || silent) localStorage.setItem('bf_access_key', key);
+    const label = data.label || 'HIM';
+    $('top-name').textContent = label;
+    $('top-av').textContent = label.charAt(0).toUpperCase();
+    $('keygate').classList.add('gone');
+  } catch(e) { if(!silent) showErr('Connection error'); }
+}
+
+function showErr(msg) {
+  const e = $('kg-err'); e.textContent = msg; e.classList.add('show');
+  $('kg-input').style.borderColor = 'rgba(239,68,68,.5)';
+  setTimeout(() => { e.classList.remove('show'); $('kg-input').style.borderColor = ''; }, 2500);
+}
+
+function doLogout() {
+  localStorage.removeItem('bf_access_key');
+  $('kg-input').value = '';
+  $('kg-remember').checked = false;
+  $('keygate').classList.remove('gone');
+}
+
+let _tt;
+const toast = msg => { const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2200); };
+</script>
 </body>
 </html>
