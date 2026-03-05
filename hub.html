@@ -536,6 +536,25 @@ function showUI(key, label) {
 function logout() { localStorage.clear(); if(rtCh) sb.removeChannel(rtCh); location.reload() }
 function setErr(m) { document.getElementById('login-err').textContent = m }
 
+var avatarCache = {}  // user_id -> imageUrl
+
+async function fetchAvatars(accs) {
+  // collect user_ids that we don't have yet
+  var ids = accs.filter(function(a){ return a.user_id && !avatarCache[a.user_id] }).map(function(a){ return a.user_id })
+  if (!ids.length) return
+  // Roblox thumbnail API: returns JSON {data:[{targetId, imageUrl}]}
+  var url = 'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=' + ids.join(',') + '&size=150x150&format=Png&isCircular=false'
+  try {
+    var res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url))
+    var json = await res.json()
+    if (json && json.data) {
+      json.data.forEach(function(item) {
+        if (item.imageUrl) avatarCache[String(item.targetId)] = item.imageUrl
+      })
+    }
+  } catch(e) { console.warn('Avatar fetch failed', e) }
+}
+
 async function loadAccounts() {
   var ico = document.getElementById('refresh-ico')
   if (ico) ico.classList.add('spinning')
@@ -544,6 +563,7 @@ async function loadAccounts() {
   var dc = document.getElementById('device-count')
   if (dc) dc.textContent = '(' + accounts.length + ')'
   if (ico) ico.classList.remove('spinning')
+  await fetchAvatars(accounts)
   render()
 }
 
@@ -657,7 +677,7 @@ function renderMoney() {
     var delay = (i * 0.06).toFixed(2)
 
     // proxy to bypass Roblox CORS
-    var proxySrc = a.avatar_url ? 'https://wsrv.nl/?url=' + encodeURIComponent(a.avatar_url) + '&w=120&h=120&fit=cover' : ''
+    var proxySrc = avatarCache[a.user_id] || avatarCache[a.username] || ''
     var fbInit = (a.username||'?')[0].toUpperCase()
     var avatarInner = proxySrc
       ? '<img class="pcard-avatar-img" src="'+proxySrc+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
