@@ -14,47 +14,51 @@ const ICONS = {
 };
 
 const BADGE_SVG = {
-  shield: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9c0-1.042-.133-2.052-.382-3.016z"/></svg>`,
-  check:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5l-4-4 1.41-1.41L10 13.67l6.59-6.59L18 8.5l-8 8z"/></svg>`,
-  star:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
-  bolt:   `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
-  crown:  `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v2H2v-2zM4 17l4-8 4 4 4-6 4 10H4z"/></svg>`,
+  shield:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9c0-1.042-.133-2.052-.382-3.016z"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5l-4-4 1.41-1.41L10 13.67l6.59-6.59L18 8.5l-8 8z"/></svg>`,
+  star:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+  bolt:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  crown:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 20h20v2H2v-2zM4 17l4-8 4 4 4-6 4 10H4z"/></svg>`,
   diamond:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 3.5L19 9l-7 9.1L5 9l7-3.5z"/></svg>`,
 };
 
-/* ── Flip ── */
+/* ── Flip (3 faces) ── */
+let _currentFace = 'profile';
 function flipTo(side) {
   const card = document.getElementById('flip-card');
   const tp = document.getElementById('tab-profile');
   const tm = document.getElementById('tab-music');
-  if (side === 'music') {
-    card.classList.add('flipped');
-    tp.classList.remove('active'); tm.classList.add('active');
-  } else {
-    card.classList.remove('flipped');
-    tm.classList.remove('active'); tp.classList.add('active');
-  }
+  const ts = document.getElementById('tab-stats');
+
+  card.classList.remove('face-profile','face-music','face-stats');
+  [tp,tm,ts].forEach(b=>b&&b.classList.remove('active'));
+
+  _currentFace = side;
+  card.classList.add('face-'+side);
+
+  if (side==='profile') tp&&tp.classList.add('active');
+  else if (side==='music') tm&&tm.classList.add('active');
+  else if (side==='stats') { ts&&ts.classList.add('active'); if(window._statsInit) window._statsInit(); }
 }
 
 /* ── Badge ── */
 function renderBadge() {
   const el = document.getElementById('badge');
-  if (!el || !C.badge || C.badge === false) { if(el) el.style.display='none'; return; }
-  if (C.badge === 'fire')   { el.className='badge emoji'; el.textContent='🔥'; return; }
-  if (C.badge === 'custom') { el.className='badge emoji'; el.textContent=C.badgeCustom||'⭐'; return; }
+  if (!el||!C.badge||C.badge===false) { if(el) el.style.display='none'; return; }
+  if (C.badge==='fire')   { el.className='badge emoji'; el.textContent='🔥'; return; }
+  if (C.badge==='custom') { el.className='badge emoji'; el.textContent=C.badgeCustom||'⭐'; return; }
   const svg = BADGE_SVG[C.badge];
   if (svg) { el.className='badge'; el.innerHTML=svg; }
 }
 
 /* ── Status ── */
 function applyStatus(s) {
-  const dot = document.getElementById('status-dot');
-  const lbl = document.getElementById('status-label');
-  const txt = document.getElementById('status-text');
-  if (dot) dot.className = `status-dot ${s}`;
-  if (lbl) lbl.className = `status-label ${s}`;
-  if (txt) txt.textContent = C.manualStatusText ||
-    ({online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline'}[s] || s);
+  const dot=document.getElementById('status-dot');
+  const lbl=document.getElementById('status-label');
+  const txt=document.getElementById('status-text');
+  if (dot) dot.className=`status-dot ${s}`;
+  if (lbl) lbl.className=`status-label ${s}`;
+  if (txt) txt.textContent=C.manualStatusText||({online:'Online',idle:'Idle',dnd:'Do Not Disturb',offline:'Offline'}[s]||s);
 }
 
 /* ── Lanyard ── */
@@ -63,33 +67,33 @@ async function fetchLanyard() {
   try {
     const j = await (await fetch(`https://api.lanyard.rest/v1/users/${C.discordId}`)).json();
     if (!j.success) throw 0;
-    const d = j.data, s = d.discord_status || 'offline';
+    const d=j.data, s=d.discord_status||'offline';
     applyStatus(s);
-    let src = C.avatarUrl;
-    if (!src && d.discord_user?.avatar)
-      src = `https://cdn.discordapp.com/avatars/${d.discord_user.id}/${d.discord_user.avatar}.png?size=128`;
-    if (src) document.getElementById('avatar').src = src;
-    const actEl = document.getElementById('activity');
-    let act = null;
-    if (d.listening_to_spotify && d.spotify)
-      act = {icon:'🎵', type:'Spotify', detail:`${d.spotify.song} · ${d.spotify.artist}`};
-    else { const a = d.activities?.find(x=>x.type===0); if(a) act={icon:'🎮',type:'Playing',detail:a.name+(a.details?` — ${a.details}`:'')}; }
+    let src=C.avatarUrl;
+    if (!src&&d.discord_user?.avatar)
+      src=`https://cdn.discordapp.com/avatars/${d.discord_user.id}/${d.discord_user.avatar}.png?size=128`;
+    if (src) document.getElementById('avatar').src=src;
+    const actEl=document.getElementById('activity');
+    let act=null;
+    if (d.listening_to_spotify&&d.spotify)
+      act={icon:'🎵',type:'Spotify',detail:`${d.spotify.song} · ${d.spotify.artist}`};
+    else { const a=d.activities?.find(x=>x.type===0); if(a) act={icon:'🎮',type:'Playing',detail:a.name+(a.details?` — ${a.details}`:'')}; }
     if (actEl) {
       if (act) {
-        document.getElementById('activity-icon').textContent  = act.icon;
-        document.getElementById('activity-type').textContent  = act.type;
-        document.getElementById('activity-detail').textContent= act.detail;
+        document.getElementById('activity-icon').textContent=act.icon;
+        document.getElementById('activity-type').textContent=act.type;
+        document.getElementById('activity-detail').textContent=act.detail;
         actEl.classList.add('show');
       } else actEl.classList.remove('show');
     }
   } catch { applyStatus(C.manualStatus); }
 }
 
-/* ── Music Player ── */
+/* ── Music ── */
 let _aud;
 function toggleMusic() {
-  if (!_aud) _aud = document.getElementById('audio');
-  const pi=document.getElementById('play-icon'), pa=document.getElementById('pause-icon');
+  if (!_aud) _aud=document.getElementById('audio');
+  const pi=document.getElementById('play-icon'),pa=document.getElementById('pause-icon');
   const vz=document.getElementById('music-viz');
   if (_aud.paused) {
     if (!C.music.url) { alert('ใส่ URL เพลงใน config.js ก่อนนะครับ!'); return; }
@@ -101,36 +105,29 @@ function toggleMusic() {
   }
 }
 
-/* ── Music Grid ── */
 function buildMusicGrid() {
-  const grid = document.getElementById('music-grid');
+  const grid=document.getElementById('music-grid');
   if (!grid) return;
-  if (!C.favMusic || C.favMusic.length === 0) {
-    grid.innerHTML = `<div class="music-empty">ยังไม่มีเพลง<br><span style="opacity:.5">เพิ่มลิงก์ใน config.js → favMusic</span></div>`;
+  if (!C.favMusic||C.favMusic.length===0) {
+    grid.innerHTML=`<div class="music-empty">ยังไม่มีเพลง<br><span style="opacity:.5">เพิ่มลิงก์ใน config.js → favMusic</span></div>`;
     return;
   }
-  grid.innerHTML = '';
-  C.favMusic.forEach(url => {
+  grid.innerHTML='';
+  C.favMusic.forEach(url=>{
     if (!url) return;
-    const card = document.createElement('div');
-    card.className = 'music-embed-card';
-    const sp = url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
-    if (sp) {
-      card.innerHTML = `<iframe src="https://open.spotify.com/embed/${sp[1]}/${sp[2]}?utm_source=generator&theme=0" height="80" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`;
-      grid.appendChild(card); return;
-    }
-    const yt = url.match(/(?:youtu\.be\/|[?&]v=)([a-zA-Z0-9_-]{11})/);
-    if (yt) {
-      card.innerHTML = `<iframe src="https://www.youtube.com/embed/${yt[1]}" height="180" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
-      grid.appendChild(card);
-    }
+    const card=document.createElement('div');
+    card.className='music-embed-card';
+    const sp=url.match(/spotify\.com\/(track|album|playlist)\/([a-zA-Z0-9]+)/);
+    if (sp) { card.innerHTML=`<iframe src="https://open.spotify.com/embed/${sp[1]}/${sp[2]}?utm_source=generator&theme=0" height="80" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy"></iframe>`; grid.appendChild(card); return; }
+    const yt=url.match(/(?:youtu\.be\/|[?&]v=)([a-zA-Z0-9_-]{11})/);
+    if (yt) { card.innerHTML=`<iframe src="https://www.youtube.com/embed/${yt[1]}" height="180" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>`; grid.appendChild(card); }
   });
 }
 
 /* ── Cursor ── */
 function initCursor() {
   if (!window.matchMedia('(hover:hover)').matches) return;
-  const cur=document.getElementById('cursor'), trl=document.getElementById('cursor-trail');
+  const cur=document.getElementById('cursor'),trl=document.getElementById('cursor-trail');
   if (!cur||!trl) return;
   let tx=0,ty=0,mx=0,my=0;
   document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; cur.style.left=mx+'px'; cur.style.top=my+'px'; });
@@ -139,8 +136,8 @@ function initCursor() {
 
 /* ── Security ── */
 function initSecurity() {
-  document.addEventListener('contextmenu', e=>e.preventDefault());
-  document.addEventListener('keydown', e=>{
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  document.addEventListener('keydown',e=>{
     if (e.key==='F12'||(e.ctrlKey&&e.shiftKey&&'IJC'.includes(e.key.toUpperCase()))||(e.ctrlKey&&e.key.toUpperCase()==='U'))
       e.preventDefault();
   });
@@ -151,39 +148,38 @@ function initSecurity() {
 }
 
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', () => {
-  document.documentElement.setAttribute('data-theme', C.theme);
-  document.title = C.name;
-  document.getElementById('profile-name').textContent = C.name;
-  document.getElementById('profile-bio').textContent  = C.bio || '';
-  document.getElementById('footer-text').textContent  = C.footerText;
-  if (C.avatarUrl) document.getElementById('avatar').src = C.avatarUrl;
+document.addEventListener('DOMContentLoaded',()=>{
+  document.documentElement.setAttribute('data-theme',C.theme);
+  document.title=C.name;
+  document.getElementById('profile-name').textContent=C.name;
+  document.getElementById('profile-bio').textContent=C.bio||'';
+  document.getElementById('footer-text').textContent=C.footerText;
+  if (C.avatarUrl) document.getElementById('avatar').src=C.avatarUrl;
 
   renderBadge();
 
-  // socials
-  const sc = document.getElementById('socials');
-  C.socials.forEach(s => {
-    if (!s.on || !s.url) return;
-    const a = document.createElement('a');
+  const sc=document.getElementById('socials');
+  C.socials.forEach(s=>{
+    if (!s.on||!s.url) return;
+    const a=document.createElement('a');
     a.className='btn'; a.href=s.url; a.target='_blank'; a.rel='noopener';
     a.innerHTML=`${ICONS[s.id]||''}<span class="btn-label">${s.label}</span><span class="btn-arrow">→</span>`;
     sc.appendChild(a);
   });
 
-  // music player
   if (!C.music.on) { document.getElementById('music-bar').style.display='none'; }
   else {
-    document.getElementById('music-title').textContent  = C.music.title  || '—';
-    document.getElementById('music-artist').textContent = C.music.artist || '';
-    if (C.music.url) document.getElementById('audio').src = C.music.url;
+    document.getElementById('music-title').textContent=C.music.title||'—';
+    document.getElementById('music-artist').textContent=C.music.artist||'';
+    if (C.music.url) document.getElementById('audio').src=C.music.url;
   }
 
   buildMusicGrid();
   initCursor();
   initSecurity();
   fetchLanyard();
-  setInterval(fetchLanyard, 12000);
+  setInterval(fetchLanyard,12000);
+
+  // init flip card to profile face
+  document.getElementById('flip-card').classList.add('face-profile');
 });
-
-
