@@ -136,32 +136,33 @@ body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
 /* avatar area */
 .pcard-avatar-wrap{
-  position:relative;height:180px;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(180deg,#1a1d25 0%,#0e1016 100%);
+  position:relative;height:210px;overflow:hidden;
+  display:flex;align-items:flex-end;justify-content:center;
+  background:linear-gradient(180deg,#12151e 0%,#0a0c13 100%);
 }
 .pcard-avatar-wrap::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:50px;
+  content:'';position:absolute;bottom:0;left:0;right:0;height:70px;
   background:linear-gradient(to bottom,transparent,#111318);
+  pointer-events:none;z-index:2;
 }
 .pcard-avatar-img{
-  width:120px;height:120px;border-radius:50%;object-fit:cover;
-  border:3px solid rgba(255,255,255,0.1);
-  transition:transform .3s ease;
+  width:190px;height:210px;object-fit:cover;object-position:top center;
+  border-radius:0;
+  transition:transform .35s ease;
   position:relative;z-index:1;
 }
-.pcard:hover .pcard-avatar-img{transform:scale(1.08);}
+.pcard:hover .pcard-avatar-img{transform:scale(1.06) translateY(-4px);}
 .pcard-avatar-fb{
-  width:120px;height:120px;border-radius:50%;
+  width:90px;height:90px;border-radius:50%;
   background:rgba(59,130,246,0.1);border:3px solid rgba(59,130,246,0.2);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Poppins';font-size:36px;font-weight:900;color:var(--primary);
-  position:relative;z-index:1;
+  font-family:'Poppins';font-size:32px;font-weight:900;color:var(--primary);
+  position:relative;z-index:1;margin-bottom:20px;
 }
 
 /* online dot on avatar */
 .pcard-dot{
-  position:absolute;bottom:10px;right:calc(50% - 70px);
+  position:absolute;bottom:12px;right:14px;
   width:12px;height:12px;border-radius:50%;
   border:2px solid #111318;z-index:2;
 }
@@ -543,9 +544,9 @@ async function fetchAvatars(accs) {
   var ids = accs.filter(function(a){ return a.user_id && !avatarCache[a.user_id] }).map(function(a){ return a.user_id })
   if (!ids.length) return
   // Roblox thumbnail API: returns JSON {data:[{targetId, imageUrl}]}
-  var url = 'https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=' + ids.join(',') + '&size=150x150&format=Png&isCircular=false'
+  var url = 'https://thumbnails.roproxy.com/v1/users/avatar?userIds=' + ids.join(',') + '&size=352x352&format=Png&isCircular=false'
   try {
-    var res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url))
+    var res = await fetch(url)
     var json = await res.json()
     if (json && json.data) {
       json.data.forEach(function(item) {
