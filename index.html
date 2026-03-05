@@ -1,292 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="rose">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>HIM · HUB</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --navy:#0a0e1a;
-  --navy2:#0d1120;
-  --navy3:#111827;
-  --card:#0f1623;
-  --border:rgba(255,255,255,.07);
-  --bh:rgba(99,179,237,.25);
-  --text:#e2e8f0;
-  --dim:#64748b;
-  --dim2:#475569;
-  --cyan:#38bdf8;
-  --cyan2:#0ea5e9;
-  --green:#22c55e;
-  --red:#ef4444;
-  --amber:#f59e0b;
-}
-html,body{height:100%;background:var(--navy);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
-
-/* noise overlay */
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:.025;
-}
-
-/* radial glow */
-body::after{
-  content:'';position:fixed;
-  width:800px;height:800px;
-  top:50%;left:50%;transform:translate(-50%,-50%);
-  background:radial-gradient(circle,rgba(56,189,248,.06) 0%,transparent 70%);
-  pointer-events:none;z-index:0;
-}
-
-/* ── TOPBAR ── */
-.topbar{
-  position:relative;z-index:10;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 32px;height:64px;
-  background:rgba(10,14,26,.9);
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(20px);
-}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-icon{
-  width:34px;height:34px;border-radius:8px;
-  background:linear-gradient(135deg,var(--cyan2),#1d4ed8);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.9rem;box-shadow:0 0 16px rgba(56,189,248,.3);
-}
-.logo-text{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:.08em}
-.logo-text span{color:var(--cyan)}
-.logo-sub{font-size:.6rem;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;margin-top:-2px}
-
-.topbar-right{display:flex;align-items:center;gap:10px}
-.user-pill{
-  display:flex;align-items:center;gap:10px;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:40px;padding:6px 14px 6px 8px;
-}
-.user-av{
-  width:28px;height:28px;border-radius:50%;
-  background:linear-gradient(135deg,var(--cyan2),#6366f1);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.65rem;font-weight:700;color:#fff;
-}
-.user-info{display:flex;flex-direction:column;line-height:1.2}
-.user-name{font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.04em}
-.user-role{font-size:.55rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase}
-.logout-btn{
-  width:30px;height:30px;border-radius:50%;
-  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all .2s;color:#ef4444;
-}
-.logout-btn:hover{background:rgba(239,68,68,.2);box-shadow:0 0 12px rgba(239,68,68,.25)}
-.logout-btn svg{width:13px;height:13px}
-
-/* ── MAIN ── */
-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:40px 24px}
-
-.hero-label{
-  font-family:'Rajdhani',sans-serif;font-size:.7rem;letter-spacing:.3em;
-  text-transform:uppercase;color:var(--cyan);margin-bottom:10px;
-  display:flex;align-items:center;gap:8px;
-}
-.hero-label::before,.hero-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(56,189,248,.3))}
-.hero-label::after{background:linear-gradient(90deg,rgba(56,189,248,.3),transparent)}
-
-.hero-title{
-  font-family:'Rajdhani',sans-serif;font-size:2.8rem;font-weight:700;
-  text-align:center;letter-spacing:.04em;margin-bottom:8px;
-  background:linear-gradient(135deg,#fff 40%,var(--cyan));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.hero-sub{font-size:.8rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:48px;text-align:center}
-
-/* ── GAME CARDS ── */
-.cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;width:100%;max-width:1060px}
-
-.game-card{
-  position:relative;width:320px;border-radius:18px;overflow:hidden;
-  background:var(--card);
-  border:1px solid var(--border);
-  cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1);
-  animation:cardIn .6s cubic-bezier(.16,1,.3,1) both;
-}
-.game-card:nth-child(1){animation-delay:.05s}
-.game-card:nth-child(2){animation-delay:.15s}
-.game-card:nth-child(3){animation-delay:.25s}
-@keyframes cardIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-
-.game-card:hover{transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.game-card.active-card{border-color:var(--cyan);box-shadow:0 0 0 1px var(--cyan),0 24px 60px rgba(56,189,248,.15)}
-.game-card.active-card:hover{box-shadow:0 0 0 1px var(--cyan),0 28px 70px rgba(56,189,248,.2)}
-
-/* card image area */
-.card-img{
-  height:200px;overflow:hidden;position:relative;
-  background:linear-gradient(180deg,#0a1628 0%,#051020 100%);
-}
-.card-img img{width:100%;height:100%;object-fit:cover;opacity:.75;transition:transform .4s,opacity .3s}
-.game-card:hover .card-img img{transform:scale(1.05);opacity:.9}
-.card-img-placeholder{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-size:4rem;opacity:.15;
-}
-
-/* gradient overlay on image */
-.card-img::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(0deg,var(--card) 0%,transparent 55%);
-}
-/* glow border on active */
-.game-card.active-card .card-img::before{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:linear-gradient(180deg,rgba(56,189,248,.08) 0%,transparent 60%);
-}
-
-/* card body */
-.card-body{padding:20px 22px 22px}
-.card-icon-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.card-icon{
-  width:34px;height:34px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;font-size:1.1rem;
-  flex-shrink:0;
-}
-.card-name{font-family:'Rajdhani',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.card-desc{font-size:.76rem;color:var(--dim);line-height:1.6;margin-bottom:18px;min-height:38px}
-
-/* open btn */
-.card-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:12px;border-radius:10px;
-  font-family:'Rajdhani',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  text-decoration:none;border:none;cursor:pointer;transition:all .25s;
-}
-.card-btn.primary{
-  background:linear-gradient(135deg,var(--cyan2),#1d4ed8);
-  color:#fff;box-shadow:0 4px 18px rgba(56,189,248,.25);
-}
-.card-btn.primary:hover{box-shadow:0 6px 24px rgba(56,189,248,.4);filter:brightness(1.1)}
-.card-btn.secondary{
-  background:rgba(255,255,255,.05);
-  border:1px solid var(--border);color:var(--text);
-}
-.card-btn.secondary:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.14)}
-.card-btn svg{width:14px;height:14px}
-
-/* coming soon badge */
-.badge-soon{
-  position:absolute;top:14px;right:14px;z-index:2;
-  background:rgba(10,14,26,.8);border:1px solid var(--border);
-  border-radius:20px;padding:4px 10px;
-  font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim2);
-  backdrop-filter:blur(8px);
-}
-
-/* ── FOOTER ── */
-footer{position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid var(--border);font-size:.6rem;color:var(--dim2);letter-spacing:.14em;text-transform:uppercase}
-footer strong{color:var(--dim)}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>blahexm</title>
+<link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">🎮</div>
-    <div>
-      <div class="logo-text">HIM <span>HUB</span></div>
-      <div class="logo-sub">Roblox Bot Dashboard</div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <div class="user-pill">
-      <div class="user-av">H</div>
-      <div class="user-info">
-        <div class="user-name">HIM</div>
-        <div class="user-role">Developer</div>
-      </div>
-    </div>
-    <div class="logout-btn" title="Logout">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    </div>
-  </div>
-</div>
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
 
-<!-- MAIN -->
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <button class="tab-btn active" id="tab-profile" onclick="showTab('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      profile
+    </button>
+    <button class="tab-btn" id="tab-music" onclick="showTab('music')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      </svg>
+      music
+    </button>
+    <!-- Stats tab → เปิดหน้า dashboard แยก -->
+    <a class="tab-btn" href="hub.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      stats
+    </a>
+  </div>
+</header>
+
 <main>
-  <div class="hero-label">select game</div>
-  <div class="hero-title">HIM HUB TRACKSTAT</div>
-  <div class="hero-sub">Roblox Bot Dashboard · Made by HIM</div>
 
-  <div class="cards">
-
-    <!-- BLOX FRUIT -->
-    <div class="game-card active-card">
-      <div class="card-img">
-        <img src="https://tr.rbxcdn.com/180DAY-6d13e58b4f8e9e8e9e8e9e8e9e8e9e8e/768/432/Image/Png/noFilter" 
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-             alt="Blox Fruit"/>
-        <div class="card-img-placeholder" style="display:none">🏝️</div>
+  <!-- ══ PAGE: PROFILE ══ -->
+  <div class="page active" id="page-profile">
+    <div class="card">
+      <div class="avatar-wrap">
+        <img class="avatar" id="avatar"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 86 86'%3E%3Ccircle cx='43' cy='43' r='43' fill='%231a1a1a'/%3E%3C/svg%3E"
+          alt="avatar"/>
+        <div class="avatar-ring"></div>
+        <div class="status-dot" id="status-dot"></div>
       </div>
-      <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.25)">🍎</div>
-          <div class="card-name" style="color:var(--cyan)">Blox Fruit</div>
+
+      <div class="name-row">
+        <div class="profile-name" id="profile-name">blahexm</div>
+        <div class="badge" id="badge"></div>
+      </div>
+
+      <div class="profile-bio" id="profile-bio"></div>
+
+      <div class="status-label" id="status-label">
+        <span class="dot"></span>
+        <span id="status-text">connecting...</span>
+      </div>
+
+      <div class="activity" id="activity">
+        <div class="activity-icon" id="activity-icon">🎮</div>
+        <div class="activity-info">
+          <div class="activity-type"   id="activity-type">Playing</div>
+          <div class="activity-detail" id="activity-detail">...</div>
         </div>
-        <div class="card-desc">Advanced monitoring system. Track Level, Bounty, Beli, Fragments and account status in real-time.</div>
-        <a href="stats-dashboard.html" class="card-btn primary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Open Dashboard
-        </a>
+      </div>
+
+      <div class="divider"></div>
+      <div class="socials" id="socials"></div>
+
+      <div class="music-bar" id="music-bar">
+        <button class="music-play-btn" onclick="toggleMusic()">
+          <svg id="play-icon"  viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pause-icon" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+        <div class="music-info">
+          <div class="music-title"  id="music-title">—</div>
+          <div class="music-artist" id="music-artist"></div>
+        </div>
+        <div class="music-viz paused" id="music-viz">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
       </div>
     </div>
-
-    <!-- FISCH -->
-    <div class="game-card">
-      <div class="card-img">
-        <div class="card-img-placeholder">🎣</div>
-      </div>
-      <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2)">🐟</div>
-          <div class="card-name" style="color:#4ade80">Fisch</div>
-        </div>
-        <div class="card-desc">Auto fishing monitor. Track catches, inventory value and earnings per session.</div>
-        <a href="#" class="card-btn secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          Coming Soon
-        </a>
-      </div>
-      <div class="badge-soon">soon</div>
-    </div>
-
-    <!-- BLOCK SPINS -->
-    <div class="game-card">
-      <div class="card-img">
-        <div class="card-img-placeholder">🎰</div>
-      </div>
-      <div class="card-body">
-        <div class="card-icon-row">
-          <div class="card-icon" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">🎲</div>
-          <div class="card-name" style="color:#fbbf24">Block Spins</div>
-        </div>
-        <div class="card-desc">Auto Spin & Rewards Manager. Maximize your gains with automated spin tracking tools.</div>
-        <a href="#" class="card-btn secondary">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-          Coming Soon
-        </a>
-      </div>
-      <div class="badge-soon">soon</div>
-    </div>
-
   </div>
+
+  <!-- ══ PAGE: MUSIC ══ -->
+  <div class="page" id="page-music">
+    <div class="card">
+      <div class="music-page-header">
+        <div class="music-page-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+          </svg>
+          favorite tracks
+        </div>
+        <div class="music-page-sub">กดเล่นได้เลย</div>
+      </div>
+      <div class="music-grid" id="music-grid"></div>
+    </div>
+  </div>
+
 </main>
 
-<footer>© 2026 HIM. All rights reserved. &nbsp;<strong>PRIVATE PROPERTY. DO NOT DISTRIBUTE SOURCE CODE.</strong></footer>
+<footer><p class="footer-text" id="footer-text">blahexm · 2026</p></footer>
+<audio id="audio" loop></audio>
 
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
