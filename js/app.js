@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   buildMusicGrid();
+  buildCalcRows();
   initCursor();
   initSecurity();
   fetchLanyard();
@@ -165,3 +166,84 @@ document.addEventListener('DOMContentLoaded', () => {
   // เปิดมาหน้า profile เสมอ
   showTab('profile');
 });
+
+/* ── Calculator ── */
+const CALC_PRICES = {
+  "Aura Crate":     { price: 500,   per: 1000,    emoji: "📦" },
+  "Cosmetic Crate": { price: 250,   per: 1000,    emoji: "🎁" },
+  "Race Reroll":    { price: 9000,  per: 1000000, emoji: "🐉" },
+  "Trait Reroll":   { price: 9000,  per: 1000000, emoji: "💎" },
+  "Clan Reroll":    { price: 450,   per: 1000000, emoji: "⚔️" },
+  "Mythical Chest": { price: 200,   per: 1000000, emoji: "🏆" },
+};
+
+function buildCalcRows() {
+  const container = document.getElementById('calc-items');
+  if (!container) return;
+  container.innerHTML = '';
+  Object.entries(CALC_PRICES).forEach(([name, cfg]) => {
+    const row = document.createElement('div');
+    row.className = 'calc-row';
+    row.innerHTML = `
+      <span class="calc-row-emoji">${cfg.emoji}</span>
+      <span class="calc-row-name">${name}</span>
+      <input class="calc-row-input" type="number" min="0" placeholder="0"
+        data-name="${name}" oninput="recalcCalc()" />
+      <span class="calc-row-val" id="calc-val-${name.replace(/\s/g,'_')}">—</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function recalcCalc() {
+  let grand = 0;
+  let hasAny = false;
+  document.querySelectorAll('.calc-row-input').forEach(inp => {
+    const name = inp.dataset.name;
+    const cfg  = CALC_PRICES[name];
+    const amt  = parseFloat(inp.value) || 0;
+    const val  = amt * (cfg.price / cfg.per);
+    grand += val;
+    const id = 'calc-val-' + name.replace(/\s/g,'_');
+    const el = document.getElementById(id);
+    if (el) el.textContent = amt > 0 ? fmtCalc(val) + '฿' : '—';
+    if (amt > 0) hasAny = true;
+  });
+  const box    = document.getElementById('calc-total-box');
+  const valEl  = document.getElementById('calc-total-val');
+  const copyBtn= document.getElementById('calc-copy-btn');
+  if (box)    box.style.display   = hasAny ? 'flex' : 'none';
+  if (valEl)  valEl.textContent   = fmtCalc(grand) + '฿';
+  if (copyBtn) copyBtn.style.display = hasAny ? 'flex' : 'none';
+}
+
+function fmtCalc(n) {
+  return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function resetCalc() {
+  document.querySelectorAll('.calc-row-input').forEach(inp => inp.value = '');
+  document.querySelectorAll('.calc-row-val').forEach(el => el.textContent = '—');
+  const box     = document.getElementById('calc-total-box');
+  const copyBtn = document.getElementById('calc-copy-btn');
+  if (box)    box.style.display    = 'none';
+  if (copyBtn) copyBtn.style.display = 'none';
+}
+
+function copyCalcResult() {
+  const lines = [];
+  document.querySelectorAll('.calc-row-input').forEach(inp => {
+    const name = inp.dataset.name;
+    const cfg  = CALC_PRICES[name];
+    const amt  = parseFloat(inp.value) || 0;
+    if (amt > 0) {
+      const val = amt * (cfg.price / cfg.per);
+      lines.push(`${cfg.emoji} ${name}: ${amt.toLocaleString('th-TH')} ชิ้น = ${fmtCalc(val)}฿`);
+    }
+  });
+  const totalEl = document.getElementById('calc-total-val');
+  if (totalEl) lines.push(`\n💰 รวม: ${totalEl.textContent}`);
+  navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
+  const btn = document.getElementById('calc-copy-btn');
+  if (btn) { btn.classList.add('copied'); btn.childNodes[2].textContent = ' copied!'; setTimeout(() => { btn.classList.remove('copied'); btn.childNodes[2].textContent = ' copy'; }, 1500); }
+}

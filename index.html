@@ -28,16 +28,13 @@
       </svg>
       music
     </button>
-    <!-- Stats tab → เปิดหน้า dashboard แยก -->
-    <a class="tab-btn" href="hub.html">
+    <button class="tab-btn" id="tab-calc" onclick="showTab('calc')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="7" height="7" rx="1"/>
-        <rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/>
-        <rect x="14" y="14" width="7" height="7" rx="1"/>
+        <rect x="4" y="2" width="16" height="20" rx="2"/>
+        <path d="M8 7h8M8 11h4M8 15h4M14 15l2 2 2-2M14 17l2 2 2-2" stroke-linecap="round"/>
       </svg>
-      stats
-    </a>
+      calc
+    </button>
   </div>
 </header>
 
@@ -106,6 +103,34 @@
         <div class="music-page-sub">กดเล่นได้เลย</div>
       </div>
       <div class="music-grid" id="music-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: CALC ══ -->
+  <div class="page" id="page-calc">
+    <div class="card calc-card">
+      <div class="calc-header">
+        <div class="calc-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 7h8M8 11h4" stroke-linecap="round"/></svg>
+          price calculator
+        </div>
+        <div class="calc-sub">คำนวณราคาขายของ</div>
+      </div>
+      <div class="calc-items" id="calc-items"></div>
+      <div class="calc-total-box" id="calc-total-box" style="display:none">
+        <div class="calc-total-label">รวมทั้งหมด</div>
+        <div class="calc-total-val" id="calc-total-val">0.00฿</div>
+      </div>
+      <div class="calc-actions">
+        <button class="calc-btn-reset" onclick="resetCalc()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          reset
+        </button>
+        <button class="calc-btn-copy" onclick="copyCalcResult()" id="calc-copy-btn" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          copy
+        </button>
+      </div>
     </div>
   </div>
 
