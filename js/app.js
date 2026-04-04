@@ -550,3 +550,14 @@ function resetRateSettings() {
   if (panel) renderRateSettings(panel);
   smartCalc();
 }
+
+function openRateSettings() {
+  const panel = document.getElementById('smart-settings-top');
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    renderRateSettings(panel);
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
