@@ -22,12 +22,6 @@
       </svg>
       profile
     </button>
-    <button class="tab-btn" id="tab-music" onclick="showTab('music')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-      </svg>
-      music
-    </button>
     <button class="tab-btn" id="tab-calc" onclick="showTab('calc')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -97,23 +91,6 @@
     </div>
   </div>
 
-  <!-- ══ PAGE: MUSIC ══ -->
-  <div class="page" id="page-music">
-    <div class="card">
-      <div class="music-page-header">
-        <div class="music-page-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-          </svg>
-          favorite tracks
-        </div>
-        <div class="music-page-sub">กดเล่นได้เลย</div>
-      </div>
-      <div class="music-grid" id="music-grid"></div>
-    </div>
-  </div>
-
-
   <!-- PAGE: CALC / FINANCE -->
   <div class="page" id="page-calc">
     <div class="card calc-card">
@@ -125,16 +102,20 @@
   <!-- PAGE: SMART CALC -->
   <div class="page" id="page-smart">
     <div class="card calc-card">
-      <div class="calc-header">
-        <div class="calc-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-            <path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/>
-            <path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/>
-          </svg>
-          smart calculator
+      <div class="calc-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="calc-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/>
+              <path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/>
+            </svg>
+            smart calculator
+          </div>
+          <div class="calc-sub">แปะข้อความจากเกมได้เลย</div>
         </div>
-        <div class="calc-sub">แปะข้อความจากเกมได้เลย</div>
+        <button class="smart-settings-btn" onclick="openRateSettings()" style="flex-shrink:0">⚙️ แก้เรท</button>
       </div>
+      <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
       <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
