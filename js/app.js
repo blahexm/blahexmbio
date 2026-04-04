@@ -18,21 +18,35 @@ const BADGE_SVG = {
   diamond:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 3.5L19 9l-7 9.1L5 9l7-3.5z"/></svg>`,
 };
 
-/* ── Scroll nav ── */
+/* ── Nav & Sidebar ── */
 let _currentTab = 'profile';
 
-function scrollTo(name) {
+function scrollToSection(name) {
   const el = document.getElementById('section-' + name);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   setActiveTab(name);
   if (name === 'calc') setTimeout(() => renderCalcPage(), 300);
+  // close sidebar on mobile
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  if (sb && sb.classList.contains('open')) {
+    sb.classList.remove('open');
+    ov.classList.remove('open');
+  }
 }
 
 function setActiveTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('tab-' + name);
   if (btn) btn.classList.add('active');
   _currentTab = name;
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
 }
 
 function initScrollSpy() {
@@ -44,11 +58,60 @@ function initScrollSpy() {
         setActiveTab(name);
       }
     });
-  }, { threshold: 0.4 });
+  }, { threshold: 0.3 });
   sections.forEach(name => {
     const el = document.getElementById('section-' + name);
     if (el) observer.observe(el);
   });
+}
+
+/* ── Theme Switcher ── */
+const THEMES = [
+  { id:'crimson', color:'#dc2626' }, { id:'rose',    color:'#f43f5e' },
+  { id:'orange',  color:'#f97316' }, { id:'amber',   color:'#f59e0b' },
+  { id:'gold',    color:'#eab308' }, { id:'yellow',  color:'#facc15' },
+  { id:'mint',    color:'#34d399' }, { id:'cobalt',  color:'#3b82f6' },
+  { id:'violet',  color:'#8b5cf6' }, { id:'silver',  color:'#94a3b8' },
+  { id:'mocha',   color:'#a0785a' },
+];
+const THEME_KEY = 'blahexm_theme';
+
+function applyTheme(id) {
+  document.documentElement.setAttribute('data-theme', id);
+  localStorage.setItem(THEME_KEY, id);
+  // update active dot
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.theme === id);
+  });
+}
+
+function buildThemeGrids() {
+  const savedTheme = localStorage.getItem(THEME_KEY) || C.theme || 'rose';
+  ['theme-grid', 'mob-theme-grid'].forEach(gid => {
+    const g = document.getElementById(gid);
+    if (!g) return;
+    g.innerHTML = '';
+    THEMES.forEach(t => {
+      const d = document.createElement('div');
+      d.className = 'theme-dot' + (t.id === savedTheme ? ' active' : '');
+      d.dataset.theme = t.id;
+      d.style.background = t.color;
+      d.title = t.id;
+      d.onclick = () => { applyTheme(t.id); closeMobThemePanel(); };
+      g.appendChild(d);
+    });
+  });
+  applyTheme(savedTheme);
+}
+
+function toggleThemePanel() {
+  const p = document.getElementById('mob-theme-panel');
+  if (!p) return;
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+function closeMobThemePanel() {
+  const p = document.getElementById('mob-theme-panel');
+  if (p) p.style.display = 'none';
 }
 
 /* ── Badge ── */
@@ -179,6 +242,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (C.music.url) document.getElementById('audio').src = C.music.url;
   }
 
+  // Apply saved theme
+  buildThemeGrids();
+
+  // Update sidebar user info
+  const sbName = document.getElementById('sb-user-name');
+  const sbStatus = document.getElementById('sb-user-status');
+  if (sbName) sbName.textContent = C.name;
+  if (sbStatus) sbStatus.textContent = C.manualStatusText || '—';
+  if (C.avatarUrl) {
+    const sbAv = document.getElementById('sb-avatar');
+    if (sbAv) sbAv.src = C.avatarUrl;
+  }
+
   initCursor();
   initSecurity();
   initScrollSpy();
@@ -189,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
 ══════════════════════════════════════ */
-const FINANCE_PIN = 'blahexm';
+// PIN is now in config.js → C.financePin
 const SESSION_KEY = 'blahexm_auth';
 const SB_URL      = 'https://zwavwijmgjgpaembmpnl.supabase.co';
 const SB_KEY      = 'sb_publishable_3h62iooez-XuZR9DAuspbw_blEOj2zl';
@@ -228,14 +304,17 @@ function fmtMoney(n) {
 function financeCheckSession() { return sessionStorage.getItem(SESSION_KEY) === '1'; }
 function financeSetSession()   { sessionStorage.setItem(SESSION_KEY, '1'); }
 
-/* ── Tab hook (kept for compatibility) ── */
-function showTab(name) { scrollTo(name); }
+function showTab(name) { scrollToSection(name); }
 
 /* ── Main render ── */
 function renderCalcPage() {
   const wrap = document.getElementById('calc-inner');
   if (!wrap) return;
-  renderFinanceDashboard(wrap);
+  if (financeCheckSession()) {
+    renderFinanceDashboard(wrap);
+  } else {
+    renderFinanceLock(wrap);
+  }
 }
 
 /* ── Lock screen ── */
@@ -266,7 +345,7 @@ function finPinInput(el) {
 
 function finPinSubmit() {
   const val = document.getElementById('fin-pin-input')?.value || '';
-  if (val === FINANCE_PIN) {
+  if (val === (C.financePin || 'blahexm')) {
     financeSetSession();
     _financeUnlocked = true;
     renderFinanceDashboard(document.getElementById('calc-inner'));
