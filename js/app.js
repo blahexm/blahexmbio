@@ -385,21 +385,53 @@ const SMART_EMOJIS = {
 
 function parseSmartText(text) {
   const results = {};
-  // match pattern: NamexNUMBER at start of line
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  for (const line of lines) {
-    const m = line.match(/^(.+?)x(\d+)$/i);
-    if (!m) continue;
-    const rawName = m[1].trim();
-    const qty     = parseInt(m[2]);
-    // fuzzy match name
-    const matched = Object.keys(SMART_RATES).find(k =>
-      k.toLowerCase() === rawName.toLowerCase() ||
-      rawName.toLowerCase().includes(k.toLowerCase().split(' ')[0]) && 
-      rawName.toLowerCase().includes(k.toLowerCase().split(' ').slice(-1)[0])
-    );
-    if (matched) results[matched] = (results[matched] || 0) + qty;
+  const lines   = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const knownNames = Object.keys(SMART_RATES);
+
+  // Strategy 1: NamexNUMBER on same line e.g. "Race Rerollx8227136"
+  // Strategy 2: Name on one line, xNUMBER on next line
+  // Strategy 3: Name repeated then xNUMBER (copy-paste artifact)
+
+  function fuzzyMatch(raw) {
+    const r = raw.toLowerCase().replace(/\s+/g,' ').trim();
+    return knownNames.find(k => {
+      const kl = k.toLowerCase();
+      if (kl === r) return true;
+      // partial: all words of key appear in raw
+      const words = kl.split(' ');
+      return words.every(w => r.includes(w));
+    });
   }
+
+  // Pass 1: same-line NamexNUM
+  const usedLines = new Set();
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^(.+?)x(\d+)$/i);
+    if (!m) continue;
+    const matched = fuzzyMatch(m[1]);
+    if (matched) {
+      results[matched] = (results[matched] || 0) + parseInt(m[2]);
+      usedLines.add(i);
+    }
+  }
+
+  // Pass 2: Name line followed by xNUMBER line (possibly with duplicate name in between)
+  for (let i = 0; i < lines.length; i++) {
+    if (usedLines.has(i)) continue;
+    const matched = fuzzyMatch(lines[i]);
+    if (!matched) continue;
+    // Look ahead up to 3 lines for xNUMBER
+    for (let j = i+1; j < Math.min(i+4, lines.length); j++) {
+      if (usedLines.has(j)) continue;
+      const m = lines[j].match(/^x(\d+)$/i);
+      if (m) {
+        results[matched] = (results[matched] || 0) + parseInt(m[1]);
+        usedLines.add(i); usedLines.add(j);
+        break;
+      }
+    }
+  }
+
   return results;
 }
 
