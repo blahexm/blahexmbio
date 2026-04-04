@@ -27,17 +27,20 @@
     </button>
     <button class="sb-item" id="tab-smart" onclick="scrollToSection('smart')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/><path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/></svg>
-      <span>Text Calc</span>
-    </button>
-    <button class="sb-item" id="tab-quick" onclick="scrollToSection('quick')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2m4 0h2M7 12h2m4 0h2"/></svg>
-      <span>Quick Calc</span>
+      <span>Calculator</span>
     </button>
   </nav>
   <div class="sb-spacer"></div>
   <div class="theme-section">
     <div class="theme-label">Theme</div>
     <div class="theme-grid" id="theme-grid"></div>
+  </div>
+  <div class="size-section">
+    <div class="size-label-row">
+      <span class="size-label">Size</span>
+      <span class="size-val" id="size-val">100%</span>
+    </div>
+    <input class="size-slider" id="size-slider" type="range" min="80" max="130" value="100" step="5" oninput="applyScale(this.value)" />
   </div>
   <div class="sb-footer">
     <div class="sb-user">
@@ -142,16 +145,6 @@
       <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
       <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
-    </div>
-  </section>
-
-  <section class="dash-section" id="section-quick">
-    <div class="section-header">
-      <h2 class="section-title">Quick Calc</h2>
-      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
-    </div>
-    <div class="dash-card">
-      <div id="quick-calc-inner"></div>
     </div>
   </section>
 
