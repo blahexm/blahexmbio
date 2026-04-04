@@ -270,3 +270,21 @@ footer{width:100%;padding:14px;border-top:1px solid var(--border);display:flex;a
 .fin-undo-btn:hover{color:var(--text);border-color:rgba(255,255,255,.12)}
 .fin-lock-btn:hover{color:#f43f5e;border-color:rgba(244,63,94,.25)}
 .fin-loading{text-align:center;padding:40px 0;font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:.1em}
+
+/* ══════════════════
+   SMART CALC PAGE
+══════════════════ */
+.smart-input{width:100%;min-height:140px;padding:12px 14px;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Space Mono',monospace;font-size:.65rem;line-height:1.7;outline:none;resize:vertical;transition:border-color .2s;-webkit-tap-highlight-color:transparent;margin-bottom:12px}
+.smart-input:focus{border-color:var(--a)}
+.smart-input::placeholder{color:rgba(255,255,255,.14)}
+.smart-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.smart-row{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px}
+.smart-emoji{font-size:.95rem;flex-shrink:0;width:22px;text-align:center}
+.smart-name{flex:1;font-size:.68rem;font-weight:700;color:var(--text)}
+.smart-qty{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--dim);flex-shrink:0}
+.smart-val{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--a);font-weight:700;flex-shrink:0;min-width:64px;text-align:right}
+.smart-total{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--ag);border:1px solid rgba(255,255,255,.07);border-radius:11px;margin-bottom:10px;font-family:'Space Mono',monospace;font-size:.58rem;color:var(--dim)}
+.smart-total-val{font-size:1.05rem;font-weight:700;color:var(--a)}
+.smart-copy-btn{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);color:var(--dim);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .2s;letter-spacing:.06em}
+.smart-copy-btn:hover{border-color:var(--a);color:var(--a)}
+.smart-empty{font-family:'Space Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.2);text-align:center;padding:20px 0}

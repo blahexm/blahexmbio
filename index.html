@@ -35,6 +35,13 @@
       </svg>
       finance
     </button>
+    <button class="tab-btn" id="tab-smart" onclick="showTab('smart')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/>
+        <path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/>
+      </svg>
+      calc
+    </button>
   </div>
 </header>
 
@@ -111,6 +118,25 @@
   <div class="page" id="page-calc">
     <div class="card calc-card">
       <div id="calc-inner"></div>
+    </div>
+  </div>
+
+
+  <!-- PAGE: SMART CALC -->
+  <div class="page" id="page-smart">
+    <div class="card calc-card">
+      <div class="calc-header">
+        <div class="calc-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/>
+            <path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/>
+          </svg>
+          smart calculator
+        </div>
+        <div class="calc-sub">แปะข้อความจากเกมได้เลย</div>
+      </div>
+      <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
+      <div id="smart-result"></div>
     </div>
   </div>
 

@@ -18,16 +18,8 @@ const BADGE_SVG = {
   diamond:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 3.5L19 9l-7 9.1L5 9l7-3.5z"/></svg>`,
 };
 
-/* ── Tab switching (ไม่มี flip card แล้ว) ── */
+/* ── Tab switching ── */
 let _currentTab = 'profile';
-function showTab(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  _currentTab = name;
-  if (name === 'calc') setTimeout(() => renderCalcPage(), 10);
-}
 
 /* ── Badge ── */
 function renderBadge() {
@@ -166,23 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // เปิดมาหน้า profile เสมอ
   showTab('profile');
 });
-
 /* ══════════════════════════════════════
-   FINANCE TRACKER — PIN locked
+   FINANCE TRACKER — Supabase sync
 ══════════════════════════════════════ */
-const FINANCE_PIN      = 'blahexm';
-const FINANCE_KEY      = 'blahexm_finance';
-const SESSION_KEY      = 'blahexm_auth';
+const FINANCE_PIN = 'blahexm';
+const SESSION_KEY = 'blahexm_auth';
+const SB_URL      = 'https://zwavwijmgjgpaembmpnl.supabase.co';
+const SB_KEY      = 'sb_publishable_3h62iooez-XuZR9DAuspbw_blEOj2zl';
+const _sb         = window.supabase.createClient(SB_URL, SB_KEY);
 
 let _financeUnlocked = false;
 
-/* ── Storage ── */
-function financeLoad() {
-  try { return JSON.parse(localStorage.getItem(FINANCE_KEY)) || {}; } catch { return {}; }
+/* ── Supabase helpers ── */
+async function financeLoad() {
+  const { data } = await _sb.from('finance').select('*');
+  const result = {};
+  (data || []).forEach(row => { result[row.date] = { total: row.total, logs: row.logs || [] }; });
+  return result;
 }
-function financeSave(data) {
-  localStorage.setItem(FINANCE_KEY, JSON.stringify(data));
+async function financeSaveDay(date, total, logs) {
+  await _sb.from('finance').upsert({ date, total, logs, updated_at: new Date().toISOString() }, { onConflict: 'date' });
 }
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -200,23 +197,24 @@ function fmtMoney(n) {
 }
 
 /* ── Auth ── */
-function financeCheckSession() {
-  return sessionStorage.getItem(SESSION_KEY) === '1';
-}
-function financeSetSession() {
-  sessionStorage.setItem(SESSION_KEY, '1');
+function financeCheckSession() { return sessionStorage.getItem(SESSION_KEY) === '1'; }
+function financeSetSession()   { sessionStorage.setItem(SESSION_KEY, '1'); }
+
+/* ── Tab hook ── */
+function showTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  _currentTab = name;
+  if (name === 'calc') setTimeout(() => renderCalcPage(), 10);
 }
 
 /* ── Main render ── */
 function renderCalcPage() {
-  _financeUnlocked = financeCheckSession();
   const wrap = document.getElementById('calc-inner');
   if (!wrap) return;
-  if (_financeUnlocked) {
-    renderFinanceDashboard(wrap);
-  } else {
-    renderFinanceLock(wrap);
-  }
+  renderFinanceDashboard(wrap);
 }
 
 /* ── Lock screen ── */
@@ -250,9 +248,7 @@ function finPinSubmit() {
   if (val === FINANCE_PIN) {
     financeSetSession();
     _financeUnlocked = true;
-    const wrap = document.getElementById('calc-inner');
-    wrap.style.animation = 'none';
-    setTimeout(() => renderFinanceDashboard(wrap), 80);
+    renderFinanceDashboard(document.getElementById('calc-inner'));
   } else {
     const inp = document.getElementById('fin-pin-input');
     const err = document.getElementById('fin-pin-err');
@@ -262,24 +258,23 @@ function finPinSubmit() {
 }
 
 /* ── Dashboard ── */
-function renderFinanceDashboard(wrap) {
-  const data    = financeLoad();
-  const today   = todayKey();
-  const todayD  = data[today] || { total: 0, logs: [] };
-  const keys    = getLast7Keys();
+async function renderFinanceDashboard(wrap) {
+  wrap.innerHTML = `<div class="fin-loading">loading...</div>`;
+  const data   = await financeLoad();
+  const today  = todayKey();
+  const todayD = data[today] || { total: 0, logs: [] };
+  const keys   = getLast7Keys();
 
-  // Week total
   let weekTotal = 0;
   keys.forEach(k => { weekTotal += (data[k]?.total || 0); });
 
-  // Bar chart
   const vals   = keys.map(k => data[k]?.total || 0);
   const maxVal = Math.max(...vals, 1);
   const barHTML = keys.map((k, i) => {
     const v   = vals[i];
     const pct = Math.max(4, Math.round((v / maxVal) * 100));
     const isT = k === today;
-    const lbl = k.slice(8); // DD
+    const lbl = k.slice(8);
     return `<div class="fin-bar-col">
       <div class="fin-bar-amt">${v > 0 ? '+'+fmtMoney(v) : ''}</div>
       <div class="fin-bar-wrap">
@@ -289,7 +284,6 @@ function renderFinanceDashboard(wrap) {
     </div>`;
   }).join('');
 
-  // Recent logs
   const logs    = (todayD.logs || []).slice(-5).reverse();
   const logHTML = logs.length === 0
     ? `<div class="fin-empty-log">ยังไม่มีรายการวันนี้</div>`
@@ -302,7 +296,6 @@ function renderFinanceDashboard(wrap) {
       </div>`).join('');
 
   wrap.innerHTML = `
-    <!-- totals -->
     <div class="fin-totals">
       <div class="fin-total-card main">
         <div class="fin-total-label">วันนี้</div>
@@ -313,12 +306,8 @@ function renderFinanceDashboard(wrap) {
         <div class="fin-total-val sm">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
       </div>
     </div>
-
-    <!-- bar chart -->
     <div class="fin-section-label">รายวัน (7 วัน)</div>
     <div class="fin-chart">${barHTML}</div>
-
-    <!-- input -->
     <div class="fin-input-row">
       <input class="fin-amount-input" id="fin-amount" type="number"
         placeholder="+200 หรือ -50" step="any"
@@ -330,12 +319,8 @@ function renderFinanceDashboard(wrap) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
-
-    <!-- recent -->
     <div class="fin-section-label" style="margin-top:14px">รายการล่าสุด</div>
     <div class="fin-logs" id="fin-logs">${logHTML}</div>
-
-    <!-- actions -->
     <div class="fin-foot-actions">
       <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
       <button class="fin-lock-btn" onclick="finLock()">🔒 ล็อค</button>
@@ -344,31 +329,31 @@ function renderFinanceDashboard(wrap) {
 }
 
 /* ── Actions ── */
-function finAddEntry() {
+async function finAddEntry() {
   const amtEl  = document.getElementById('fin-amount');
   const noteEl = document.getElementById('fin-note');
   const amt    = parseFloat(amtEl?.value);
   if (isNaN(amt) || amt === 0) { amtEl?.classList.add('shake'); setTimeout(()=>amtEl?.classList.remove('shake'),400); return; }
   const note = noteEl?.value?.trim() || '';
   const time = new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
-  const data  = financeLoad();
   const today = todayKey();
+  const data  = await financeLoad();
   if (!data[today]) data[today] = { total: 0, logs: [] };
   data[today].total += amt;
   data[today].logs.push({ amount: amt, note, time });
-  financeSave(data);
+  await financeSaveDay(today, data[today].total, data[today].logs);
   if (amtEl)  amtEl.value  = '';
   if (noteEl) noteEl.value = '';
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
-function finUndo() {
-  const data  = financeLoad();
+async function finUndo() {
   const today = todayKey();
+  const data  = await financeLoad();
   if (!data[today]?.logs?.length) return;
   const last = data[today].logs.pop();
   data[today].total -= last.amount;
-  financeSave(data);
+  await financeSaveDay(today, data[today].total, data[today].logs);
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
@@ -376,4 +361,87 @@ function finLock() {
   sessionStorage.removeItem(SESSION_KEY);
   _financeUnlocked = false;
   renderFinanceLock(document.getElementById('calc-inner'));
+}
+
+/* ══════════════════════════════════════
+   SMART CALCULATOR
+══════════════════════════════════════ */
+const SMART_RATES = {
+  'Aura Crate':     { per100: 333.33333 },
+  'Cosmetic Crate': { per100: 1000 },
+  'Clan Reroll':    { per100: 70000 },
+  'Mythical Chest': { per100: 40000 },
+  'Power Shard':    { per100: 150000 },
+  'Upper Seal':     { per100: 150000 },
+  'Race Reroll':    { per100: 2000000 },  // 1M = 50฿ → per100 = 2M
+  'Trait Reroll':   { per100: 2000000 },
+  'Passive Shard':  { per100: 0 },
+};
+const SMART_EMOJIS = {
+  'Aura Crate':'📦','Cosmetic Crate':'🎁','Clan Reroll':'⚔️',
+  'Mythical Chest':'🏆','Power Shard':'🔷','Upper Seal':'🔱',
+  'Race Reroll':'🐉','Trait Reroll':'💎','Passive Shard':'🔮',
+};
+
+function parseSmartText(text) {
+  const results = {};
+  // match pattern: NamexNUMBER at start of line
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    const m = line.match(/^(.+?)x(\d+)$/i);
+    if (!m) continue;
+    const rawName = m[1].trim();
+    const qty     = parseInt(m[2]);
+    // fuzzy match name
+    const matched = Object.keys(SMART_RATES).find(k =>
+      k.toLowerCase() === rawName.toLowerCase() ||
+      rawName.toLowerCase().includes(k.toLowerCase().split(' ')[0]) && 
+      rawName.toLowerCase().includes(k.toLowerCase().split(' ').slice(-1)[0])
+    );
+    if (matched) results[matched] = (results[matched] || 0) + qty;
+  }
+  return results;
+}
+
+function smartCalc() {
+  const text   = document.getElementById('smart-input')?.value || '';
+  const result = document.getElementById('smart-result');
+  if (!result) return;
+  if (!text.trim()) { result.innerHTML = ''; return; }
+
+  const parsed = parseSmartText(text);
+  if (Object.keys(parsed).length === 0) {
+    result.innerHTML = '<div class="smart-empty">ไม่พบของที่รู้จัก — ลองแปะข้อความใหม่</div>';
+    return;
+  }
+
+  let grand = 0;
+  const rows = Object.entries(parsed).map(([name, qty]) => {
+    const rate  = SMART_RATES[name];
+    const emoji = SMART_EMOJIS[name] || '📦';
+    if (!rate || rate.per100 === 0) return null;
+    const val = (qty / rate.per100) * 100;
+    grand += val;
+    return `<div class="smart-row">
+      <span class="smart-emoji">${emoji}</span>
+      <span class="smart-name">${name}</span>
+      <span class="smart-qty">${qty.toLocaleString('th-TH')}</span>
+      <span class="smart-val">${val.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})}฿</span>
+    </div>`;
+  }).filter(Boolean);
+
+  result.innerHTML = `
+    <div class="smart-rows">${rows.join('')}</div>
+    <div class="smart-total">
+      <span>รวมทั้งหมด</span>
+      <span class="smart-total-val">${grand.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})}฿</span>
+    </div>
+    <button class="smart-copy-btn" onclick="smartCopy(${grand.toFixed(2)})">copy ยอดรวม</button>
+  `;
+}
+
+function smartCopy(val) {
+  navigator.clipboard.writeText(val.toFixed(2)).catch(()=>{});
+  const btn = document.querySelector('.smart-copy-btn');
+  if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
 }
