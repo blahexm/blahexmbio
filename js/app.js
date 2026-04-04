@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (C.music.url) document.getElementById('audio').src = C.music.url;
   }
 
-  buildMusicGrid();
   initCursor();
   initSecurity();
   fetchLanyard();
@@ -480,9 +479,7 @@ function smartCalc() {
     </div>
     <div class="smart-btn-row">
       <button class="smart-copy-btn" onclick="smartCopy(${grand.toFixed(2)})">copy ยอดรวม</button>
-      <button class="smart-settings-btn" onclick="toggleRateSettings()">⚙️ แก้เรท</button>
     </div>
-    <div class="smart-settings-panel" id="smart-settings" style="display:none"></div>
   `;
 }
 
@@ -492,16 +489,6 @@ function smartCopy(val) {
   if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
 }
 
-function toggleRateSettings() {
-  const panel = document.getElementById('smart-settings');
-  if (!panel) return;
-  if (panel.style.display === 'none') {
-    renderRateSettings(panel);
-    panel.style.display = 'block';
-  } else {
-    panel.style.display = 'none';
-  }
-}
 
 function renderRateSettings(panel) {
   const rates = loadRates();
