@@ -50,7 +50,7 @@ function toggleSidebar() {
 }
 
 function initScrollSpy() {
-  const sections = ['profile', 'calc', 'smart'];
+  const sections = ['profile', 'calc', 'smart', 'quick'];
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -281,6 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchLanyard();
   setInterval(fetchLanyard, 12000);
   renderCalcPage();
+
+  const qcWrap = document.getElementById('quick-calc-inner');
+  if (qcWrap) renderQuickCalc(qcWrap);
 });
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
@@ -658,7 +661,7 @@ function saveRateSettings() {
 function resetRateSettings() {
   localStorage.removeItem(SMART_RATES_KEY);
   SMART_RATES = loadRates();
-  const panel = document.getElementById('smart-settings');
+  const panel = document.getElementById('smart-settings-top');
   if (panel) renderRateSettings(panel);
   smartCalc();
 }
@@ -672,4 +675,86 @@ function openRateSettings() {
   } else {
     panel.style.display = 'none';
   }
+}
+/* ══════════════════════════════════════
+   QUICK CALC — กรอกจำนวนชิ้น คิดราคาออโต้
+══════════════════════════════════════ */
+function renderQuickCalc(container) {
+  const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
+  const inputsHTML = items.map(([name, def]) => {
+    const id = 'qc_' + name.replace(/\s/g,'_');
+    return `<div class="qcalc-item">
+      <span class="qcalc-emoji">${def.emoji}</span>
+      <span class="qcalc-name">${name}</span>
+      <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0" oninput="updateQuickCalc()" />
+    </div>`;
+  }).join('');
+  const resultsHTML = items.map(([name, def]) => {
+    const rid = 'qcr_' + name.replace(/\s/g,'_');
+    return `<div class="qcalc-result-row" id="row_${name.replace(/\s/g,'_')}">
+      <span class="qcalc-result-emoji">${def.emoji}</span>
+      <span class="qcalc-result-name">${name}</span>
+      <span class="qcalc-result-qty" id="${rid}_qty"></span>
+      <span class="qcalc-result-val zero" id="${rid}_val">—</span>
+    </div>`;
+  }).join('');
+  container.innerHTML = `
+    <div class="qcalc-wrap">
+      <div class="qcalc-left">
+        <div class="qcalc-label">ใส่จำนวนชิ้น</div>
+        <div class="qcalc-inputs">${inputsHTML}</div>
+      </div>
+      <div class="qcalc-right">
+        <div class="qcalc-label">ราคารวม</div>
+        <div class="qcalc-result-rows">${resultsHTML}</div>
+        <div class="qcalc-total">
+          <span class="qcalc-total-label">รวมทั้งหมด</span>
+          <span class="qcalc-total-val" id="qcalc-grand">0.00฿</span>
+        </div>
+        <button class="qcalc-copy-btn" id="qcalc-copy-btn" onclick="quickCalcCopy()">copy ยอดรวม</button>
+      </div>
+    </div>
+  `;
+}
+
+let _qcGrand = 0;
+
+function updateQuickCalc() {
+  const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
+  let grand = 0;
+  items.forEach(([name, def]) => {
+    const id = 'qc_' + name.replace(/\s/g,'_');
+    const rid = 'qcr_' + name.replace(/\s/g,'_');
+    const rowId = 'row_' + name.replace(/\s/g,'_');
+    const inp = document.getElementById(id);
+    const valEl = document.getElementById(rid + '_val');
+    const qtyEl = document.getElementById(rid + '_qty');
+    const row = document.getElementById(rowId);
+    if (!inp || !valEl) return;
+    const qty = parseFloat(inp.value) || 0;
+    const rate = SMART_RATES[name] || def;
+    if (!rate || rate.divisor === 0) return;
+    const val = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
+    grand += val;
+    if (qty > 0) {
+      valEl.textContent = val.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '฿';
+      valEl.className = 'qcalc-result-val';
+      qtyEl.textContent = qty.toLocaleString('th-TH') + ' ชิ้น';
+      if (row) row.classList.add('has-val');
+    } else {
+      valEl.textContent = '—';
+      valEl.className = 'qcalc-result-val zero';
+      qtyEl.textContent = '';
+      if (row) row.classList.remove('has-val');
+    }
+  });
+  _qcGrand = grand;
+  const grandEl = document.getElementById('qcalc-grand');
+  if (grandEl) grandEl.textContent = grand.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '฿';
+}
+
+function quickCalcCopy() {
+  navigator.clipboard.writeText(_qcGrand.toFixed(2)).catch(()=>{});
+  const btn = document.getElementById('qcalc-copy-btn');
+  if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
 }
