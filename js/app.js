@@ -367,8 +367,8 @@ function finLock() {
 ══════════════════════════════════════ */
 // เรทเริ่มต้น — divisor คือจำนวนของ ÷ divisor = ราคา฿
 const SMART_RATES_DEFAULT = {
-  'Aura Crate':     { divisor: 0.3,    emoji: '📦' },
-  'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁' },
+  'Aura Crate':     { divisor: 0.3,    emoji: '📦', multiply: true },
+  'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁', multiply: true },
   'Clan Reroll':    { divisor: 700,    emoji: '⚔️' },
   'Mythical Chest': { divisor: 400,    emoji: '🏆' },
   'Power Shard':    { divisor: 1500,   emoji: '🔷' },
@@ -461,7 +461,7 @@ function smartCalc() {
     const rate  = SMART_RATES[name];
     const emoji = (SMART_RATES_DEFAULT[name]?.emoji) || '📦';
     if (!rate || rate.divisor === 0) return null;
-    const val = qty / rate.divisor;
+    const val = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
     grand += val;
     return `<div class="smart-row">
       <span class="smart-emoji">${emoji}</span>
