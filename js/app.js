@@ -26,6 +26,7 @@ function showTab(name) {
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
   _currentTab = name;
+  if (name === 'calc') setTimeout(() => renderCalcPage(), 10);
 }
 
 /* ── Badge ── */
@@ -157,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   buildMusicGrid();
-  buildCalcRows();
   initCursor();
   initSecurity();
   fetchLanyard();
@@ -167,83 +167,213 @@ document.addEventListener('DOMContentLoaded', () => {
   showTab('profile');
 });
 
-/* ── Calculator ── */
-const CALC_PRICES = {
-  "Aura Crate":     { price: 500,   per: 1000,    emoji: "📦" },
-  "Cosmetic Crate": { price: 250,   per: 1000,    emoji: "🎁" },
-  "Race Reroll":    { price: 9000,  per: 1000000, emoji: "🐉" },
-  "Trait Reroll":   { price: 9000,  per: 1000000, emoji: "💎" },
-  "Clan Reroll":    { price: 450,   per: 1000000, emoji: "⚔️" },
-  "Mythical Chest": { price: 200,   per: 1000000, emoji: "🏆" },
-};
+/* ══════════════════════════════════════
+   FINANCE TRACKER — PIN locked
+══════════════════════════════════════ */
+const FINANCE_PIN      = 'blahexm';
+const FINANCE_KEY      = 'blahexm_finance';
+const SESSION_KEY      = 'blahexm_auth';
 
-function buildCalcRows() {
-  const container = document.getElementById('calc-items');
-  if (!container) return;
-  container.innerHTML = '';
-  Object.entries(CALC_PRICES).forEach(([name, cfg]) => {
-    const row = document.createElement('div');
-    row.className = 'calc-row';
-    row.innerHTML = `
-      <span class="calc-row-emoji">${cfg.emoji}</span>
-      <span class="calc-row-name">${name}</span>
-      <input class="calc-row-input" type="number" min="0" placeholder="0"
-        data-name="${name}" oninput="recalcCalc()" />
-      <span class="calc-row-val" id="calc-val-${name.replace(/\s/g,'_')}">—</span>
-    `;
-    container.appendChild(row);
-  });
+let _financeUnlocked = false;
+
+/* ── Storage ── */
+function financeLoad() {
+  try { return JSON.parse(localStorage.getItem(FINANCE_KEY)) || {}; } catch { return {}; }
 }
-
-function recalcCalc() {
-  let grand = 0;
-  let hasAny = false;
-  document.querySelectorAll('.calc-row-input').forEach(inp => {
-    const name = inp.dataset.name;
-    const cfg  = CALC_PRICES[name];
-    const amt  = parseFloat(inp.value) || 0;
-    const val  = amt * (cfg.price / cfg.per);
-    grand += val;
-    const id = 'calc-val-' + name.replace(/\s/g,'_');
-    const el = document.getElementById(id);
-    if (el) el.textContent = amt > 0 ? fmtCalc(val) + '฿' : '—';
-    if (amt > 0) hasAny = true;
-  });
-  const box    = document.getElementById('calc-total-box');
-  const valEl  = document.getElementById('calc-total-val');
-  const copyBtn= document.getElementById('calc-copy-btn');
-  if (box)    box.style.display   = hasAny ? 'flex' : 'none';
-  if (valEl)  valEl.textContent   = fmtCalc(grand) + '฿';
-  if (copyBtn) copyBtn.style.display = hasAny ? 'flex' : 'none';
+function financeSave(data) {
+  localStorage.setItem(FINANCE_KEY, JSON.stringify(data));
 }
-
-function fmtCalc(n) {
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getLast7Keys() {
+  const keys = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+  return keys;
+}
+function fmtMoney(n) {
   return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function resetCalc() {
-  document.querySelectorAll('.calc-row-input').forEach(inp => inp.value = '');
-  document.querySelectorAll('.calc-row-val').forEach(el => el.textContent = '—');
-  const box     = document.getElementById('calc-total-box');
-  const copyBtn = document.getElementById('calc-copy-btn');
-  if (box)    box.style.display    = 'none';
-  if (copyBtn) copyBtn.style.display = 'none';
+/* ── Auth ── */
+function financeCheckSession() {
+  return sessionStorage.getItem(SESSION_KEY) === '1';
+}
+function financeSetSession() {
+  sessionStorage.setItem(SESSION_KEY, '1');
 }
 
-function copyCalcResult() {
-  const lines = [];
-  document.querySelectorAll('.calc-row-input').forEach(inp => {
-    const name = inp.dataset.name;
-    const cfg  = CALC_PRICES[name];
-    const amt  = parseFloat(inp.value) || 0;
-    if (amt > 0) {
-      const val = amt * (cfg.price / cfg.per);
-      lines.push(`${cfg.emoji} ${name}: ${amt.toLocaleString('th-TH')} ชิ้น = ${fmtCalc(val)}฿`);
-    }
-  });
-  const totalEl = document.getElementById('calc-total-val');
-  if (totalEl) lines.push(`\n💰 รวม: ${totalEl.textContent}`);
-  navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
-  const btn = document.getElementById('calc-copy-btn');
-  if (btn) { btn.classList.add('copied'); btn.childNodes[2].textContent = ' copied!'; setTimeout(() => { btn.classList.remove('copied'); btn.childNodes[2].textContent = ' copy'; }, 1500); }
+/* ── Main render ── */
+function renderCalcPage() {
+  _financeUnlocked = financeCheckSession();
+  const wrap = document.getElementById('calc-inner');
+  if (!wrap) return;
+  if (_financeUnlocked) {
+    renderFinanceDashboard(wrap);
+  } else {
+    renderFinanceLock(wrap);
+  }
+}
+
+/* ── Lock screen ── */
+function renderFinanceLock(wrap) {
+  wrap.innerHTML = `
+    <div class="fin-lock">
+      <div class="fin-lock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="fin-lock-title">finance</div>
+      <div class="fin-lock-sub">enter password to continue</div>
+      <input class="fin-pin-input" id="fin-pin-input" type="password"
+        placeholder="••••••••" autocomplete="off" spellcheck="false"
+        oninput="finPinInput(this)" onkeydown="if(event.key==='Enter')finPinSubmit()" />
+      <div class="fin-pin-err" id="fin-pin-err"></div>
+    </div>
+  `;
+  setTimeout(() => document.getElementById('fin-pin-input')?.focus(), 100);
+}
+
+function finPinInput(el) {
+  document.getElementById('fin-pin-err').textContent = '';
+  el.style.borderColor = '';
+}
+
+function finPinSubmit() {
+  const val = document.getElementById('fin-pin-input')?.value || '';
+  if (val === FINANCE_PIN) {
+    financeSetSession();
+    _financeUnlocked = true;
+    const wrap = document.getElementById('calc-inner');
+    wrap.style.animation = 'none';
+    setTimeout(() => renderFinanceDashboard(wrap), 80);
+  } else {
+    const inp = document.getElementById('fin-pin-input');
+    const err = document.getElementById('fin-pin-err');
+    if (inp) { inp.value = ''; inp.style.borderColor = 'rgba(244,63,94,.5)'; inp.classList.add('shake'); setTimeout(() => inp.classList.remove('shake'), 400); }
+    if (err) err.textContent = 'wrong password';
+  }
+}
+
+/* ── Dashboard ── */
+function renderFinanceDashboard(wrap) {
+  const data    = financeLoad();
+  const today   = todayKey();
+  const todayD  = data[today] || { total: 0, logs: [] };
+  const keys    = getLast7Keys();
+
+  // Week total
+  let weekTotal = 0;
+  keys.forEach(k => { weekTotal += (data[k]?.total || 0); });
+
+  // Bar chart
+  const vals   = keys.map(k => data[k]?.total || 0);
+  const maxVal = Math.max(...vals, 1);
+  const barHTML = keys.map((k, i) => {
+    const v   = vals[i];
+    const pct = Math.max(4, Math.round((v / maxVal) * 100));
+    const isT = k === today;
+    const lbl = k.slice(8); // DD
+    return `<div class="fin-bar-col">
+      <div class="fin-bar-amt">${v > 0 ? '+'+fmtMoney(v) : ''}</div>
+      <div class="fin-bar-wrap">
+        <div class="fin-bar-fill ${isT?'today':''}" style="height:${pct}%"></div>
+      </div>
+      <div class="fin-bar-lbl ${isT?'today':''}">${lbl}</div>
+    </div>`;
+  }).join('');
+
+  // Recent logs
+  const logs    = (todayD.logs || []).slice(-5).reverse();
+  const logHTML = logs.length === 0
+    ? `<div class="fin-empty-log">ยังไม่มีรายการวันนี้</div>`
+    : logs.map(l => `
+      <div class="fin-log-row">
+        <span class="fin-log-dot ${l.amount>=0?'pos':'neg'}"></span>
+        <span class="fin-log-note">${l.note || (l.amount>=0?'รายรับ':'รายจ่าย')}</span>
+        <span class="fin-log-time">${l.time}</span>
+        <span class="fin-log-amt ${l.amount>=0?'pos':'neg'}">${l.amount>=0?'+':''}${fmtMoney(l.amount)}฿</span>
+      </div>`).join('');
+
+  wrap.innerHTML = `
+    <!-- totals -->
+    <div class="fin-totals">
+      <div class="fin-total-card main">
+        <div class="fin-total-label">วันนี้</div>
+        <div class="fin-total-val">${todayD.total>=0?'+':''}${fmtMoney(todayD.total)}฿</div>
+      </div>
+      <div class="fin-total-card">
+        <div class="fin-total-label">7 วัน</div>
+        <div class="fin-total-val sm">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
+      </div>
+    </div>
+
+    <!-- bar chart -->
+    <div class="fin-section-label">รายวัน (7 วัน)</div>
+    <div class="fin-chart">${barHTML}</div>
+
+    <!-- input -->
+    <div class="fin-input-row">
+      <input class="fin-amount-input" id="fin-amount" type="number"
+        placeholder="+200 หรือ -50" step="any"
+        onkeydown="if(event.key==='Enter')finAddEntry()" />
+      <input class="fin-note-input" id="fin-note" type="text"
+        placeholder="หมายเหตุ (optional)"
+        onkeydown="if(event.key==='Enter')finAddEntry()" />
+      <button class="fin-add-btn" onclick="finAddEntry()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+
+    <!-- recent -->
+    <div class="fin-section-label" style="margin-top:14px">รายการล่าสุด</div>
+    <div class="fin-logs" id="fin-logs">${logHTML}</div>
+
+    <!-- actions -->
+    <div class="fin-foot-actions">
+      <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
+      <button class="fin-lock-btn" onclick="finLock()">🔒 ล็อค</button>
+    </div>
+  `;
+}
+
+/* ── Actions ── */
+function finAddEntry() {
+  const amtEl  = document.getElementById('fin-amount');
+  const noteEl = document.getElementById('fin-note');
+  const amt    = parseFloat(amtEl?.value);
+  if (isNaN(amt) || amt === 0) { amtEl?.classList.add('shake'); setTimeout(()=>amtEl?.classList.remove('shake'),400); return; }
+  const note = noteEl?.value?.trim() || '';
+  const time = new Date().toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit' });
+  const data  = financeLoad();
+  const today = todayKey();
+  if (!data[today]) data[today] = { total: 0, logs: [] };
+  data[today].total += amt;
+  data[today].logs.push({ amount: amt, note, time });
+  financeSave(data);
+  if (amtEl)  amtEl.value  = '';
+  if (noteEl) noteEl.value = '';
+  renderFinanceDashboard(document.getElementById('calc-inner'));
+}
+
+function finUndo() {
+  const data  = financeLoad();
+  const today = todayKey();
+  if (!data[today]?.logs?.length) return;
+  const last = data[today].logs.pop();
+  data[today].total -= last.amount;
+  financeSave(data);
+  renderFinanceDashboard(document.getElementById('calc-inner'));
+}
+
+function finLock() {
+  sessionStorage.removeItem(SESSION_KEY);
+  _financeUnlocked = false;
+  renderFinanceLock(document.getElementById('calc-inner'));
 }
