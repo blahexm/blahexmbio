@@ -569,3 +569,26 @@ body {
 .qcalc-total-val { font-family:'Geist Mono',monospace; font-size:1.15rem; font-weight:700; color:var(--a); }
 .qcalc-copy-btn { width:100%; padding:9px; border-radius:9px; border:1px solid rgba(255,255,255,.07); background:rgba(255,255,255,.03); color:var(--dim); font-family:'Geist Mono',monospace; font-size:.58rem; cursor:pointer; transition:all .18s; letter-spacing:.06em; }
 .qcalc-copy-btn:hover { border-color:var(--a); color:var(--a); }
+/* ── Item Icons (รูปภาพไอเทมแทน emoji) ── */
+.item-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 4px;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.5));
+}
+.smart-icon-wrap,
+.qcalc-icon-wrap,
+.rate-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+/* Smart calc row ขยายให้รูปใหญ่ขึ้นนิด */
+.smart-row .item-icon { width: 30px; height: 30px; }
+/* Rate settings row */
+.rate-row .item-icon  { width: 26px; height: 26px; }

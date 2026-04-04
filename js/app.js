@@ -491,15 +491,15 @@ function finLock() {
 ══════════════════════════════════════ */
 // เรทเริ่มต้น — divisor คือจำนวนของ ÷ divisor = ราคา฿
 const SMART_RATES_DEFAULT = {
-  'Aura Crate':     { divisor: 0.3,    emoji: '📦', multiply: true },
-  'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁', multiply: true },
-  'Clan Reroll':    { divisor: 700,    emoji: '⚔️' },
-  'Mythical Chest': { divisor: 400,    emoji: '🏆' },
-  'Power Shard':    { divisor: 1500,   emoji: '🔷' },
-  'Upper Seal':     { divisor: 1500,   emoji: '🔱' },
-  'Race Reroll':    { divisor: 20000,  emoji: '🐉' },
-  'Trait Reroll':   { divisor: 20000,  emoji: '💎' },
-  'Passive Shard':  { divisor: 0,      emoji: '🔮' },
+  'Aura Crate':     { divisor: 0.3,    emoji: '📦', img: 'img/items/aura-crate.png',     multiply: true },
+  'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁', img: 'img/items/cosmetic-crate.png', multiply: true },
+  'Clan Reroll':    { divisor: 700,    emoji: '⚔️', img: 'img/items/clan-reroll.png' },
+  'Mythical Chest': { divisor: 400,    emoji: '🏆', img: 'img/items/mythical-chest.png' },
+  'Power Shard':    { divisor: 1500,   emoji: '🔷', img: 'img/items/power-shard.png' },
+  'Upper Seal':     { divisor: 1500,   emoji: '🔱', img: 'img/items/upper-seal.png' },
+  'Race Reroll':    { divisor: 20000,  emoji: '🐉', img: 'img/items/race-reroll.png' },
+  'Trait Reroll':   { divisor: 20000,  emoji: '💎', img: 'img/items/trait-reroll.png' },
+  'Passive Shard':  { divisor: 0,      emoji: '🔮', img: 'img/items/passive-shard.png' },
 };
 const SMART_RATES_KEY = 'blahexm_rates';
 
@@ -582,13 +582,18 @@ function smartCalc() {
 
   let grand = 0;
   const rows = Object.entries(parsed).map(([name, qty]) => {
-    const rate  = SMART_RATES[name];
-    const emoji = (SMART_RATES_DEFAULT[name]?.emoji) || '📦';
+    const rate   = SMART_RATES[name];
+    const def    = SMART_RATES_DEFAULT[name];
+    const imgSrc = def?.img || '';
+    const emoji  = def?.emoji || '📦';
     if (!rate || rate.divisor === 0) return null;
     const val = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
     grand += val;
+    const iconHtml = imgSrc
+      ? `<img class="item-icon" src="${imgSrc}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="smart-emoji" style="display:none">${emoji}</span>`
+      : `<span class="smart-emoji">${emoji}</span>`;
     return `<div class="smart-row">
-      <span class="smart-emoji">${emoji}</span>
+      <span class="smart-icon-wrap">${iconHtml}</span>
       <span class="smart-name">${name}</span>
       <span class="smart-qty">${qty.toLocaleString('th-TH')}</span>
       <span class="smart-val">${val.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})}฿</span>
@@ -624,8 +629,11 @@ function renderRateSettings(panel) {
       const op  = def.multiply
         ? '<span class="rate-op multiply">× คูณ</span>'
         : '<span class="rate-op divide">÷ หาร</span>';
+      const iconHtml = def.img
+        ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="rate-emoji" style="display:none">${def.emoji}</span>`
+        : `<span class="rate-emoji">${def.emoji}</span>`;
       return `<div class="rate-row">
-        <span class="rate-emoji">${def.emoji}</span>
+        <span class="rate-icon-wrap">${iconHtml}</span>
         <span class="rate-name">${name}</span>
         ${op}
         <input class="rate-input" id="${id}" type="number" value="${cur}" step="any" min="0"/>
@@ -683,16 +691,22 @@ function renderQuickCalc(container) {
   const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
   const inputsHTML = items.map(([name, def]) => {
     const id = 'qc_' + name.replace(/\s/g,'_');
+    const iconHtml = def.img
+      ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-emoji" style="display:none">${def.emoji}</span>`
+      : `<span class="qcalc-emoji">${def.emoji}</span>`;
     return `<div class="qcalc-item">
-      <span class="qcalc-emoji">${def.emoji}</span>
+      <span class="qcalc-icon-wrap">${iconHtml}</span>
       <span class="qcalc-name">${name}</span>
       <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0" oninput="updateQuickCalc()" />
     </div>`;
   }).join('');
   const resultsHTML = items.map(([name, def]) => {
     const rid = 'qcr_' + name.replace(/\s/g,'_');
+    const iconHtml = def.img
+      ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-result-emoji" style="display:none">${def.emoji}</span>`
+      : `<span class="qcalc-result-emoji">${def.emoji}</span>`;
     return `<div class="qcalc-result-row" id="row_${name.replace(/\s/g,'_')}">
-      <span class="qcalc-result-emoji">${def.emoji}</span>
+      <span class="qcalc-icon-wrap">${iconHtml}</span>
       <span class="qcalc-result-name">${name}</span>
       <span class="qcalc-result-qty" id="${rid}_qty"></span>
       <span class="qcalc-result-val zero" id="${rid}_val">—</span>
