@@ -16,20 +16,20 @@
 <!-- Header -->
 <header>
   <div class="header-inner">
-    <button class="tab-btn active" id="tab-profile" onclick="showTab('profile')">
+    <button class="tab-btn active" id="tab-profile" onclick="scrollTo('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
       </svg>
       profile
     </button>
-    <button class="tab-btn" id="tab-calc" onclick="showTab('calc')">
+    <button class="tab-btn" id="tab-calc" onclick="scrollTo('calc')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
         <path d="M3 9h18M9 21V9" stroke-linecap="round"/>
       </svg>
       finance
     </button>
-    <button class="tab-btn" id="tab-smart" onclick="showTab('smart')">
+    <button class="tab-btn" id="tab-smart" onclick="scrollTo('smart')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/>
         <path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/>
@@ -41,8 +41,8 @@
 
 <main>
 
-  <!-- ══ PAGE: PROFILE ══ -->
-  <div class="page active" id="page-profile">
+  <!-- ══ SECTION: PROFILE ══ -->
+  <section class="section" id="section-profile">
     <div class="card">
       <div class="avatar-wrap">
         <img class="avatar" id="avatar"
@@ -89,18 +89,17 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- PAGE: CALC / FINANCE -->
-  <div class="page" id="page-calc">
+  <!-- ══ SECTION: FINANCE ══ -->
+  <section class="section" id="section-calc">
     <div class="card calc-card">
       <div id="calc-inner"></div>
     </div>
-  </div>
+  </section>
 
-
-  <!-- PAGE: SMART CALC -->
-  <div class="page" id="page-smart">
+  <!-- ══ SECTION: SMART CALC ══ -->
+  <section class="section" id="section-smart">
     <div class="card calc-card">
       <div class="calc-header" style="display:flex;align-items:center;justify-content:space-between;">
         <div>
@@ -119,7 +118,7 @@
       <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
-  </div>
+  </section>
 
 </main>
 
