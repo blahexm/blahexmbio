@@ -497,15 +497,19 @@ function renderRateSettings(panel) {
     .map(([name, def]) => {
       const cur = rates[name]?.divisor ?? def.divisor;
       const id  = 'rate_' + name.replace(/\s/g,'_');
+      const op  = def.multiply
+        ? '<span class="rate-op multiply">× คูณ</span>'
+        : '<span class="rate-op divide">÷ หาร</span>';
       return `<div class="rate-row">
         <span class="rate-emoji">${def.emoji}</span>
         <span class="rate-name">${name}</span>
+        ${op}
         <input class="rate-input" id="${id}" type="number" value="${cur}" step="any" min="0"/>
       </div>`;
     }).join('');
 
   panel.innerHTML = `
-    <div class="rate-title">แก้เรท (qty ÷ เรท = ฿)</div>
+    <div class="rate-title">แก้เรท</div>
     <div class="rate-rows">${rows}</div>
     <div class="rate-actions">
       <button class="rate-save-btn" onclick="saveRateSettings()">💾 บันทึก</button>

@@ -298,6 +298,9 @@ footer{width:100%;padding:14px;border-top:1px solid var(--border);display:flex;a
 .rate-title{font-family:'Space Mono',monospace;font-size:.5rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
 .rate-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .rate-row{display:flex;align-items:center;gap:8px}
+.rate-op{font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:5px;flex-shrink:0}
+.rate-op.multiply{background:rgba(52,211,153,.12);color:#34d399}
+.rate-op.divide{background:rgba(148,163,184,.1);color:var(--dim)}
 .rate-emoji{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}
 .rate-name{flex:1;font-size:.65rem;font-weight:700;color:var(--text)}
 .rate-input{width:80px;padding:5px 8px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:7px;color:var(--a);font-family:'Space Mono',monospace;font-size:.65rem;text-align:right;outline:none;transition:border-color .2s}
