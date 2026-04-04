@@ -288,3 +288,22 @@ footer{width:100%;padding:14px;border-top:1px solid var(--border);display:flex;a
 .smart-copy-btn{width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);color:var(--dim);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .2s;letter-spacing:.06em}
 .smart-copy-btn:hover{border-color:var(--a);color:var(--a)}
 .smart-empty{font-family:'Space Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.2);text-align:center;padding:20px 0}
+
+/* Rate Settings */
+.smart-btn-row{display:flex;gap:8px;margin-bottom:8px}
+.smart-settings-btn{flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--dim);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.smart-settings-btn:hover{border-color:var(--a);color:var(--a)}
+.smart-copy-btn{flex:1}
+.smart-settings-panel{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:4px;animation:fadeUp .2s ease}
+.rate-title{font-family:'Space Mono',monospace;font-size:.5rem;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.rate-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.rate-row{display:flex;align-items:center;gap:8px}
+.rate-emoji{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}
+.rate-name{flex:1;font-size:.65rem;font-weight:700;color:var(--text)}
+.rate-input{width:80px;padding:5px 8px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:7px;color:var(--a);font-family:'Space Mono',monospace;font-size:.65rem;text-align:right;outline:none;transition:border-color .2s}
+.rate-input:focus{border-color:var(--a)}
+.rate-actions{display:flex;gap:8px}
+.rate-save-btn,.rate-reset-btn{flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--dim);font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.rate-save-btn:hover{background:var(--ag);border-color:var(--a);color:var(--a)}
+.rate-reset-btn:hover{color:var(--text);border-color:rgba(255,255,255,.12)}
+.rate-msg{font-family:'Space Mono',monospace;font-size:.55rem;color:#22c55e;margin-top:8px;min-height:14px;text-align:center}

@@ -366,27 +366,37 @@ function finLock() {
 /* ══════════════════════════════════════
    SMART CALCULATOR
 ══════════════════════════════════════ */
-const SMART_RATES = {
-  'Aura Crate':     { per100: 333.33333 },
-  'Cosmetic Crate': { per100: 1000 },
-  'Clan Reroll':    { per100: 70000 },
-  'Mythical Chest': { per100: 40000 },
-  'Power Shard':    { per100: 150000 },
-  'Upper Seal':     { per100: 150000 },
-  'Race Reroll':    { per100: 2000000 },  // 1M = 50฿ → per100 = 2M
-  'Trait Reroll':   { per100: 2000000 },
-  'Passive Shard':  { per100: 0 },
+// เรทเริ่มต้น — divisor คือจำนวนของ ÷ divisor = ราคา฿
+const SMART_RATES_DEFAULT = {
+  'Aura Crate':     { divisor: 0.3,    emoji: '📦' },
+  'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁' },
+  'Clan Reroll':    { divisor: 700,    emoji: '⚔️' },
+  'Mythical Chest': { divisor: 400,    emoji: '🏆' },
+  'Power Shard':    { divisor: 1500,   emoji: '🔷' },
+  'Upper Seal':     { divisor: 1500,   emoji: '🔱' },
+  'Race Reroll':    { divisor: 20000,  emoji: '🐉' },
+  'Trait Reroll':   { divisor: 20000,  emoji: '💎' },
+  'Passive Shard':  { divisor: 0,      emoji: '🔮' },
 };
-const SMART_EMOJIS = {
-  'Aura Crate':'📦','Cosmetic Crate':'🎁','Clan Reroll':'⚔️',
-  'Mythical Chest':'🏆','Power Shard':'🔷','Upper Seal':'🔱',
-  'Race Reroll':'🐉','Trait Reroll':'💎','Passive Shard':'🔮',
-};
+const SMART_RATES_KEY = 'blahexm_rates';
+
+function loadRates() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SMART_RATES_KEY));
+    if (saved) return saved;
+  } catch {}
+  return JSON.parse(JSON.stringify(SMART_RATES_DEFAULT));
+}
+function saveRates(rates) {
+  localStorage.setItem(SMART_RATES_KEY, JSON.stringify(rates));
+}
+let SMART_RATES = loadRates();
+
 
 function parseSmartText(text) {
   const results = {};
   const lines   = text.split('\n').map(l => l.trim()).filter(Boolean);
-  const knownNames = Object.keys(SMART_RATES);
+  const knownNames = Object.keys(SMART_RATES_DEFAULT);
 
   // Strategy 1: NamexNUMBER on same line e.g. "Race Rerollx8227136"
   // Strategy 2: Name on one line, xNUMBER on next line
@@ -450,9 +460,9 @@ function smartCalc() {
   let grand = 0;
   const rows = Object.entries(parsed).map(([name, qty]) => {
     const rate  = SMART_RATES[name];
-    const emoji = SMART_EMOJIS[name] || '📦';
-    if (!rate || rate.per100 === 0) return null;
-    const val = (qty / rate.per100) * 100;
+    const emoji = (SMART_RATES_DEFAULT[name]?.emoji) || '📦';
+    if (!rate || rate.divisor === 0) return null;
+    const val = qty / rate.divisor;
     grand += val;
     return `<div class="smart-row">
       <span class="smart-emoji">${emoji}</span>
@@ -468,7 +478,11 @@ function smartCalc() {
       <span>รวมทั้งหมด</span>
       <span class="smart-total-val">${grand.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2})}฿</span>
     </div>
-    <button class="smart-copy-btn" onclick="smartCopy(${grand.toFixed(2)})">copy ยอดรวม</button>
+    <div class="smart-btn-row">
+      <button class="smart-copy-btn" onclick="smartCopy(${grand.toFixed(2)})">copy ยอดรวม</button>
+      <button class="smart-settings-btn" onclick="toggleRateSettings()">⚙️ แก้เรท</button>
+    </div>
+    <div class="smart-settings-panel" id="smart-settings" style="display:none"></div>
   `;
 }
 
@@ -476,4 +490,63 @@ function smartCopy(val) {
   navigator.clipboard.writeText(val.toFixed(2)).catch(()=>{});
   const btn = document.querySelector('.smart-copy-btn');
   if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
+}
+
+function toggleRateSettings() {
+  const panel = document.getElementById('smart-settings');
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    renderRateSettings(panel);
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function renderRateSettings(panel) {
+  const rates = loadRates();
+  const rows = Object.entries(SMART_RATES_DEFAULT)
+    .filter(([, v]) => v.divisor > 0)
+    .map(([name, def]) => {
+      const cur = rates[name]?.divisor ?? def.divisor;
+      const id  = 'rate_' + name.replace(/\s/g,'_');
+      return `<div class="rate-row">
+        <span class="rate-emoji">${def.emoji}</span>
+        <span class="rate-name">${name}</span>
+        <input class="rate-input" id="${id}" type="number" value="${cur}" step="any" min="0"/>
+      </div>`;
+    }).join('');
+
+  panel.innerHTML = `
+    <div class="rate-title">แก้เรท (qty ÷ เรท = ฿)</div>
+    <div class="rate-rows">${rows}</div>
+    <div class="rate-actions">
+      <button class="rate-save-btn" onclick="saveRateSettings()">💾 บันทึก</button>
+      <button class="rate-reset-btn" onclick="resetRateSettings()">↺ reset</button>
+    </div>
+    <div class="rate-msg" id="rate-msg"></div>
+  `;
+}
+
+function saveRateSettings() {
+  const rates = loadRates();
+  Object.entries(SMART_RATES_DEFAULT).filter(([,v])=>v.divisor>0).forEach(([name]) => {
+    const id  = 'rate_' + name.replace(/\s/g,'_');
+    const el  = document.getElementById(id);
+    const val = parseFloat(el?.value);
+    if (!isNaN(val) && val > 0) rates[name] = { ...(rates[name]||{}), divisor: val };
+  });
+  saveRates(rates);
+  SMART_RATES = rates;
+  const msg = document.getElementById('rate-msg');
+  if (msg) { msg.textContent = '✓ บันทึกแล้ว'; setTimeout(()=>{ msg.textContent=''; }, 1500); }
+  smartCalc();
+}
+
+function resetRateSettings() {
+  localStorage.removeItem(SMART_RATES_KEY);
+  SMART_RATES = loadRates();
+  const panel = document.getElementById('smart-settings');
+  if (panel) renderRateSettings(panel);
+  smartCalc();
 }
