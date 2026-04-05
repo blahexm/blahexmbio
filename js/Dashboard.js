@@ -7,7 +7,7 @@
 
 // ── config ──────────────────────────
 // ถ้า updated_at ภายใน X นาที = online
-const ONLINE_THRESHOLD_MIN = 10;
+const ONLINE_THRESHOLD_MIN = 3;
 
 // ── state ────────────────────────────
 let _dashData     = [];      // raw rows จาก Supabase
@@ -197,6 +197,7 @@ function renderDashboard() {
     const statusLabel = row._online ? 'online' : 'offline';
     const valStr      = row._value > 0 ? fmtBaht(row._value) : '—';
     const valCls      = row._value > 0 ? '' : 'zero';
+    const safeUser    = encodeURIComponent(row.username);
 
     // items mini-list (แสดงแค่ของที่มี > 0)
     const miniItems = (typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(row.items || {}))
@@ -213,6 +214,9 @@ function renderDashboard() {
 
     return `
       <tr>
+        <td style="width:32px;padding-left:12px">
+          <input type="checkbox" class="dash-row-check" data-user="${row.username}" onchange="dashUpdateDeleteBtn()" style="accent-color:var(--a);cursor:pointer;width:13px;height:13px">
+        </td>
         <td>
           <div class="dash-id-name">
             <span class="dash-id-status-dot ${statusCls}"></span>
@@ -223,6 +227,9 @@ function renderDashboard() {
         <td><span class="dash-id-val ${valCls}">${valStr}</span></td>
         <td style="max-width:200px;overflow:hidden">${miniItems}</td>
         <td><span class="dash-id-time">${timeSinceDash(row.updated_at)}</span></td>
+        <td>
+          <button onclick="dashDeleteOne('${row.username}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:6px;padding:3px 8px;font-size:.5rem;cursor:pointer;font-family:'Geist Mono',monospace;transition:all .15s" onmouseover="this.style.background='rgba(239,68,68,.2)'" onmouseout="this.style.background='rgba(239,68,68,.1)'">🗑️</button>
+        </td>
       </tr>`;
   }).join('');
 
@@ -241,6 +248,8 @@ function renderDashboard() {
         <button class="dash-filter-btn ${_dashFilter==='all'?'active':''}" onclick="dashSetFilter('all')">ทั้งหมด (${allRows.length})</button>
         <button class="dash-filter-btn online ${_dashFilter==='online'?'active':''}" onclick="dashSetFilter('online')">🟢 Online (${onlineCnt})</button>
         <button class="dash-filter-btn offline ${_dashFilter==='offline'?'active':''}" onclick="dashSetFilter('offline')">⚫ Offline (${offlineCnt})</button>
+        <button class="dash-filter-btn" id="dash-del-selected-btn" onclick="dashDeleteSelected()" style="display:none;border-color:rgba(239,68,68,.4);color:#ef4444">🗑️ ลบที่เลือก</button>
+        <button class="dash-filter-btn" onclick="dashDeleteAll()" style="border-color:rgba(239,68,68,.2);color:rgba(239,68,68,.6)">🗑️ ลบทั้งหมด</button>
         <input class="dash-id-search" placeholder="ค้นหา username..." value="${_dashSearch}"
                oninput="_dashSearch=this.value;renderDashboard()">
       </div>
@@ -249,15 +258,17 @@ function renderDashboard() {
         <table class="dash-id-table">
           <thead>
             <tr>
+              <th style="width:32px;padding-left:12px"><input type="checkbox" id="dash-check-all" onchange="dashToggleAll(this.checked)" style="accent-color:var(--a);cursor:pointer;width:13px;height:13px"></th>
               <th class="${thCls('name')}"    onclick="dashSort('name')">Username ${thArrow('name')}</th>
               <th>Status</th>
               <th class="${thCls('value')}"   onclick="dashSort('value')">มูลค่า ${thArrow('value')}</th>
               <th>ของในคลัง</th>
               <th class="${thCls('updated')}" onclick="dashSort('updated')">อัปเดต ${thArrow('updated')}</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
-            ${tableRowsHtml || `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--dim2);font-size:.6rem">ไม่พบ ID ที่ตรงกัน</td></tr>`}
+            ${tableRowsHtml || `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--dim2);font-size:.6rem">ไม่พบ ID ที่ตรงกัน</td></tr>`}
           </tbody>
         </table>
       </div>
@@ -311,4 +322,58 @@ function startDashboard() {
   fetchDashboard();
   if (_dashAutoTimer) clearInterval(_dashAutoTimer);
   _dashAutoTimer = setInterval(fetchDashboard, 30000); // refresh ทุก 30 วิ
+}
+
+// ── checkbox helpers ─────────────────
+function dashToggleAll(checked) {
+  document.querySelectorAll('.dash-row-check').forEach(c => c.checked = checked);
+  dashUpdateDeleteBtn();
+}
+
+function dashUpdateDeleteBtn() {
+  const cnt = document.querySelectorAll('.dash-row-check:checked').length;
+  const btn = document.getElementById('dash-del-selected-btn');
+  if (btn) {
+    btn.style.display = cnt > 0 ? '' : 'none';
+    btn.textContent = `🗑️ ลบที่เลือก (${cnt})`;
+  }
+  // sync select-all
+  const all = document.querySelectorAll('.dash-row-check').length;
+  const allBox = document.getElementById('dash-check-all');
+  if (allBox) allBox.checked = cnt === all && all > 0;
+}
+
+// ── delete functions ─────────────────
+async function dashDeleteOne(username) {
+  if (!confirm(`ลบ "${username}" ออกจากระบบ?`)) return;
+  try {
+    const { error } = await _invSb.from('inventory').delete().eq('username', username);
+    if (error) throw error;
+    _dashData = _dashData.filter(r => r.username !== username);
+    renderDashboard();
+  } catch(e) { alert('ลบไม่ได้: ' + e.message); }
+}
+
+async function dashDeleteSelected() {
+  const usernames = [...document.querySelectorAll('.dash-row-check:checked')].map(c => c.dataset.user);
+  if (!usernames.length) return;
+  if (!confirm(`ลบ ${usernames.length} ID ที่เลือก?`)) return;
+  try {
+    const { error } = await _invSb.from('inventory').delete().in('username', usernames);
+    if (error) throw error;
+    _dashData = _dashData.filter(r => !usernames.includes(r.username));
+    renderDashboard();
+  } catch(e) { alert('ลบไม่ได้: ' + e.message); }
+}
+
+async function dashDeleteAll() {
+  if (!_dashData.length) return;
+  if (!confirm(`ลบทุก ID (${_dashData.length} รายการ) ออกจากระบบ?`)) return;
+  try {
+    const allUsers = _dashData.map(r => r.username);
+    const { error } = await _invSb.from('inventory').delete().in('username', allUsers);
+    if (error) throw error;
+    _dashData = [];
+    renderDashboard();
+  } catch(e) { alert('ลบไม่ได้: ' + e.message); }
 }
