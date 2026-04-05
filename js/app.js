@@ -923,8 +923,9 @@ function renderInvIdList() {
     el.innerHTML = `<div class="inv-empty">ยังไม่มี ID — กด "+ เพิ่ม ID" ด้านบน</div>`;
     return;
   }
-  el.innerHTML = data.ids.map((id, i) => `
+  const rows = data.ids.map((id, i) => `
     <div class="inv-id-row">
+      <input type="checkbox" class="inv-id-check" data-idx="${i}" onchange="updateInvDeleteBtn()" />
       <span class="inv-id-dot ${id.online ? 'online' : 'offline'}"></span>
       <span class="inv-id-name">${id.name}</span>
       <span class="inv-id-status">${id.online ? 'ออนไลน์' : 'ออฟไลน์'}</span>
@@ -937,6 +938,53 @@ function renderInvIdList() {
       </div>
     </div>
   `).join('');
+  el.innerHTML = `
+    <div class="inv-list-toolbar">
+      <label class="inv-select-all-wrap">
+        <input type="checkbox" id="inv-check-all" onchange="toggleSelectAll(this.checked)" />
+        <span class="inv-select-all-label">เลือกทั้งหมด</span>
+      </label>
+      <div class="inv-toolbar-right">
+        <button class="inv-toolbar-btn refresh" onclick="renderInventory()">🔄 รีเฟรช</button>
+        <button class="inv-toolbar-btn danger" id="inv-delete-selected" onclick="deleteSelected()" style="display:none">🗑️ ลบที่เลือก</button>
+        <button class="inv-toolbar-btn danger" onclick="deleteAllIds()">🗑️ ลบทั้งหมด</button>
+      </div>
+    </div>
+    ${rows}
+  `;
+}
+
+function updateInvDeleteBtn() {
+  const checked = document.querySelectorAll('.inv-id-check:checked').length;
+  const btn = document.getElementById('inv-delete-selected');
+  if (btn) btn.style.display = checked > 0 ? '' : 'none';
+  // sync select-all checkbox
+  const all = document.querySelectorAll('.inv-id-check').length;
+  const allCheck = document.getElementById('inv-check-all');
+  if (allCheck) allCheck.checked = checked === all && all > 0;
+}
+
+function toggleSelectAll(checked) {
+  document.querySelectorAll('.inv-id-check').forEach(c => c.checked = checked);
+  updateInvDeleteBtn();
+}
+
+function deleteSelected() {
+  const idxs = [...document.querySelectorAll('.inv-id-check:checked')].map(c => parseInt(c.dataset.idx));
+  if (!idxs.length) return;
+  if (!confirm(`ลบ ${idxs.length} ID ที่เลือก?`)) return;
+  const data = invLoad();
+  data.ids = data.ids.filter((_, i) => !idxs.includes(i));
+  invSave(data);
+  renderInventory();
+}
+
+function deleteAllIds() {
+  const data = invLoad();
+  if (!data.ids.length) return;
+  if (!confirm('ลบ ID ทั้งหมด?')) return;
+  invSave({ ids: [] });
+  renderInventory();
 }
 
 /* ── Modal ── */

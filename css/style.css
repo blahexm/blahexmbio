@@ -708,3 +708,23 @@ body {
   background:transparent; color:var(--dim); font-size:.72rem; cursor:pointer; transition:all .15s;
 }
 .inv-modal-cancel:hover { border-color:var(--dim); color:var(--text); }
+
+/* ── Inventory Toolbar ── */
+.inv-list-toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; gap:10px; flex-wrap:wrap;
+}
+.inv-select-all-wrap { display:flex; align-items:center; gap:6px; cursor:pointer; }
+.inv-select-all-label { font-size:.65rem; color:var(--dim); }
+.inv-toolbar-right { display:flex; gap:6px; flex-wrap:wrap; }
+.inv-toolbar-btn {
+  padding:6px 12px; border-radius:7px; font-size:.62rem;
+  border:1px solid var(--border); background:rgba(255,255,255,.03);
+  color:var(--dim); cursor:pointer; transition:all .15s;
+}
+.inv-toolbar-btn.refresh:hover { border-color:var(--a); color:var(--a); }
+.inv-toolbar-btn.danger { border-color:rgba(239,68,68,.3); color:#ef4444; }
+.inv-toolbar-btn.danger:hover { background:rgba(239,68,68,.1); border-color:#ef4444; }
+
+/* checkbox */
+.inv-id-check { width:15px; height:15px; accent-color:var(--a); cursor:pointer; flex-shrink:0; }
