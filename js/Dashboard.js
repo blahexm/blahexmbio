@@ -6,8 +6,22 @@
 ══════════════════════════════════════ */
 
 // ── config ──────────────────────────
-// ถ้า updated_at ภายใน X นาที = online
 const ONLINE_THRESHOLD_MIN = 1;
+
+// ── filter state — ไอเทมที่ซ่อน (เก็บใน localStorage) ──
+const DASH_FILTER_KEY = 'blahexm_dash_hidden';
+function dashHiddenLoad() {
+  try { return JSON.parse(localStorage.getItem(DASH_FILTER_KEY)) || []; } catch { return []; }
+}
+function dashHiddenSave(arr) { localStorage.setItem(DASH_FILTER_KEY, JSON.stringify(arr)); }
+let _dashHidden = dashHiddenLoad(); // array ชื่อไอเทมที่ซ่อน
+
+function dashIsHidden(name) { return _dashHidden.includes(name); }
+function dashToggleHidden(name) {
+  if (dashIsHidden(name)) _dashHidden = _dashHidden.filter(n => n !== name);
+  else _dashHidden.push(name);
+  dashHiddenSave(_dashHidden);
+}
 
 // ── state ────────────────────────────
 let _dashData     = [];      // raw rows จาก Supabase
@@ -36,6 +50,7 @@ function calcRowValue(items) {
              || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
   let total = 0;
   Object.entries(items || {}).forEach(([name, val]) => {
+    if (dashIsHidden(name)) return; // ซ่อนอยู่ → ไม่นับในมูลค่า
     const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
     const rate = rates[name];
     if (!rate || rate.divisor === 0) return;
@@ -167,28 +182,44 @@ function renderDashboard() {
   const itemSummaryHtml = itemOrder
     .filter(name => (aggItems[name] || 0) > 0)
     .map(name => {
-      const qty  = aggItems[name] || 0;
-      const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-      const rate = rates[name];
-      const rarity = meta.rarity || 'legendary';
-      const rc = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b', glow: '' };
-      let valStr = '—';
-      let hasVal = false;
-      if (rate && rate.divisor > 0) {
+      const qty     = aggItems[name] || 0;
+      const meta    = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
+      const rate    = rates[name];
+      const rarity  = meta.rarity || 'legendary';
+      const rc      = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b', glow: '' };
+      const hidden  = dashIsHidden(name);
+      let valStr = '—', hasVal = false;
+      if (!hidden && rate && rate.divisor > 0) {
         const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
-        valStr = fmtBaht(v);
-        hasVal = true;
+        valStr = fmtBaht(v); hasVal = true;
       }
       return `
-        <div class="dash-sum-card" style="--rc:${rc.color}">
+        <div class="dash-sum-card" style="--rc:${hidden ? '#444' : rc.color};opacity:${hidden ? '.38' : '1'};transition:opacity .2s">
           <div class="dash-sum-top">
             <img class="dash-sum-img" src="${meta.img || ''}" alt="${name}" onerror="this.style.opacity='.2'">
             <span class="dash-sum-name">${name}</span>
           </div>
           <div class="dash-sum-qty">x${fmtQtyDash(qty)}</div>
-          <div class="dash-sum-val ${hasVal ? 'has-val' : ''}">${valStr}</div>
+          <div class="dash-sum-val ${hasVal ? 'has-val' : ''}">${hidden ? '<span style="font-size:.48rem;color:var(--dim2)">ซ่อนอยู่</span>' : valStr}</div>
         </div>`;
     }).join('');
+
+  // ── Filter panel items (สำหรับ dropdown) ──
+  const filterPanelHtml = itemOrder.map(name => {
+    const meta   = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
+    const hidden = dashIsHidden(name);
+    const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[meta.rarity || 'legendary'] : null) || { color: '#f59e0b' };
+    return `
+      <label class="dash-filter-item ${hidden ? 'hidden' : 'visible'}" onclick="dashToggleHidden('${name}');renderDashboard()" style="cursor:pointer">
+        <div style="display:flex;align-items:center;gap:8px;flex:1">
+          <img src="${meta.img || ''}" width="20" height="20" style="object-fit:contain" onerror="this.style.display='none'">
+          <span style="font-size:.6rem;color:var(--text)">${name}</span>
+        </div>
+        <div class="dash-filter-toggle ${hidden ? '' : 'on'}" style="--tc:${rc.color}">
+          <div class="dash-filter-toggle-knob"></div>
+        </div>
+      </label>`;
+  }).join('');
 
   // ── ID table ──
   const thArrow = (col) => {
@@ -241,8 +272,27 @@ function renderDashboard() {
   wrap.innerHTML = `
     ${statsHtml}
 
-    <div class="dash-card" style="margin-bottom:12px">
-      <div class="dash-section-label">ของรวมทุก ID</div>
+    <div class="dash-card" style="margin-bottom:12px;position:relative">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="dash-section-label" style="margin-bottom:0">ของรวมทุก ID</div>
+        <button class="dash-filter-btn" onclick="dashToggleFilterPanel()" id="dash-filter-panel-btn" style="display:flex;align-items:center;gap:5px;${_dashHidden.length>0?'border-color:var(--a);color:var(--a)':''}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z"/></svg>
+          Filters${_dashHidden.length > 0 ? ` (${_dashHidden.length})` : ''}
+        </button>
+      </div>
+
+      <!-- Filter dropdown panel -->
+      <div id="dash-filter-panel" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px">
+        <div style="font-family:'Geist Mono',monospace;font-size:.48rem;color:var(--dim2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">แสดง / ซ่อน ไอเทม</div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          ${filterPanelHtml}
+        </div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;gap:6px">
+          <button class="dash-filter-btn" onclick="_dashHidden=[];dashHiddenSave([]);renderDashboard()" style="font-size:.5rem">✓ แสดงทั้งหมด</button>
+          <button class="dash-filter-btn" onclick="dashToggleFilterPanel()" style="font-size:.5rem">ปิด</button>
+        </div>
+      </div>
+
       <div class="dash-item-summary">
         ${itemSummaryHtml || '<div class="dash-empty" style="padding:16px 0">ยังไม่มีของ</div>'}
       </div>
@@ -318,6 +368,12 @@ async function fetchDashboard() {
   } finally {
     if (btn) btn.classList.remove('spinning');
   }
+}
+
+// ── filter panel toggle ──────────────
+function dashToggleFilterPanel() {
+  const p = document.getElementById('dash-filter-panel');
+  if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
 }
 
 // ── start / stop auto-refresh ───────
