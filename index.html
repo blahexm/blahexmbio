@@ -39,6 +39,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Inventory</span>
     </button>
+    <button class="sb-item" id="tab-rates" onclick="scrollToSection('rates')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Rates</span>
+    </button>
   </nav>
   <div class="sb-spacer"></div>
   <div class="theme-section">
@@ -149,10 +153,8 @@
   <section class="dash-section" id="section-smart">
     <div class="section-header">
       <h2 class="section-title">Calculator</h2>
-      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
     </div>
     <div class="dash-card">
-      <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
       <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
@@ -161,7 +163,6 @@
   <section class="dash-section" id="section-quick">
     <div class="section-header">
       <h2 class="section-title">Quick Calc</h2>
-      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
     </div>
     <div class="dash-card">
       <div id="quick-calc-inner"></div>
@@ -178,6 +179,15 @@
     </div>
     <div id="dash-inner">
       <div class="dash-loading"><div class="dash-spinner"></div><span>กำลังโหลด...</span></div>
+    </div>
+  </section>
+
+  <section class="dash-section" id="section-rates">
+    <div class="section-header">
+      <h2 class="section-title">Rates</h2>
+    </div>
+    <div class="dash-card" id="rates-card">
+      <div id="rates-inner"></div>
     </div>
   </section>
 

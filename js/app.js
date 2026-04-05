@@ -50,7 +50,7 @@ function toggleSidebar() {
 }
 
 function initScrollSpy() {
-  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory'];
+  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory', 'rates'];
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (qcWrap) renderQuickCalc(qcWrap);
   // Inventory is now driven by Supabase via Dashboard.js + inventory.js
   if (typeof startDashboard === 'function') startDashboard();
+  renderRatesPage();
 });
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
@@ -621,71 +622,112 @@ function smartCopy(val) {
 }
 
 
-function renderRateSettings(panel) {
-  const rates = loadRates();
-  const rows = Object.entries(SMART_RATES_DEFAULT)
-    .filter(([, v]) => v.divisor > 0)
-    .map(([name, def]) => {
-      const cur = rates[name]?.divisor ?? def.divisor;
-      const id  = 'rate_' + name.replace(/\s/g,'_');
-      const op  = def.multiply
-        ? '<span class="rate-op multiply">× คูณ</span>'
-        : '<span class="rate-op divide">÷ หาร</span>';
-      const iconHtml = def.img
-        ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="rate-emoji" style="display:none">${def.emoji}</span>`
-        : `<span class="rate-emoji">${def.emoji}</span>`;
-      return `<div class="rate-row">
-        <span class="rate-icon-wrap">${iconHtml}</span>
-        <span class="rate-name">${name}</span>
-        ${op}
-        <input class="rate-input" id="${id}" type="number" value="${cur}" step="any" min="0"/>
-      </div>`;
-    }).join('');
+/* ══════════════════════════════════════
+   RATES PAGE — แก้เรทรวมทั้งเว็บ
+══════════════════════════════════════ */
+function renderRatesPage() {
+  const wrap = document.getElementById('rates-inner');
+  if (!wrap) return;
 
-  panel.innerHTML = `
-    <div class="rate-title">แก้เรท</div>
-    <div class="rate-rows">${rows}</div>
-    <div class="rate-actions">
-      <button class="rate-save-btn" onclick="saveRateSettings()">💾 บันทึก</button>
-      <button class="rate-reset-btn" onclick="resetRateSettings()">↺ reset</button>
+  const rates = loadRates();
+  const rows = Object.entries(SMART_RATES_DEFAULT).map(([name, def]) => {
+    const cur    = rates[name]?.divisor ?? def.divisor;
+    const id     = 'rp_' + name.replace(/\s/g,'_');
+    const isZero = def.divisor === 0;
+    const opHtml = def.multiply
+      ? `<span class="rp-op multiply">× คูณ</span>`
+      : `<span class="rp-op divide">÷ หาร</span>`;
+    const iconHtml = def.img
+      ? `<img src="${def.img}" width="28" height="28" style="object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))" onerror="this.style.display='none'">`
+      : `<span style="font-size:1.2rem">${def.emoji}</span>`;
+
+    const meta   = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
+    const rarity = meta.rarity || 'legendary';
+    const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b' };
+
+    return `
+      <div class="rp-row" style="--rc:${rc.color}">
+        <div class="rp-icon">${iconHtml}</div>
+        <div class="rp-name">${name}</div>
+        <div class="rp-formula">
+          ${opHtml}
+          <input class="rp-input" id="${id}" type="number"
+            value="${isZero ? '' : cur}" step="any" min="0"
+            placeholder="${isZero ? 'ไม่มีเรท' : cur}"
+            oninput="rpPreview('${name}','${id}')" />
+        </div>
+        <div class="rp-preview" id="${id}_preview">
+          ${isZero ? '<span style="color:var(--dim2);font-size:.52rem">—</span>' : rpCalcPreview(name, cur, def)}
+        </div>
+      </div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="rp-header">
+      <div class="rp-desc">เรทที่ตั้งไว้จะใช้กับ Text Calc, Quick Calc และ Inventory ทั้งหมด</div>
+      <div class="rp-actions">
+        <button class="rp-btn save" onclick="rpSave()">💾 บันทึกเรท</button>
+        <button class="rp-btn reset" onclick="rpReset()">↺ Reset ค่าเริ่มต้น</button>
+      </div>
     </div>
-    <div class="rate-msg" id="rate-msg"></div>
+    <div class="rp-rows">${rows}</div>
+    <div class="rp-msg" id="rp-msg"></div>
   `;
 }
 
-function saveRateSettings() {
+function rpCalcPreview(name, divisor, def) {
+  if (!divisor || divisor === 0) return '—';
+  const ex  = def.multiply ? `1 ชิ้น = ${divisor}฿` : `${divisor} ชิ้น = 1฿`;
+  return `<span class="rp-preview-txt">${ex}</span>`;
+}
+
+function rpPreview(name, id) {
+  const inp = document.getElementById(id);
+  const pre = document.getElementById(id + '_preview');
+  if (!inp || !pre) return;
+  const val = parseFloat(inp.value);
+  const def = SMART_RATES_DEFAULT[name];
+  if (!isNaN(val) && val > 0) {
+    pre.innerHTML = rpCalcPreview(name, val, def);
+  } else {
+    pre.innerHTML = '<span style="color:var(--dim2);font-size:.52rem">—</span>';
+  }
+}
+
+function rpSave() {
   const rates = loadRates();
-  Object.entries(SMART_RATES_DEFAULT).filter(([,v])=>v.divisor>0).forEach(([name]) => {
-    const id  = 'rate_' + name.replace(/\s/g,'_');
+  Object.entries(SMART_RATES_DEFAULT).forEach(([name]) => {
+    const id  = 'rp_' + name.replace(/\s/g,'_');
     const el  = document.getElementById(id);
     const val = parseFloat(el?.value);
-    if (!isNaN(val) && val > 0) rates[name] = { ...(rates[name]||{}), divisor: val };
+    if (!isNaN(val) && val >= 0) rates[name] = { ...(rates[name]||{}), divisor: val };
   });
   saveRates(rates);
   SMART_RATES = rates;
-  const msg = document.getElementById('rate-msg');
-  if (msg) { msg.textContent = '✓ บันทึกแล้ว'; setTimeout(()=>{ msg.textContent=''; }, 1500); }
+  // refresh calc ทุกอัน
   smartCalc();
+  const qcWrap = document.getElementById('quick-calc-inner');
+  if (qcWrap) renderQuickCalc(qcWrap);
+  renderDashboard && renderDashboard();
+  const msg = document.getElementById('rp-msg');
+  if (msg) { msg.textContent = '✅ บันทึกแล้ว — เรทใช้งานทั้งเว็บทันที'; setTimeout(()=>{ msg.textContent=''; }, 2500); }
 }
 
-function resetRateSettings() {
+function rpReset() {
+  if (!confirm('Reset เรทกลับค่าเริ่มต้น?')) return;
   localStorage.removeItem(SMART_RATES_KEY);
   SMART_RATES = loadRates();
-  const panel = document.getElementById('smart-settings-top');
-  if (panel) renderRateSettings(panel);
+  renderRatesPage();
   smartCalc();
+  const qcWrap = document.getElementById('quick-calc-inner');
+  if (qcWrap) renderQuickCalc(qcWrap);
 }
 
-function openRateSettings() {
-  const panel = document.getElementById('smart-settings-top');
-  if (!panel) return;
-  if (panel.style.display === 'none') {
-    renderRateSettings(panel);
-    panel.style.display = 'block';
-  } else {
-    panel.style.display = 'none';
-  }
-}
+// compat — old buttons still work
+function openRateSettings() { scrollToSection('rates'); }
+function saveRateSettings()  { rpSave(); }
+function resetRateSettings() { rpReset(); }
+
 /* ══════════════════════════════════════
    QUICK CALC — กรอกจำนวนชิ้น คิดราคาออโต้
 ══════════════════════════════════════ */

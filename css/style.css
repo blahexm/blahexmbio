@@ -728,3 +728,88 @@ body {
 
 /* checkbox */
 .inv-id-check { width:15px; height:15px; accent-color:var(--a); cursor:pointer; flex-shrink:0; }
+/* ══════════════════════════════════════
+   RATES PAGE
+══════════════════════════════════════ */
+.rp-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.rp-desc {
+  font-family: 'Geist Mono', monospace;
+  font-size: .58rem; color: var(--dim);
+}
+.rp-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.rp-btn {
+  font-family: 'Geist Mono', monospace;
+  font-size: .58rem; padding: 7px 14px;
+  border-radius: 8px; border: 1px solid var(--border);
+  cursor: pointer; transition: all .15s; letter-spacing: .03em;
+}
+.rp-btn.save  { background: var(--ag); color: var(--a); border-color: var(--a); }
+.rp-btn.save:hover  { background: var(--aglow); }
+.rp-btn.reset { background: transparent; color: var(--dim); }
+.rp-btn.reset:hover { border-color: var(--border2); color: var(--text); }
+
+.rp-rows { display: flex; flex-direction: column; gap: 8px; }
+
+.rp-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color .18s;
+}
+.rp-row:hover { border-color: var(--rc, var(--border2)); }
+
+.rp-icon { display: flex; align-items: center; justify-content: center; }
+.rp-name {
+  font-size: .68rem; font-weight: 600; color: var(--text);
+}
+.rp-formula { display: flex; align-items: center; gap: 8px; }
+.rp-op {
+  font-family: 'Geist Mono', monospace;
+  font-size: .52rem; padding: 3px 8px;
+  border-radius: 5px; font-weight: 600; white-space: nowrap;
+}
+.rp-op.multiply { background: rgba(52,211,153,.12); color: #34d399; }
+.rp-op.divide   { background: rgba(59,130,246,.12);  color: #3b82f6; }
+.rp-input {
+  font-family: 'Geist Mono', monospace;
+  font-size: .65rem; width: 110px;
+  padding: 6px 10px; border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text);
+  outline: none; transition: border-color .15s;
+  -moz-appearance: textfield;
+}
+.rp-input::-webkit-outer-spin-button,
+.rp-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.rp-input:focus { border-color: var(--rc, var(--a)); }
+
+.rp-preview {
+  min-width: 120px; text-align: right;
+}
+.rp-preview-txt {
+  font-family: 'Geist Mono', monospace;
+  font-size: .52rem; color: var(--rc, var(--dim));
+}
+
+.rp-msg {
+  margin-top: 14px;
+  font-family: 'Geist Mono', monospace;
+  font-size: .6rem; color: #34d399;
+  min-height: 1.4em;
+}
+
+@media (max-width: 600px) {
+  .rp-row { grid-template-columns: 36px 1fr; grid-template-rows: auto auto; }
+  .rp-formula { grid-column: 1 / -1; }
+  .rp-preview { grid-column: 1 / -1; text-align: left; }
+}
