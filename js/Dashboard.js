@@ -20,7 +20,12 @@ let _dashTimer    = null;
 // ── helpers ──────────────────────────
 function isOnline(dateStr) {
   if (!dateStr) return false;
-  const diffMin = (Date.now() - new Date(dateStr).getTime()) / 60000;
+  // Supabase ส่งมาเป็น "2026-04-05 09:52:41.621026" (space แทน T)
+  // new Date() บางตัว parse ไม่ได้ → normalize ก่อน
+  const normalized = dateStr.replace(' ', 'T').replace(/(\+00)$/, 'Z').replace(/(\.\d+)$/, '$1Z');
+  const t = new Date(normalized).getTime();
+  if (isNaN(t)) return false;
+  const diffMin = (Date.now() - t) / 60000;
   return diffMin <= ONLINE_THRESHOLD_MIN;
 }
 
