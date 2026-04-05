@@ -6,6 +6,7 @@
 <title>blahexm</title>
 <link rel="stylesheet" href="css/style.css"/>
 <link rel="stylesheet" href="css/inventory.css"/>
+<link rel="stylesheet" href="css/dashboard.css"/>
 </head>
 <body>
 <div id="cursor"></div>
@@ -37,6 +38,10 @@
     <button class="sb-item" id="tab-inventory" onclick="scrollToSection('inventory'); startInventoryRefresh()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
       <span>Inventory</span>
+    </button>
+    <button class="sb-item" id="tab-dashboard" onclick="scrollToSection('dashboard'); startDashboard()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
     </button>
   </nav>
   <div class="sb-spacer"></div>
@@ -183,6 +188,20 @@
     </div>
   </section>
 
+  <!-- DASHBOARD SECTION -->
+  <section class="dash-section" id="section-dashboard">
+    <div class="section-header">
+      <h2 class="section-title">Dashboard</h2>
+      <button class="inv-refresh-btn" id="dash-refresh-btn" onclick="fetchDashboardData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+        </svg>
+        รีเฟรช
+      </button>
+    </div>
+    <div id="dash-inner"></div>
+  </section>
+
   <footer class="dash-footer">
     <p id="footer-text">blahexm · 2026</p>
   </footer>
@@ -193,5 +212,6 @@
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
 <script src="js/inventory.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>
