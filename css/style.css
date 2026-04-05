@@ -592,3 +592,14 @@ body {
 .smart-row .item-icon { width: 30px; height: 30px; }
 /* Rate settings row */
 .rate-row .item-icon  { width: 26px; height: 26px; }
+
+/* ── Quick Calc Tabs ── */
+.qcalc-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.qcalc-tab {
+  flex:1; padding:9px 0; border-radius:9px;
+  border:1px solid var(--border); background:rgba(255,255,255,.03);
+  color:var(--dim); font-family:'Geist Mono',monospace; font-size:.65rem;
+  cursor:pointer; transition:all .18s; letter-spacing:.04em;
+}
+.qcalc-tab:hover { border-color:var(--a); color:var(--a); }
+.qcalc-tab.active { background:var(--ag); border-color:var(--a); color:var(--a); font-weight:700; }

@@ -687,9 +687,13 @@ function openRateSettings() {
 /* ══════════════════════════════════════
    QUICK CALC — กรอกจำนวนชิ้น คิดราคาออโต้
 ══════════════════════════════════════ */
+let _qcMode = 'qty'; // 'qty' = ชิ้น→บาท | 'price' = บาท→ชิ้น
+
 function renderQuickCalc(container) {
   const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
-  const inputsHTML = items.map(([name, def]) => {
+
+  // ── mode: qty → price ──
+  const inputsQtyHTML = items.map(([name, def]) => {
     const id = 'qc_' + name.replace(/\s/g,'_');
     const iconHtml = def.img
       ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-emoji" style="display:none">${def.emoji}</span>`
@@ -700,7 +704,8 @@ function renderQuickCalc(container) {
       <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0" oninput="updateQuickCalc()" />
     </div>`;
   }).join('');
-  const resultsHTML = items.map(([name, def]) => {
+
+  const resultsQtyHTML = items.map(([name, def]) => {
     const rid = 'qcr_' + name.replace(/\s/g,'_');
     const iconHtml = def.img
       ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-result-emoji" style="display:none">${def.emoji}</span>`
@@ -712,23 +717,82 @@ function renderQuickCalc(container) {
       <span class="qcalc-result-val zero" id="${rid}_val">—</span>
     </div>`;
   }).join('');
+
+  // ── mode: price → qty ──
+  const inputsPriceHTML = items.map(([name, def]) => {
+    const id = 'rqc_' + name.replace(/\s/g,'_');
+    const iconHtml = def.img
+      ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-emoji" style="display:none">${def.emoji}</span>`
+      : `<span class="qcalc-emoji">${def.emoji}</span>`;
+    return `<div class="qcalc-item">
+      <span class="qcalc-icon-wrap">${iconHtml}</span>
+      <span class="qcalc-name">${name}</span>
+      <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0฿" oninput="updateReverseCalc()" />
+    </div>`;
+  }).join('');
+
+  const resultsReverseHTML = items.map(([name, def]) => {
+    const rid = 'rqcr_' + name.replace(/\s/g,'_');
+    const iconHtml = def.img
+      ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-result-emoji" style="display:none">${def.emoji}</span>`
+      : `<span class="qcalc-result-emoji">${def.emoji}</span>`;
+    return `<div class="qcalc-result-row" id="rrow_${name.replace(/\s/g,'_')}">
+      <span class="qcalc-icon-wrap">${iconHtml}</span>
+      <span class="qcalc-result-name">${name}</span>
+      <span class="qcalc-result-qty" id="${rid}_extra"></span>
+      <span class="qcalc-result-val zero" id="${rid}_val">—</span>
+    </div>`;
+  }).join('');
+
   container.innerHTML = `
-    <div class="qcalc-wrap">
-      <div class="qcalc-left">
-        <div class="qcalc-label">ใส่จำนวนชิ้น</div>
-        <div class="qcalc-inputs">${inputsHTML}</div>
-      </div>
-      <div class="qcalc-right">
-        <div class="qcalc-label">ราคารวม</div>
-        <div class="qcalc-result-rows">${resultsHTML}</div>
-        <div class="qcalc-total">
-          <span class="qcalc-total-label">รวมทั้งหมด</span>
-          <span class="qcalc-total-val" id="qcalc-grand">0.00฿</span>
+    <div class="qcalc-tabs">
+      <button class="qcalc-tab active" id="tab-qty" onclick="switchQcMode('qty')">🧮 ชิ้น → บาท</button>
+      <button class="qcalc-tab" id="tab-price" onclick="switchQcMode('price')">💰 บาท → ชิ้น</button>
+    </div>
+
+    <div id="qcalc-qty-panel">
+      <div class="qcalc-wrap">
+        <div class="qcalc-left">
+          <div class="qcalc-label">ใส่จำนวนชิ้น</div>
+          <div class="qcalc-inputs">${inputsQtyHTML}</div>
         </div>
-        <button class="qcalc-copy-btn" id="qcalc-copy-btn" onclick="quickCalcCopy()">copy ยอดรวม</button>
+        <div class="qcalc-right">
+          <div class="qcalc-label">ราคารวม</div>
+          <div class="qcalc-result-rows">${resultsQtyHTML}</div>
+          <div class="qcalc-total">
+            <span class="qcalc-total-label">รวมทั้งหมด</span>
+            <span class="qcalc-total-val" id="qcalc-grand">0.00฿</span>
+          </div>
+          <button class="qcalc-copy-btn" id="qcalc-copy-btn" onclick="quickCalcCopy()">copy ยอดรวม</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="qcalc-price-panel" style="display:none">
+      <div class="qcalc-wrap">
+        <div class="qcalc-left">
+          <div class="qcalc-label">ใส่จำนวนเงิน (฿)</div>
+          <div class="qcalc-inputs">${inputsPriceHTML}</div>
+        </div>
+        <div class="qcalc-right">
+          <div class="qcalc-label">ได้ของกี่ชิ้น</div>
+          <div class="qcalc-result-rows">${resultsReverseHTML}</div>
+          <div class="qcalc-total">
+            <span class="qcalc-total-label">เงินรวม</span>
+            <span class="qcalc-total-val" id="rqcalc-grand">0.00฿</span>
+          </div>
+        </div>
       </div>
     </div>
   `;
+}
+
+function switchQcMode(mode) {
+  _qcMode = mode;
+  document.getElementById('qcalc-qty-panel').style.display   = mode === 'qty'   ? '' : 'none';
+  document.getElementById('qcalc-price-panel').style.display = mode === 'price' ? '' : 'none';
+  document.getElementById('tab-qty').classList.toggle('active',   mode === 'qty');
+  document.getElementById('tab-price').classList.toggle('active', mode === 'price');
 }
 
 let _qcGrand = 0;
@@ -765,6 +829,40 @@ function updateQuickCalc() {
   _qcGrand = grand;
   const grandEl = document.getElementById('qcalc-grand');
   if (grandEl) grandEl.textContent = grand.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '฿';
+}
+
+function updateReverseCalc() {
+  const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
+  let grandBaht = 0;
+  items.forEach(([name, def]) => {
+    const id    = 'rqc_'  + name.replace(/\s/g,'_');
+    const rid   = 'rqcr_' + name.replace(/\s/g,'_');
+    const rowId = 'rrow_' + name.replace(/\s/g,'_');
+    const inp   = document.getElementById(id);
+    const valEl = document.getElementById(rid + '_val');
+    const extEl = document.getElementById(rid + '_extra');
+    const row   = document.getElementById(rowId);
+    if (!inp || !valEl) return;
+    const baht = parseFloat(inp.value) || 0;
+    const rate = SMART_RATES[name] || def;
+    if (!rate || rate.divisor === 0) return;
+    // กลับสูตร: qty = baht / divisor (multiply) หรือ qty = baht * divisor (divide)
+    const qty = rate.multiply ? baht / rate.divisor : baht * rate.divisor;
+    grandBaht += baht;
+    if (baht > 0) {
+      valEl.textContent = Math.floor(qty).toLocaleString('th-TH') + ' ชิ้น';
+      valEl.className = 'qcalc-result-val';
+      if (extEl) extEl.textContent = baht.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '฿';
+      if (row) row.classList.add('has-val');
+    } else {
+      valEl.textContent = '—';
+      valEl.className = 'qcalc-result-val zero';
+      if (extEl) extEl.textContent = '';
+      if (row) row.classList.remove('has-val');
+    }
+  });
+  const grandEl = document.getElementById('rqcalc-grand');
+  if (grandEl) grandEl.textContent = grandBaht.toLocaleString('th-TH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '฿';
 }
 
 function quickCalcCopy() {
