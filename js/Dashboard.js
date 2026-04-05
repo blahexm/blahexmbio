@@ -7,7 +7,7 @@
 
 // ── config ──────────────────────────
 // ถ้า updated_at ภายใน X นาที = online
-const ONLINE_THRESHOLD_MIN = 3;
+const ONLINE_THRESHOLD_MIN = 1;
 
 // ── state ────────────────────────────
 let _dashData     = [];      // raw rows จาก Supabase
@@ -326,7 +326,7 @@ let _dashAutoTimer = null;
 function startDashboard() {
   fetchDashboard();
   if (_dashAutoTimer) clearInterval(_dashAutoTimer);
-  _dashAutoTimer = setInterval(fetchDashboard, 30000); // refresh ทุก 30 วิ
+  _dashAutoTimer = setInterval(fetchDashboard, 10000); // refresh ทุก 10 วิ
 }
 
 // ── checkbox helpers ─────────────────
