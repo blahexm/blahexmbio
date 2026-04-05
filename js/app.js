@@ -50,7 +50,7 @@ function toggleSidebar() {
 }
 
 function initScrollSpy() {
-  const sections = ['profile', 'calc', 'smart', 'quick'];
+  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory'];
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
