@@ -27,19 +27,47 @@ const RARITY_COLOR = {
   secret:    { color: '#ec4899', glow: 'rgba(236,72,153,.25)' },
 };
 
-/* ── แปลง rbxassetid://XXXXX → URL รูปจริงจาก Roblox CDN ── */
+/* ── แปลง rbxassetid://XXXXX → URL รูปจริง (ผ่าน proxy เพราะ Roblox บล็อก CORS) ── */
 function rbxImgUrl(rbxImg) {
   if (!rbxImg) return '';
-  // รองรับทั้ง "rbxassetid://12345" และ "rbxthumb://..." และ assetid ตรงๆ
+  // ดึง assetId จาก rbxassetid://XXXXXXXXX หรือ rbxthumb://...assetId=XXXXX
   const thumbMatch = rbxImg.match(/rbxthumb:\/\/.*?assetId=(\d+)/i);
   if (thumbMatch) {
-    return `https://www.roblox.com/asset-thumbnail/image?assetId=${thumbMatch[1]}&width=150&height=150&format=png`;
+    return `https://assetdelivery.roblox.com/v1/asset/?id=${thumbMatch[1]}`;
   }
   const assetMatch = rbxImg.match(/(\d{5,})/);
   if (assetMatch) {
-    return `https://www.roblox.com/asset-thumbnail/image?assetId=${assetMatch[1]}&width=150&height=150&format=png`;
+    // ใช้ thumbnails API ผ่าน allorigins proxy เพื่อหลีกเลี่ยง CORS block
+    return `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.roblox.com/asset-thumbnail/image?assetId=${assetMatch[1]}&width=150&height=150&format=png`)}`;
   }
   return '';
+}
+
+/* ── cache รูปที่โหลดแล้ว เพื่อไม่ต้อง fetch ซ้ำ ── */
+const _imgCache = {};
+async function rbxImgUrlAsync(rbxImg, imgEl) {
+  if (!rbxImg || !imgEl) return;
+  const assetMatch = rbxImg.match(/(\d{5,})/);
+  if (!assetMatch) return;
+  const assetId = assetMatch[1];
+
+  // ถ้า cache มีแล้วใส่เลย
+  if (_imgCache[assetId]) { imgEl.src = _imgCache[assetId]; return; }
+
+  try {
+    const res = await fetch(
+      `https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&returnPolicy=PlaceHolder&size=150x150&format=png&isCircular=false`
+    );
+    const json = await res.json();
+    const url  = json?.data?.[0]?.imageUrl;
+    if (url) {
+      _imgCache[assetId] = url;
+      imgEl.src = url;
+    }
+  } catch {
+    // fallback: ใช้ allorigins proxy
+    imgEl.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.roblox.com/asset-thumbnail/image?assetId=${assetId}&width=150&height=150&format=png`)}`;
+  }
 }
 
 /* ── ดึง qty และ image จาก val ที่ส่งมาจากสคริปใหม่ ── */
@@ -71,17 +99,24 @@ function timeSince(dateStr) {
 }
 
 /* ── render card แต่ละชิ้น ── */
+let _invCardId = 0;
 function renderItemCard(name, qty, rbxImg) {
   const meta   = ITEM_META[name] || {};
   const rarity = meta.rarity || 'legendary';
   const rc     = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
   const label  = meta.label || rarity;
-  const imgSrc = rbxImgUrl(rbxImg); // รูปจากเกมออโต้
+  const uid    = 'inv-img-' + (++_invCardId);
+
+  // โหลดรูปแบบ async หลัง render เพื่อหลีก CORS
+  setTimeout(() => {
+    const el = document.getElementById(uid);
+    if (el && rbxImg) rbxImgUrlAsync(rbxImg, el);
+  }, 0);
 
   return `
     <div class="inv-card" style="--rc:${rc.color};--rg:${rc.glow}">
       <div class="inv-card-img-wrap">
-        <img class="inv-card-img" src="${imgSrc}" alt="${name}"
+        <img class="inv-card-img" id="${uid}" src="" alt="${name}"
              onerror="this.style.opacity='.15'">
         <div class="inv-card-glow"></div>
       </div>
