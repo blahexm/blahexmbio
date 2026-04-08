@@ -31,7 +31,7 @@ function calcRowValue(items) {
              || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
   let total = 0;
   Object.entries(items || {}).forEach(([name, val]) => {
-    const qty = typeof val === 'object' ? (val.quantity ?? val.qty ?? 0) : (val ?? 0);
+    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
     const rate = rates[name];
     if (!rate || rate.divisor === 0) return;
     const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
@@ -43,7 +43,7 @@ function calcRowValue(items) {
 function calcTotalItems(items) {
   let t = 0;
   Object.values(items || {}).forEach(val => {
-    const qty = typeof val === 'object' ? (val.quantity ?? val.qty ?? 0) : (val ?? 0);
+    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
     t += qty;
   });
   return t;
@@ -77,7 +77,7 @@ function aggregateItems(rows) {
   const totals = {};
   rows.forEach(row => {
     Object.entries(row.items || {}).forEach(([name, val]) => {
-      const qty = typeof val === 'object' ? (val.quantity ?? val.qty ?? 0) : (val ?? 0);
+      const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
       totals[name] = (totals[name] || 0) + qty;
     });
   });
@@ -174,18 +174,10 @@ function renderDashboard() {
         valStr = fmtBaht(v);
         hasVal = true;
       }
-      const sumUid = 'dsum-'+name.replace(/\s/g,'-');
-      // ดึง rbxImg จาก data row แรกที่มีของชิ้นนี้
-      let _sumRbx = '';
-      for (const _r of _dashData) {
-        const _v = (_r.items||{})[name];
-        if (_v && typeof _v === 'object' && _v.image) { _sumRbx = _v.image; break; }
-      }
-      setTimeout(()=>{ const el=document.getElementById(sumUid); if(el&&_sumRbx) _dashLoadImg(_sumRbx,el); },0);
       return `
         <div class="dash-sum-card" style="--rc:${rc.color}">
           <div class="dash-sum-top">
-            <img class="dash-sum-img" id="${sumUid}" src="${meta.img || ''}" alt="${name}" onerror="this.style.opacity='.2'">
+            <img class="dash-sum-img" src="${meta.img || ''}" alt="${name}" onerror="this.style.opacity='.2'">
             <span class="dash-sum-name">${name}</span>
           </div>
           <div class="dash-sum-qty">x${fmtQtyDash(qty)}</div>
@@ -210,14 +202,11 @@ function renderDashboard() {
     const miniItems = (typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(row.items || {}))
       .map(name => {
         const val = (row.items || {})[name];
-        const qty = typeof val === 'object' ? (val.quantity ?? val.qty ?? 0) : (val ?? 0);
-        const rbxImg = typeof val === 'object' ? (val.image ?? '') : '';
-        const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
+        const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
         if (qty <= 0) return '';
-        const mUid = 'dmini-'+row.username.replace(/\W/g,'_')+'-'+name.replace(/\s/g,'-');
-        setTimeout(()=>{ const el=document.getElementById(mUid); if(el) _dashLoadImg(rbxImg||'',el); },0);
+        const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
         return `<span title="${name}: ${qty}" style="display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:.5rem;color:var(--dim)">
-          <img id="${mUid}" src="${meta.img||''}" width="12" height="12" style="object-fit:contain;opacity:.8" onerror="this.style.display='none'">
+          <img src="${meta.img||''}" width="12" height="12" style="object-fit:contain;opacity:.8" onerror="this.style.display='none'">
           ${fmtQtyDash(qty)}
         </span>`;
       }).join('');
@@ -317,13 +306,6 @@ async function fetchDashboard() {
 
 // ── start / stop auto-refresh ───────
 let _dashAutoTimer = null;
-
-/* ── ใช้ cache รูปร่วมกับ inventory.js ── */
-function _dashLoadImg(rbxImg, imgEl) {
-  if (!rbxImg || !imgEl) return;
-  // loadRbxImg และ _imgCache ถูก define ใน inventory.js ที่ load ก่อน
-  if (typeof loadRbxImg === 'function') loadRbxImg(rbxImg, imgEl);
-}
 
 function startDashboard() {
   fetchDashboard();

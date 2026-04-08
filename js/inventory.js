@@ -1,46 +1,25 @@
 /* ══════════════════════════════════════
    INVENTORY — Supabase Reader
-   ดึงข้อมูลจาก Supabase แล้วแสดงแบบ Grid
+   รูปดึงจากเกม Roblox ออโต้ผ่าน image field
 ══════════════════════════════════════ */
 
 const INV_SB_URL = 'https://nzzsqkvjzlaszxswehkd.supabase.co';
 const INV_SB_KEY = 'sb_publishable_B04udlxe_F-GxoGCoiFdBQ_LCLS9LVq';
 const _invSb     = window.supabase.createClient(INV_SB_URL, INV_SB_KEY);
 
-// mapping ชื่อไอเทม → รูป + rarity color
+/* ── rarity config (ไม่มีรูป local แล้ว — รูปมาจากเกมอัตโนมัติ) ── */
 const ITEM_META = {
-  'Race Reroll':    { img: 'img/items/race-reroll.png',    rarity: 'epic',      label: 'Epic'      },
-  'Trait Reroll':   { img: 'img/items/trait-reroll.png',   rarity: 'epic',      label: 'Epic'      },
-  'Clan Reroll':    { img: 'img/items/clan-reroll.png',    rarity: 'legendary', label: 'Legendary' },
-  'Mythical Chest': { img: 'img/items/mythical-chest.png', rarity: 'mythical',  label: 'Mythical'  },
-  'Aura Crate':     { img: 'img/items/aura-crate.png',     rarity: 'secret',    label: 'Secret'    },
-  'Cosmetic Crate': { img: 'img/items/cosmetic-crate.png', rarity: 'secret',    label: 'Secret'    },
-  'Passive Shard':  { img: 'img/items/passive-shard.png',  rarity: 'legendary', label: 'Legendary' },
-  'Power Shard':    { img: 'img/items/power-shard.png',    rarity: 'legendary', label: 'Legendary' },
-  'Upper Seal':     { img: 'img/items/upper-seal.png',     rarity: 'legendary', label: 'Legendary' },
+  'Race Reroll':    { rarity: 'epic',      label: 'Epic'      },
+  'Trait Reroll':   { rarity: 'epic',      label: 'Epic'      },
+  'Clan Reroll':    { rarity: 'legendary', label: 'Legendary' },
+  'Mythical Chest': { rarity: 'mythical',  label: 'Mythical'  },
+  'Aura Crate':     { rarity: 'secret',    label: 'Secret'    },
+  'Cosmetic Crate': { rarity: 'secret',    label: 'Secret'    },
+  'Passive Shard':  { rarity: 'legendary', label: 'Legendary' },
+  'Power Shard':    { rarity: 'legendary', label: 'Legendary' },
+  'Upper Seal':     { rarity: 'legendary', label: 'Legendary' },
 };
 
-/* ── image cache ── */
-const _imgCache = {};
-
-/* ── async โหลดรูปจาก Roblox thumbnails API (หลีก CORS) ── */
-async function loadRbxImg(rbxImg, imgEl) {
-  if (!rbxImg || !imgEl) return;
-  const m = rbxImg.match(/(\d{5,})/);
-  if (!m) return;
-  const assetId = m[1];
-  if (_imgCache[assetId]) { imgEl.src = _imgCache[assetId]; return; }
-  try {
-    const res  = await fetch(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&returnPolicy=PlaceHolder&size=150x150&format=png&isCircular=false`);
-    const json = await res.json();
-    const url  = json?.data?.[0]?.imageUrl;
-    if (url) { _imgCache[assetId] = url; imgEl.src = url; }
-  } catch {
-    imgEl.src = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.roblox.com/asset-thumbnail/image?assetId='+assetId+'&width=150&height=150&format=png')}`;
-  }
-}
-
-// rarity → accent color
 const RARITY_COLOR = {
   epic:      { color: '#a855f7', glow: 'rgba(168,85,247,.25)' },
   legendary: { color: '#f59e0b', glow: 'rgba(245,158,11,.25)' },
@@ -48,10 +27,28 @@ const RARITY_COLOR = {
   secret:    { color: '#ec4899', glow: 'rgba(236,72,153,.25)' },
 };
 
-/* ── parse item value (รองรับ {quantity,image} ที่ Lua ส่งมา และตัวเลขดิบ) ── */
+/* ── แปลง rbxassetid://XXXXX → URL รูปจริงจาก Roblox CDN ── */
+function rbxImgUrl(rbxImg) {
+  if (!rbxImg) return '';
+  // รองรับทั้ง "rbxassetid://12345" และ "rbxthumb://..." และ assetid ตรงๆ
+  const thumbMatch = rbxImg.match(/rbxthumb:\/\/.*?assetId=(\d+)/i);
+  if (thumbMatch) {
+    return `https://www.roblox.com/asset-thumbnail/image?assetId=${thumbMatch[1]}&width=150&height=150&format=png`;
+  }
+  const assetMatch = rbxImg.match(/(\d{5,})/);
+  if (assetMatch) {
+    return `https://www.roblox.com/asset-thumbnail/image?assetId=${assetMatch[1]}&width=150&height=150&format=png`;
+  }
+  return '';
+}
+
+/* ── ดึง qty และ image จาก val ที่ส่งมาจากสคริปใหม่ ── */
 function parseItem(val) {
   if (typeof val === 'object' && val !== null) {
-    return { qty: val.quantity ?? val.qty ?? 0, image: val.image ?? '' };
+    return {
+      qty:   val.quantity ?? val.qty ?? 0,
+      image: val.image    ?? '',
+    };
   }
   return { qty: val ?? 0, image: '' };
 }
@@ -73,29 +70,19 @@ function timeSince(dateStr) {
   return `${Math.floor(h / 24)} วันที่แล้ว`;
 }
 
-// ── render card แต่ละชิ้น (rbxImg = rbxassetid://... จาก Supabase) ──
-let _cardUid = 0;
+/* ── render card แต่ละชิ้น ── */
 function renderItemCard(name, qty, rbxImg) {
-  const meta    = ITEM_META[name] || {};
-  const rarity  = meta.rarity || 'legendary';
-  const rc      = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
-  const localImg = meta.img || '';
-  const label   = meta.label || rarity;
-  const uid     = 'invimg-' + (++_cardUid);
-
-  // ถ้ามีรูปจากเกม (rbxassetid) ให้โหลด async, fallback ใช้รูป local
-  if (rbxImg) {
-    setTimeout(() => {
-      const el = document.getElementById(uid);
-      if (el) loadRbxImg(rbxImg, el);
-    }, 0);
-  }
+  const meta   = ITEM_META[name] || {};
+  const rarity = meta.rarity || 'legendary';
+  const rc     = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
+  const label  = meta.label || rarity;
+  const imgSrc = rbxImgUrl(rbxImg); // รูปจากเกมออโต้
 
   return `
     <div class="inv-card" style="--rc:${rc.color};--rg:${rc.glow}">
       <div class="inv-card-img-wrap">
-        <img class="inv-card-img" id="${uid}" src="${rbxImg ? '' : localImg}" alt="${name}"
-             onerror="this.src='${localImg}';this.onerror=null">
+        <img class="inv-card-img" src="${imgSrc}" alt="${name}"
+             onerror="this.style.opacity='.15'">
         <div class="inv-card-glow"></div>
       </div>
       <div class="inv-card-info">
@@ -108,7 +95,7 @@ function renderItemCard(name, qty, rbxImg) {
     </div>`;
 }
 
-// ── render section ──
+/* ── render section ── */
 async function renderInventorySection() {
   const wrap = document.getElementById('inv-inner');
   if (!wrap) return;
@@ -130,9 +117,10 @@ async function renderInventorySection() {
       return;
     }
 
+    const itemOrder = Object.keys(ITEM_META);
+
     wrap.innerHTML = data.map(row => {
       const items = row.items || {};
-      const itemOrder = Object.keys(ITEM_META);
 
       const cardsHtml = itemOrder
         .filter(name => {
@@ -167,7 +155,7 @@ async function renderInventorySection() {
   }
 }
 
-// auto-refresh ทุก 60 วิ
+/* ── auto-refresh ทุก 60 วิ ── */
 let _invTimer = null;
 function startInventoryRefresh() {
   renderInventorySection();

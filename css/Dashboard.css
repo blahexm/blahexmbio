@@ -284,3 +284,36 @@
   font-weight: 700;
   color: #34d399;
 }
+/* ── Filter Item Toggle ── */
+.dash-filter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: background .15s, border-color .15s;
+  user-select: none;
+}
+.dash-filter-item:hover { background: rgba(255,255,255,.03); border-color: var(--border2); }
+.dash-filter-item.hidden { opacity: .5; }
+
+.dash-filter-toggle {
+  width: 32px; height: 18px;
+  border-radius: 9px;
+  background: var(--border2);
+  position: relative;
+  flex-shrink: 0;
+  transition: background .2s;
+}
+.dash-filter-toggle.on { background: var(--tc, var(--a)); }
+.dash-filter-toggle-knob {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
+.dash-filter-toggle.on .dash-filter-toggle-knob { transform: translateX(14px); }

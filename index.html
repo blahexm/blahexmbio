@@ -169,34 +169,10 @@
   <section class="dash-section" id="section-inventory">
     <div class="section-header">
       <h2 class="section-title">Inventory</h2>
-      <button class="btn-outline" onclick="openAddIdModal()">+ เพิ่ม ID</button>
+      <button class="btn-outline" onclick="startInventoryRefresh()">↺ รีเฟรช</button>
     </div>
-    <div class="dash-card" id="inv-summary-card">
-      <div class="card-label">สต็อกรวมทุก ID</div>
-      <div id="inv-summary"></div>
-    </div>
-    <div class="dash-card" style="margin-top:14px">
-      <div class="card-label">รายการ ID</div>
-      <div id="inv-id-list"></div>
-    </div>
-    <!-- Modal เพิ่ม/แก้ ID -->
-    <div class="inv-modal-overlay" id="inv-modal-overlay" style="display:none" onclick="closeIdModal()"></div>
-    <div class="inv-modal" id="inv-modal" style="display:none">
-      <div class="inv-modal-title" id="inv-modal-title">เพิ่ม ID</div>
-      <input class="inv-modal-input" id="inv-modal-idname" placeholder="ชื่อ ID เช่น jfthhpil5392" />
-      <div class="inv-modal-status-row">
-        <span class="inv-modal-label">สถานะ</span>
-        <label class="inv-toggle">
-          <input type="checkbox" id="inv-modal-online" checked />
-          <span class="inv-toggle-slider"></span>
-        </label>
-        <span id="inv-modal-status-txt">ออนไลน์</span>
-      </div>
-      <div class="inv-modal-items" id="inv-modal-items"></div>
-      <div class="inv-modal-actions">
-        <button class="inv-modal-save" onclick="saveIdModal()">💾 บันทึก</button>
-        <button class="inv-modal-cancel" onclick="closeIdModal()">ยกเลิก</button>
-      </div>
+    <div class="dash-card">
+      <div id="inv-inner"></div>
     </div>
   </section>
 
@@ -209,6 +185,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
+<script src="js/inventory.js"></script>
 </body>
 </html>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
