@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const qcWrap = document.getElementById('quick-calc-inner');
   if (qcWrap) renderQuickCalc(qcWrap);
-  renderInventory();
+  startSbInventory();
 });
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
@@ -1072,4 +1072,226 @@ function deleteId(i) {
   data.ids.splice(i, 1);
   invSave(data);
   renderInventory();
+}
+
+/* ══════════════════════════════════════
+   SUPABASE INVENTORY — ดึงข้อมูลจริงจาก Roblox
+   (รวมไว้ใน app.js เพราะ index.html load แค่ไฟล์นี้)
+══════════════════════════════════════ */
+const INV_SB_URL = 'https://nzzsqkvjzlaszxswehkd.supabase.co';
+const INV_SB_KEY = 'sb_publishable_B04udlxe_F-GxoGCoiFdBQ_LCLS9LVq';
+const _invSb     = window.supabase.createClient(INV_SB_URL, INV_SB_KEY);
+
+// ── rarity config ──
+const RARITY_COLOR = {
+  epic:      { color: '#a855f7', glow: 'rgba(168,85,247,.25)' },
+  legendary: { color: '#f59e0b', glow: 'rgba(245,158,11,.25)' },
+  mythical:  { color: '#ef4444', glow: 'rgba(239,68,68,.25)'  },
+  secret:    { color: '#ec4899', glow: 'rgba(236,72,153,.25)' },
+};
+const ITEM_RARITY = {
+  'Race Reroll':    { rarity: 'epic',      label: 'Epic'      },
+  'Trait Reroll':   { rarity: 'epic',      label: 'Epic'      },
+  'Clan Reroll':    { rarity: 'legendary', label: 'Legendary' },
+  'Mythical Chest': { rarity: 'mythical',  label: 'Mythical'  },
+  'Aura Crate':     { rarity: 'secret',    label: 'Secret'    },
+  'Cosmetic Crate': { rarity: 'secret',    label: 'Secret'    },
+  'Passive Shard':  { rarity: 'legendary', label: 'Legendary' },
+  'Power Shard':    { rarity: 'legendary', label: 'Legendary' },
+  'Upper Seal':     { rarity: 'legendary', label: 'Legendary' },
+};
+
+// ── parse item value (รองรับ {quantity, image} และตัวเลขเดิม) ──
+function sbParseItem(val) {
+  if (typeof val === 'object' && val !== null) {
+    return {
+      qty:   val.quantity ?? val.qty ?? 0,
+      image: val.image ?? '',
+    };
+  }
+  return { qty: val ?? 0, image: '' };
+}
+
+// ── image cache ──
+const _imgCache = {};
+
+// ── async load รูปจาก Roblox thumbnails API (หลีก CORS) ──
+async function loadRbxImg(rbxImg, imgEl) {
+  if (!rbxImg || !imgEl) return;
+  const m = rbxImg.match(/(\d{5,})/);
+  if (!m) return;
+  const id = m[1];
+  if (_imgCache[id]) { imgEl.src = _imgCache[id]; return; }
+  try {
+    const res  = await fetch(`https://thumbnails.roblox.com/v1/assets?assetIds=${id}&returnPolicy=PlaceHolder&size=150x150&format=png&isCircular=false`);
+    const json = await res.json();
+    const url  = json?.data?.[0]?.imageUrl;
+    if (url) { _imgCache[id] = url; imgEl.src = url; }
+  } catch {
+    imgEl.src = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.roblox.com/asset-thumbnail/image?assetId='+id+'&width=150&height=150&format=png')}`;
+  }
+}
+
+// ── format helpers ──
+function sbFmtQty(n) {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(1).replace(/\.0$/,'')+'M';
+  if (n >= 1_000)     return (n/1_000).toFixed(1).replace(/\.0$/,'')+'K';
+  return n.toLocaleString('th-TH');
+}
+function sbTimeSince(dateStr) {
+  if (!dateStr) return '—';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1)  return 'เมื่อกี้';
+  if (m < 60) return m+' นาทีที่แล้ว';
+  const h = Math.floor(m/60);
+  if (h < 24) return h+' ชั่วโมงที่แล้ว';
+  return Math.floor(h/24)+' วันที่แล้ว';
+}
+function sbFmtBaht(n) {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(2)+'M฿';
+  if (n >= 1_000)     return (n/1_000).toFixed(1)+'K฿';
+  return n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})+'฿';
+}
+
+// ── render Supabase inventory card ──
+let _sbCardIdx = 0;
+function renderSbCard(name, qty, rbxImg) {
+  const meta   = ITEM_RARITY[name] || {};
+  const rarity = meta.rarity || 'legendary';
+  const rc     = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
+  const label  = meta.label || rarity;
+  const uid    = 'sbimg-'+(++_sbCardIdx);
+  setTimeout(()=>{ const el=document.getElementById(uid); if(el&&rbxImg) loadRbxImg(rbxImg,el); },0);
+  return `
+    <div class="inv-card" style="--rc:${rc.color};--rg:${rc.glow}">
+      <div class="inv-card-img-wrap">
+        <img class="inv-card-img" id="${uid}" src="" alt="${name}" onerror="this.style.opacity='.15'">
+        <div class="inv-card-glow"></div>
+      </div>
+      <div class="inv-card-info">
+        <div class="inv-card-name">${name}</div>
+        <div class="inv-card-bottom">
+          <span class="inv-card-badge inv-rarity-${rarity}">${label}</span>
+          <span class="inv-card-qty">x${sbFmtQty(qty)}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── render summary bar (รวมทุก ID) ──
+function renderSbSummary(rows) {
+  const el = document.getElementById('inv-summary');
+  if (!el) return;
+  const totals = {};
+  const images = {};
+  const itemOrder = Object.keys(ITEM_RARITY);
+
+  rows.forEach(row => {
+    Object.entries(row.items||{}).forEach(([name, val]) => {
+      const { qty, image } = sbParseItem(val);
+      totals[name] = (totals[name]||0) + qty;
+      if (image && !images[name]) images[name] = image;
+    });
+  });
+
+  const rates = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
+             || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
+
+  let grandTotal = 0;
+  const cards = itemOrder.map(name => {
+    const qty = totals[name]||0;
+    if (qty === 0) return '';
+    const meta   = ITEM_RARITY[name]||{};
+    const rarity = meta.rarity||'legendary';
+    const rc     = RARITY_COLOR[rarity]||RARITY_COLOR.legendary;
+    const uid    = 'sbsum-'+name.replace(/\s/g,'-');
+    const rbxImg = images[name]||'';
+    const rate   = rates[name];
+    let valStr = '';
+    if (rate && rate.divisor > 0) {
+      const v = rate.multiply ? qty*rate.divisor : qty/rate.divisor;
+      grandTotal += v;
+      valStr = sbFmtBaht(v);
+    }
+    setTimeout(()=>{ const el=document.getElementById(uid); if(el&&rbxImg) loadRbxImg(rbxImg,el); },0);
+    return `<div class="inv-sum-item" style="--rc:${rc.color}">
+      <img class="inv-sum-sbimg" id="${uid}" src="" alt="${name}" onerror="this.style.opacity='.15'">
+      <span class="inv-sum-name">${name}</span>
+      <span class="inv-sum-qty" style="color:${rc.color}">x${sbFmtQty(qty)}</span>
+      ${valStr ? `<span class="inv-sum-val">${valStr}</span>` : ''}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  el.innerHTML = `
+    <div class="inv-sum-grid">${cards||'<div class="inv-empty" style="padding:16px 0">ยังไม่มีของ</div>'}</div>
+    ${grandTotal > 0 ? `<div class="inv-grand-row"><span>มูลค่ารวมทั้งหมด</span><span class="inv-grand-val">${sbFmtBaht(grandTotal)}</span></div>` : ''}
+  `;
+}
+
+// ── render ID list (Supabase) ──
+function renderSbIdList(rows) {
+  const el = document.getElementById('inv-id-list');
+  if (!el) return;
+  if (!rows.length) {
+    el.innerHTML = '<div class="inv-empty">ยังไม่มีข้อมูล — รัน script ใน Roblox ก่อนนะครับ</div>';
+    return;
+  }
+  const itemOrder = Object.keys(ITEM_RARITY);
+  const rates = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
+             || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
+
+  el.innerHTML = rows.map(row => {
+    const items  = row.items||{};
+    const isOn   = (Date.now()-new Date(row.updated_at).getTime())/60000 <= 10;
+    let rowVal = 0;
+    const cardsHtml = itemOrder.map(name => {
+      const { qty, image } = sbParseItem(items[name]||0);
+      if (qty <= 0) return '';
+      const rate = rates[name];
+      if (rate && rate.divisor > 0) rowVal += rate.multiply ? qty*rate.divisor : qty/rate.divisor;
+      return renderSbCard(name, qty, image);
+    }).join('');
+
+    return `
+      <div class="inv-player-block">
+        <div class="inv-player-header">
+          <div class="inv-player-name">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            ${row.username}
+            <span class="inv-id-dot ${isOn?'online':'offline'}" style="width:7px;height:7px;border-radius:50%;display:inline-block;background:${isOn?'#34d399':'var(--dim2)'};${isOn?'box-shadow:0 0 5px #34d39966':''}"></span>
+            ${rowVal > 0 ? `<span style="font-family:'Geist Mono',monospace;font-size:.6rem;color:#34d399;margin-left:4px">${sbFmtBaht(rowVal)}</span>` : ''}
+          </div>
+          <div class="inv-player-time">อัปเดต ${sbTimeSince(row.updated_at)}</div>
+        </div>
+        <div class="inv-grid">
+          ${cardsHtml||'<div class="inv-empty-row">ไม่มีของที่ track</div>'}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── fetch + render ──
+let _sbRows = [];
+async function fetchAndRenderInventory() {
+  const el = document.getElementById('inv-id-list');
+  const sumEl = document.getElementById('inv-summary');
+  if (el && !_sbRows.length) el.innerHTML = '<div class="inv-loading"><div class="inv-spinner"></div><span>กำลังโหลด...</span></div>';
+  try {
+    const { data, error } = await _invSb.from('inventory').select('username,items,updated_at').order('updated_at',{ascending:false});
+    if (error) throw error;
+    _sbRows = data||[];
+    renderSbSummary(_sbRows);
+    renderSbIdList(_sbRows);
+  } catch(e) {
+    if (el) el.innerHTML = `<div class="inv-empty">เกิดข้อผิดพลาด: ${e.message}</div>`;
+  }
+}
+
+// ── start auto-refresh ──
+let _sbTimer = null;
+function startSbInventory() {
+  fetchAndRenderInventory();
+  if (_sbTimer) clearInterval(_sbTimer);
+  _sbTimer = setInterval(fetchAndRenderInventory, 30000);
 }
