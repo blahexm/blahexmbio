@@ -20,6 +20,26 @@ const ITEM_META = {
   'Upper Seal':     { img: 'img/items/upper-seal.png',     rarity: 'legendary', label: 'Legendary' },
 };
 
+/* ── image cache ── */
+const _imgCache = {};
+
+/* ── async โหลดรูปจาก Roblox thumbnails API (หลีก CORS) ── */
+async function loadRbxImg(rbxImg, imgEl) {
+  if (!rbxImg || !imgEl) return;
+  const m = rbxImg.match(/(\d{5,})/);
+  if (!m) return;
+  const assetId = m[1];
+  if (_imgCache[assetId]) { imgEl.src = _imgCache[assetId]; return; }
+  try {
+    const res  = await fetch(`https://thumbnails.roblox.com/v1/assets?assetIds=${assetId}&returnPolicy=PlaceHolder&size=150x150&format=png&isCircular=false`);
+    const json = await res.json();
+    const url  = json?.data?.[0]?.imageUrl;
+    if (url) { _imgCache[assetId] = url; imgEl.src = url; }
+  } catch {
+    imgEl.src = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.roblox.com/asset-thumbnail/image?assetId='+assetId+'&width=150&height=150&format=png')}`;
+  }
+}
+
 // rarity → accent color
 const RARITY_COLOR = {
   epic:      { color: '#a855f7', glow: 'rgba(168,85,247,.25)' },
@@ -27,6 +47,14 @@ const RARITY_COLOR = {
   mythical:  { color: '#ef4444', glow: 'rgba(239,68,68,.25)'  },
   secret:    { color: '#ec4899', glow: 'rgba(236,72,153,.25)' },
 };
+
+/* ── parse item value (รองรับ {quantity,image} ที่ Lua ส่งมา และตัวเลขดิบ) ── */
+function parseItem(val) {
+  if (typeof val === 'object' && val !== null) {
+    return { qty: val.quantity ?? val.qty ?? 0, image: val.image ?? '' };
+  }
+  return { qty: val ?? 0, image: '' };
+}
 
 function fmtQty(n) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -45,19 +73,29 @@ function timeSince(dateStr) {
   return `${Math.floor(h / 24)} วันที่แล้ว`;
 }
 
-// ── render card แต่ละชิ้น ──
-function renderItemCard(name, qty) {
+// ── render card แต่ละชิ้น (rbxImg = rbxassetid://... จาก Supabase) ──
+let _cardUid = 0;
+function renderItemCard(name, qty, rbxImg) {
   const meta    = ITEM_META[name] || {};
   const rarity  = meta.rarity || 'legendary';
   const rc      = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
-  const imgSrc  = meta.img || '';
+  const localImg = meta.img || '';
   const label   = meta.label || rarity;
+  const uid     = 'invimg-' + (++_cardUid);
+
+  // ถ้ามีรูปจากเกม (rbxassetid) ให้โหลด async, fallback ใช้รูป local
+  if (rbxImg) {
+    setTimeout(() => {
+      const el = document.getElementById(uid);
+      if (el) loadRbxImg(rbxImg, el);
+    }, 0);
+  }
 
   return `
     <div class="inv-card" style="--rc:${rc.color};--rg:${rc.glow}">
       <div class="inv-card-img-wrap">
-        <img class="inv-card-img" src="${imgSrc}" alt="${name}"
-             onerror="this.style.opacity='.2'">
+        <img class="inv-card-img" id="${uid}" src="${rbxImg ? '' : localImg}" alt="${name}"
+             onerror="this.src='${localImg}';this.onerror=null">
         <div class="inv-card-glow"></div>
       </div>
       <div class="inv-card-info">
@@ -97,11 +135,13 @@ async function renderInventorySection() {
       const itemOrder = Object.keys(ITEM_META);
 
       const cardsHtml = itemOrder
-        .filter(name => (items[name]?.qty ?? items[name] ?? 0) > 0)
+        .filter(name => {
+          const { qty } = parseItem(items[name]);
+          return qty > 0;
+        })
         .map(name => {
-          const val = items[name];
-          const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-          return renderItemCard(name, qty);
+          const { qty, image } = parseItem(items[name]);
+          return renderItemCard(name, qty, image);
         })
         .join('');
 
