@@ -50,7 +50,7 @@ function toggleSidebar() {
 }
 
 function initScrollSpy() {
-  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory', 'rates'];
+  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory'];
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -284,9 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const qcWrap = document.getElementById('quick-calc-inner');
   if (qcWrap) renderQuickCalc(qcWrap);
-  // Inventory is now driven by Supabase via Dashboard.js + inventory.js
-  if (typeof startDashboard === 'function') startDashboard();
-  renderRatesPage();
+  renderInventory();
+  // Inventory (Supabase) — โหลดหลังสุด
+  if (typeof startInventoryRefresh === 'function') startInventoryRefresh();
 });
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
@@ -622,112 +622,71 @@ function smartCopy(val) {
 }
 
 
-/* ══════════════════════════════════════
-   RATES PAGE — แก้เรทรวมทั้งเว็บ
-══════════════════════════════════════ */
-function renderRatesPage() {
-  const wrap = document.getElementById('rates-inner');
-  if (!wrap) return;
-
+function renderRateSettings(panel) {
   const rates = loadRates();
-  const rows = Object.entries(SMART_RATES_DEFAULT).map(([name, def]) => {
-    const cur    = rates[name]?.divisor ?? def.divisor;
-    const id     = 'rp_' + name.replace(/\s/g,'_');
-    const isZero = def.divisor === 0;
-    const opHtml = def.multiply
-      ? `<span class="rp-op multiply">× คูณ</span>`
-      : `<span class="rp-op divide">÷ หาร</span>`;
-    const iconHtml = def.img
-      ? `<img src="${def.img}" width="28" height="28" style="object-fit:contain;filter:drop-shadow(0 1px 4px rgba(0,0,0,.5))" onerror="this.style.display='none'">`
-      : `<span style="font-size:1.2rem">${def.emoji}</span>`;
-
-    const meta   = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-    const rarity = meta.rarity || 'legendary';
-    const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b' };
-
-    return `
-      <div class="rp-row" style="--rc:${rc.color}">
-        <div class="rp-icon">${iconHtml}</div>
-        <div class="rp-name">${name}</div>
-        <div class="rp-formula">
-          ${opHtml}
-          <input class="rp-input" id="${id}" type="number"
-            value="${isZero ? '' : cur}" step="any" min="0"
-            placeholder="${isZero ? 'ไม่มีเรท' : cur}"
-            oninput="rpPreview('${name}','${id}')" />
-        </div>
-        <div class="rp-preview" id="${id}_preview">
-          ${isZero ? '<span style="color:var(--dim2);font-size:.52rem">—</span>' : rpCalcPreview(name, cur, def)}
-        </div>
+  const rows = Object.entries(SMART_RATES_DEFAULT)
+    .filter(([, v]) => v.divisor > 0)
+    .map(([name, def]) => {
+      const cur = rates[name]?.divisor ?? def.divisor;
+      const id  = 'rate_' + name.replace(/\s/g,'_');
+      const op  = def.multiply
+        ? '<span class="rate-op multiply">× คูณ</span>'
+        : '<span class="rate-op divide">÷ หาร</span>';
+      const iconHtml = def.img
+        ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="rate-emoji" style="display:none">${def.emoji}</span>`
+        : `<span class="rate-emoji">${def.emoji}</span>`;
+      return `<div class="rate-row">
+        <span class="rate-icon-wrap">${iconHtml}</span>
+        <span class="rate-name">${name}</span>
+        ${op}
+        <input class="rate-input" id="${id}" type="number" value="${cur}" step="any" min="0"/>
       </div>`;
-  }).join('');
+    }).join('');
 
-  wrap.innerHTML = `
-    <div class="rp-header">
-      <div class="rp-desc">เรทที่ตั้งไว้จะใช้กับ Text Calc, Quick Calc และ Inventory ทั้งหมด</div>
-      <div class="rp-actions">
-        <button class="rp-btn save" onclick="rpSave()">💾 บันทึกเรท</button>
-        <button class="rp-btn reset" onclick="rpReset()">↺ Reset ค่าเริ่มต้น</button>
-      </div>
+  panel.innerHTML = `
+    <div class="rate-title">แก้เรท</div>
+    <div class="rate-rows">${rows}</div>
+    <div class="rate-actions">
+      <button class="rate-save-btn" onclick="saveRateSettings()">💾 บันทึก</button>
+      <button class="rate-reset-btn" onclick="resetRateSettings()">↺ reset</button>
     </div>
-    <div class="rp-rows">${rows}</div>
-    <div class="rp-msg" id="rp-msg"></div>
+    <div class="rate-msg" id="rate-msg"></div>
   `;
 }
 
-function rpCalcPreview(name, divisor, def) {
-  if (!divisor || divisor === 0) return '—';
-  const ex  = def.multiply ? `1 ชิ้น = ${divisor}฿` : `${divisor} ชิ้น = 1฿`;
-  return `<span class="rp-preview-txt">${ex}</span>`;
-}
-
-function rpPreview(name, id) {
-  const inp = document.getElementById(id);
-  const pre = document.getElementById(id + '_preview');
-  if (!inp || !pre) return;
-  const val = parseFloat(inp.value);
-  const def = SMART_RATES_DEFAULT[name];
-  if (!isNaN(val) && val > 0) {
-    pre.innerHTML = rpCalcPreview(name, val, def);
-  } else {
-    pre.innerHTML = '<span style="color:var(--dim2);font-size:.52rem">—</span>';
-  }
-}
-
-function rpSave() {
+function saveRateSettings() {
   const rates = loadRates();
-  Object.entries(SMART_RATES_DEFAULT).forEach(([name]) => {
-    const id  = 'rp_' + name.replace(/\s/g,'_');
+  Object.entries(SMART_RATES_DEFAULT).filter(([,v])=>v.divisor>0).forEach(([name]) => {
+    const id  = 'rate_' + name.replace(/\s/g,'_');
     const el  = document.getElementById(id);
     const val = parseFloat(el?.value);
-    if (!isNaN(val) && val >= 0) rates[name] = { ...(rates[name]||{}), divisor: val };
+    if (!isNaN(val) && val > 0) rates[name] = { ...(rates[name]||{}), divisor: val };
   });
   saveRates(rates);
   SMART_RATES = rates;
-  // refresh calc ทุกอัน
+  const msg = document.getElementById('rate-msg');
+  if (msg) { msg.textContent = '✓ บันทึกแล้ว'; setTimeout(()=>{ msg.textContent=''; }, 1500); }
   smartCalc();
-  const qcWrap = document.getElementById('quick-calc-inner');
-  if (qcWrap) renderQuickCalc(qcWrap);
-  renderDashboard && renderDashboard();
-  const msg = document.getElementById('rp-msg');
-  if (msg) { msg.textContent = '✅ บันทึกแล้ว — เรทใช้งานทั้งเว็บทันที'; setTimeout(()=>{ msg.textContent=''; }, 2500); }
 }
 
-function rpReset() {
-  if (!confirm('Reset เรทกลับค่าเริ่มต้น?')) return;
+function resetRateSettings() {
   localStorage.removeItem(SMART_RATES_KEY);
   SMART_RATES = loadRates();
-  renderRatesPage();
+  const panel = document.getElementById('smart-settings-top');
+  if (panel) renderRateSettings(panel);
   smartCalc();
-  const qcWrap = document.getElementById('quick-calc-inner');
-  if (qcWrap) renderQuickCalc(qcWrap);
 }
 
-// compat — old buttons still work
-function openRateSettings() { scrollToSection('rates'); }
-function saveRateSettings()  { rpSave(); }
-function resetRateSettings() { rpReset(); }
-
+function openRateSettings() {
+  const panel = document.getElementById('smart-settings-top');
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    renderRateSettings(panel);
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+  }
+}
 /* ══════════════════════════════════════
    QUICK CALC — กรอกจำนวนชิ้น คิดราคาออโต้
 ══════════════════════════════════════ */
@@ -913,4 +872,153 @@ function quickCalcCopy() {
   navigator.clipboard.writeText(_qcGrand.toFixed(2)).catch(()=>{});
   const btn = document.getElementById('qcalc-copy-btn');
   if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
+}
+/* ══════════════════════════════════════
+   INVENTORY — ดึงจาก Supabase อัตโนมัติ
+══════════════════════════════════════ */
+const INV_SB_URL    = 'https://nzzsqkvjzlaszxswehkd.supabase.co';
+const INV_SB_KEY    = 'sb_publishable_B04udlxe_F-GxoGCoiFdBQ_LCLS9LVq';
+const INV_REFRESH_MS = 60000; // refresh ทุก 60 วิ ตาม Lua script
+let _invData        = [];
+let _invRefreshTimer = null;
+let _invLastFetch   = null;
+
+const INV_ITEMS = Object.keys(SMART_RATES_DEFAULT);
+
+/* ── fetch จาก Supabase ── */
+async function invFetch() {
+  try {
+    const res = await fetch(`${INV_SB_URL}/rest/v1/inventory?select=username,items,updated_at&order=username`, {
+      headers: {
+        'apikey':        INV_SB_KEY,
+        'Authorization': 'Bearer ' + INV_SB_KEY,
+      }
+    });
+    if (!res.ok) throw new Error(res.status);
+    _invData = await res.json();
+    _invLastFetch = new Date();
+  } catch(e) {
+    console.error('[INV]', e);
+  }
+}
+
+/* ── สถานะออน/ออฟ — ถ้า updated_at < 2 นาทีที่แล้ว = ออนไลน์ ── */
+function isOnline(updated_at) {
+  if (!updated_at) return false;
+  const diff = (Date.now() - new Date(updated_at).getTime()) / 1000;
+  return diff < 120; // 2 นาที = online (script ส่งทุก 60 วิ)
+}
+
+/* ── render หน้า Inventory ── */
+async function renderInventory() {
+  renderInvLoading();
+  await invFetch();
+  renderInvSummary();
+  renderInvIdList();
+  startInvAutoRefresh();
+}
+
+function renderInvLoading() {
+  const s = document.getElementById('inv-summary');
+  const l = document.getElementById('inv-id-list');
+  if (s) s.innerHTML = `<div class="inv-empty">กำลังโหลด...</div>`;
+  if (l) l.innerHTML = '';
+}
+
+function renderInvSummary() {
+  const el = document.getElementById('inv-summary');
+  if (!el) return;
+
+  // รวมสต็อกทุก ID
+  const totals = {};
+  INV_ITEMS.forEach(k => totals[k] = 0);
+  _invData.forEach(row => {
+    INV_ITEMS.forEach(k => { totals[k] += (row.items?.[k] || 0); });
+  });
+
+  const html = INV_ITEMS.map(name => {
+    const def = SMART_RATES_DEFAULT[name];
+    const qty = totals[name];
+    const iconHtml = def?.img
+      ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none'">`
+      : `<span>${def?.emoji||'📦'}</span>`;
+    return `<div class="inv-sum-item ${qty === 0 ? 'zero' : ''}">
+      <span class="inv-sum-icon">${iconHtml}</span>
+      <span class="inv-sum-name">${name}</span>
+      <span class="inv-sum-qty">${qty > 0 ? 'x' + qty.toLocaleString('th-TH') : '—'}</span>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="inv-sum-grid">${html}</div>`;
+}
+
+function renderInvIdList() {
+  const el = document.getElementById('inv-id-list');
+  if (!el) return;
+
+  if (_invData.length === 0) {
+    el.innerHTML = `<div class="inv-empty">ยังไม่มีข้อมูล — รัน Script ในเกมก่อนครับ</div>`;
+    return;
+  }
+
+  // แปลง updated_at เป็นข้อความ
+  function timeAgo(updated_at) {
+    if (!updated_at) return '—';
+    const diff = Math.floor((Date.now() - new Date(updated_at).getTime()) / 1000);
+    if (diff < 60)   return `${diff} วิที่แล้ว`;
+    if (diff < 3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
+    return `${Math.floor(diff/3600)} ชม.ที่แล้ว`;
+  }
+
+  const rows = _invData.map(row => {
+    const online = isOnline(row.updated_at);
+    // แสดงของแต่ละ ID เฉพาะที่มี
+    const itemBadges = INV_ITEMS
+      .filter(n => (row.items?.[n] || 0) > 0)
+      .map(n => {
+        const def = SMART_RATES_DEFAULT[n];
+        const iconHtml = def?.img
+          ? `<img class="item-icon-xs" src="${def.img}" alt="${n}" onerror="this.style.display='none'">`
+          : `<span>${def?.emoji||'📦'}</span>`;
+        return `<span class="inv-item-badge">${iconHtml} x${(row.items[n]).toLocaleString('th-TH')}</span>`;
+      }).join('');
+
+    return `<div class="inv-id-row">
+      <span class="inv-id-dot ${online ? 'online' : 'offline'}"></span>
+      <div class="inv-id-info">
+        <div class="inv-id-top">
+          <span class="inv-id-name">${row.username}</span>
+          <span class="inv-id-status ${online ? 'online' : 'offline'}">${online ? '🟢 ออนไลน์' : '🔴 ออฟไลน์'}</span>
+          <span class="inv-id-time">${timeAgo(row.updated_at)}</span>
+        </div>
+        ${itemBadges ? `<div class="inv-id-items">${itemBadges}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // นับออน/ออฟ
+  const onlineCount  = _invData.filter(r => isOnline(r.updated_at)).length;
+  const offlineCount = _invData.length - onlineCount;
+  const lastFetchStr = _invLastFetch ? _invLastFetch.toLocaleTimeString('th-TH') : '—';
+
+  el.innerHTML = `
+    <div class="inv-list-toolbar">
+      <div class="inv-status-summary">
+        <span class="inv-count online">🟢 ${onlineCount} ออนไลน์</span>
+        <span class="inv-count offline">🔴 ${offlineCount} ออฟไลน์</span>
+        <span class="inv-last-fetch">อัปเดต ${lastFetchStr}</span>
+      </div>
+      <button class="inv-toolbar-btn refresh" onclick="renderInventory()">🔄 รีเฟรช</button>
+    </div>
+    ${rows}
+  `;
+}
+
+/* ── auto refresh ── */
+function startInvAutoRefresh() {
+  if (_invRefreshTimer) clearInterval(_invRefreshTimer);
+  _invRefreshTimer = setInterval(async () => {
+    await invFetch();
+    renderInvSummary();
+    renderInvIdList();
+  }, INV_REFRESH_MS);
 }

@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>blahexm</title>
 <link rel="stylesheet" href="css/style.css"/>
-<link rel="stylesheet" href="css/inventory.css"/>
-<link rel="stylesheet" href="css/Dashboard.css"/>
 </head>
 <body>
 <div id="cursor"></div>
@@ -38,10 +36,6 @@
     <button class="sb-item" id="tab-inventory" onclick="scrollToSection('inventory')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Inventory</span>
-    </button>
-    <button class="sb-item" id="tab-rates" onclick="scrollToSection('rates')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span>Rates</span>
     </button>
   </nav>
   <div class="sb-spacer"></div>
@@ -153,8 +147,10 @@
   <section class="dash-section" id="section-smart">
     <div class="section-header">
       <h2 class="section-title">Calculator</h2>
+      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
     </div>
     <div class="dash-card">
+      <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
       <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
@@ -163,6 +159,7 @@
   <section class="dash-section" id="section-quick">
     <div class="section-header">
       <h2 class="section-title">Quick Calc</h2>
+      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
     </div>
     <div class="dash-card">
       <div id="quick-calc-inner"></div>
@@ -172,22 +169,10 @@
   <section class="dash-section" id="section-inventory">
     <div class="section-header">
       <h2 class="section-title">Inventory</h2>
-      <button class="dash-refresh-btn" id="dash-refresh-btn" onclick="fetchDashboard()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        รีเฟรช
-      </button>
+      <button class="btn-outline" onclick="startInventoryRefresh()">↺ รีเฟรช</button>
     </div>
-    <div id="dash-inner">
-      <div class="dash-loading"><div class="dash-spinner"></div><span>กำลังโหลด...</span></div>
-    </div>
-  </section>
-
-  <section class="dash-section" id="section-rates">
-    <div class="section-header">
-      <h2 class="section-title">Rates</h2>
-    </div>
-    <div class="dash-card" id="rates-card">
-      <div id="rates-inner"></div>
+    <div class="dash-card">
+      <div id="inv-inner"></div>
     </div>
   </section>
 
@@ -199,8 +184,7 @@
 <audio id="audio" loop></audio>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
-<script src="js/inventory.js"></script>
-<script src="js/Dashboard.js"></script>
 <script src="js/app.js"></script>
+<script src="js/inventory.js"></script>
 </body>
 </html>
