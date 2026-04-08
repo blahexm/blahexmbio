@@ -2,19 +2,18 @@
    DASHBOARD.JS — Multi-ID Overview
    - รวมของทุก ID
    - Online / Offline ตาม updated_at
-   - คำนวณมูลค่าด้วยเรทเดียวกับ Quick Calc
+   - รูปดึงจากเกม Roblox ออโต้
 ══════════════════════════════════════ */
 
-// ── config ──────────────────────────
 const ONLINE_THRESHOLD_MIN = 1;
 
-// ── filter state — ไอเทมที่ซ่อน (เก็บใน localStorage) ──
+/* ── filter state ── */
 const DASH_FILTER_KEY = 'blahexm_dash_hidden';
 function dashHiddenLoad() {
   try { return JSON.parse(localStorage.getItem(DASH_FILTER_KEY)) || []; } catch { return []; }
 }
 function dashHiddenSave(arr) { localStorage.setItem(DASH_FILTER_KEY, JSON.stringify(arr)); }
-let _dashHidden = dashHiddenLoad(); // array ชื่อไอเทมที่ซ่อน
+let _dashHidden = dashHiddenLoad();
 
 function dashIsHidden(name) { return _dashHidden.includes(name); }
 function dashToggleHidden(name) {
@@ -23,39 +22,68 @@ function dashToggleHidden(name) {
   dashHiddenSave(_dashHidden);
 }
 
-// ── state ────────────────────────────
-let _dashData     = [];      // raw rows จาก Supabase
-let _dashFilter   = 'all';   // 'all' | 'online' | 'offline'
-let _dashSearch   = '';
-let _dashSortCol  = 'value'; // column ที่ sort
-let _dashSortAsc  = false;
-let _dashTimer    = null;
+/* ── state ── */
+let _dashData    = [];
+let _dashFilter  = 'all';
+let _dashSearch  = '';
+let _dashSortCol = 'value';
+let _dashSortAsc = false;
 
-// ── helpers ──────────────────────────
+/* ── parse item (รองรับ format ใหม่ {quantity, image} และ format เก่า) ── */
+function dashParseItem(val) {
+  if (typeof val === 'object' && val !== null) {
+    return {
+      qty:   val.quantity ?? val.qty ?? 0,
+      image: val.image    ?? '',
+    };
+  }
+  return { qty: val ?? 0, image: '' };
+}
+
+/* ── แปลง rbxassetid → Roblox CDN URL ── */
+function dashRbxImgUrl(rbxImg) {
+  if (!rbxImg) return '';
+  const thumbMatch = rbxImg.match(/rbxthumb:\/\/.*?assetId=(\d+)/i);
+  if (thumbMatch) {
+    return `https://www.roblox.com/asset-thumbnail/image?assetId=${thumbMatch[1]}&width=150&height=150&format=png`;
+  }
+  const assetMatch = rbxImg.match(/(\d{5,})/);
+  if (assetMatch) {
+    return `https://www.roblox.com/asset-thumbnail/image?assetId=${assetMatch[1]}&width=150&height=150&format=png`;
+  }
+  return '';
+}
+
+/* ── ดึง image ของไอเทมจากแถวแรกที่มีข้อมูล (ใช้แสดงใน summary/filter) ── */
+function dashGetItemImage(name) {
+  for (const row of _dashData) {
+    const val = (row.items || {})[name];
+    if (val && typeof val === 'object' && val.image) {
+      return dashRbxImgUrl(val.image);
+    }
+  }
+  return '';
+}
+
+/* ── helpers ── */
 function isOnline(dateStr) {
   if (!dateStr) return false;
-  // Supabase ส่งมาเป็น "2026-04-05 09:52:41.621026" (space แทน T)
-  // new Date() บางตัว parse ไม่ได้ → normalize ก่อน
   const normalized = dateStr.replace(' ', 'T').replace(/(\+00)$/, 'Z').replace(/(\.\d+)$/, '$1Z');
   const t = new Date(normalized).getTime();
   if (isNaN(t)) return false;
-  const diffMin = (Date.now() - t) / 60000;
-  return diffMin <= ONLINE_THRESHOLD_MIN;
+  return (Date.now() - t) / 60000 <= ONLINE_THRESHOLD_MIN;
 }
 
 function calcRowValue(items) {
-  // ใช้ SMART_RATES (จาก app.js ที่โหลดอยู่แล้ว)
-  // ถ้า SMART_RATES ไม่มี fallback ไป SMART_RATES_DEFAULT
   const rates = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
              || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
   let total = 0;
   Object.entries(items || {}).forEach(([name, val]) => {
-    if (dashIsHidden(name)) return; // ซ่อนอยู่ → ไม่นับในมูลค่า
-    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
+    if (dashIsHidden(name)) return;
+    const { qty } = dashParseItem(val);
     const rate = rates[name];
     if (!rate || rate.divisor === 0) return;
-    const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
-    total += v;
+    total += rate.multiply ? qty * rate.divisor : qty / rate.divisor;
   });
   return total;
 }
@@ -63,7 +91,7 @@ function calcRowValue(items) {
 function calcTotalItems(items) {
   let t = 0;
   Object.values(items || {}).forEach(val => {
-    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
+    const { qty } = dashParseItem(val);
     t += qty;
   });
   return t;
@@ -92,19 +120,19 @@ function timeSinceDash(dateStr) {
   return `${Math.floor(h / 24)}d`;
 }
 
-// ── compute aggregated totals per item ──
+/* ── aggregate qty รวมทุก ID ── */
 function aggregateItems(rows) {
   const totals = {};
   rows.forEach(row => {
     Object.entries(row.items || {}).forEach(([name, val]) => {
-      const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
+      const { qty } = dashParseItem(val);
       totals[name] = (totals[name] || 0) + qty;
     });
   });
   return totals;
 }
 
-// ── filter & sort rows ──
+/* ── filter & sort ── */
 function getFilteredRows() {
   let rows = _dashData.map(row => ({
     ...row,
@@ -121,8 +149,8 @@ function getFilteredRows() {
   }
 
   rows.sort((a, b) => {
+    if (_dashSortCol === 'name')    return _dashSortAsc ? a.username.localeCompare(b.username) : b.username.localeCompare(a.username);
     let va, vb;
-    if (_dashSortCol === 'name')    { va = a.username; vb = b.username; return _dashSortAsc ? va.localeCompare(vb) : vb.localeCompare(va); }
     if (_dashSortCol === 'value')   { va = a._value;   vb = b._value; }
     if (_dashSortCol === 'items')   { va = a._total;   vb = b._total; }
     if (_dashSortCol === 'updated') { va = new Date(a.updated_at||0); vb = new Date(b.updated_at||0); }
@@ -132,7 +160,7 @@ function getFilteredRows() {
   return rows;
 }
 
-// ── render ────────────────────────────
+/* ── render ── */
 function renderDashboard() {
   const wrap = document.getElementById('dash-inner');
   if (!wrap) return;
@@ -142,14 +170,18 @@ function renderDashboard() {
     return;
   }
 
-  const allRows     = _dashData.map(r => ({ ...r, _online: isOnline(r.updated_at), _value: calcRowValue(r.items) }));
-  const onlineCnt   = allRows.filter(r => r._online).length;
-  const offlineCnt  = allRows.length - onlineCnt;
-  const totalVal    = allRows.reduce((s, r) => s + r._value, 0);
-  const aggItems    = aggregateItems(_dashData);
+  const allRows      = _dashData.map(r => ({ ...r, _online: isOnline(r.updated_at), _value: calcRowValue(r.items) }));
+  const onlineCnt    = allRows.filter(r => r._online).length;
+  const offlineCnt   = allRows.length - onlineCnt;
+  const totalVal     = allRows.reduce((s, r) => s + r._value, 0);
+  const aggItems     = aggregateItems(_dashData);
   const filteredRows = getFilteredRows();
 
-  // ── Stats bar ──
+  const itemOrder = typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(aggItems);
+  const rates     = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
+                 || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
+
+  /* ── Stats bar ── */
   const statsHtml = `
     <div class="dash-stats-row">
       <div class="dash-stat-card">
@@ -174,29 +206,28 @@ function renderDashboard() {
       </div>
     </div>`;
 
-  // ── Item summary ──
-  const itemOrder = typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(aggItems);
-  const rates     = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
-                 || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
-
+  /* ── Item summary (รูปดึงจากเกมออโต้) ── */
   const itemSummaryHtml = itemOrder
     .filter(name => (aggItems[name] || 0) > 0)
     .map(name => {
-      const qty     = aggItems[name] || 0;
-      const meta    = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-      const rate    = rates[name];
-      const rarity  = meta.rarity || 'legendary';
-      const rc      = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b', glow: '' };
-      const hidden  = dashIsHidden(name);
+      const qty    = aggItems[name] || 0;
+      const meta   = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
+      const rate   = rates[name];
+      const rarity = meta.rarity || 'legendary';
+      const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b', glow: '' };
+      const hidden = dashIsHidden(name);
+      const imgSrc = dashGetItemImage(name); // รูปจากเกมออโต้
+
       let valStr = '—', hasVal = false;
       if (!hidden && rate && rate.divisor > 0) {
         const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
         valStr = fmtBaht(v); hasVal = true;
       }
+
       return `
         <div class="dash-sum-card" style="--rc:${hidden ? '#444' : rc.color};opacity:${hidden ? '.38' : '1'};transition:opacity .2s">
           <div class="dash-sum-top">
-            <img class="dash-sum-img" src="${meta.img || ''}" alt="${name}" onerror="this.style.opacity='.2'">
+            <img class="dash-sum-img" src="${imgSrc}" alt="${name}" onerror="this.style.opacity='.15'">
             <span class="dash-sum-name">${name}</span>
           </div>
           <div class="dash-sum-qty">x${fmtQtyDash(qty)}</div>
@@ -204,15 +235,18 @@ function renderDashboard() {
         </div>`;
     }).join('');
 
-  // ── Filter panel items (สำหรับ dropdown) ──
+  /* ── Filter panel (รูปจากเกมออโต้) ── */
   const filterPanelHtml = itemOrder.map(name => {
     const meta   = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
     const hidden = dashIsHidden(name);
-    const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[meta.rarity || 'legendary'] : null) || { color: '#f59e0b' };
+    const rarity = meta.rarity || 'legendary';
+    const rc     = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b' };
+    const imgSrc = dashGetItemImage(name);
+
     return `
       <label class="dash-filter-item ${hidden ? 'hidden' : 'visible'}" onclick="dashToggleHidden('${name}');renderDashboard()" style="cursor:pointer">
         <div style="display:flex;align-items:center;gap:8px;flex:1">
-          <img src="${meta.img || ''}" width="20" height="20" style="object-fit:contain" onerror="this.style.display='none'">
+          <img src="${imgSrc}" width="20" height="20" style="object-fit:contain" onerror="this.style.display='none'">
           <span style="font-size:.6rem;color:var(--text)">${name}</span>
         </div>
         <div class="dash-filter-toggle ${hidden ? '' : 'on'}" style="--tc:${rc.color}">
@@ -221,32 +255,30 @@ function renderDashboard() {
       </label>`;
   }).join('');
 
-  // ── ID table ──
-  const thArrow = (col) => {
+  /* ── ID table ── */
+  const thArrow = col => {
     const arrow = _dashSortCol === col ? (_dashSortAsc ? '▲' : '▼') : '▾';
     return `<span class="sort-arrow">${arrow}</span>`;
   };
-  const thCls = (col) => _dashSortCol === col ? 'sorted' : '';
+  const thCls = col => _dashSortCol === col ? 'sorted' : '';
 
   const tableRowsHtml = filteredRows.map(row => {
     const statusCls   = row._online ? 'online' : 'offline';
     const statusLabel = row._online ? 'online' : 'offline';
     const valStr      = row._value > 0 ? fmtBaht(row._value) : '—';
     const valCls      = row._value > 0 ? '' : 'zero';
-    const safeUser    = encodeURIComponent(row.username);
 
-    // items mini-list (แสดงแค่ของที่มี > 0)
-    const miniItems = (typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(row.items || {}))
-      .map(name => {
-        const val = (row.items || {})[name];
-        const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-        if (qty <= 0) return '';
-        const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-        return `<span title="${name}: ${qty}" style="display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:.5rem;color:var(--dim)">
-          <img src="${meta.img||''}" width="12" height="12" style="object-fit:contain;opacity:.8" onerror="this.style.display='none'">
-          ${fmtQtyDash(qty)}
-        </span>`;
-      }).join('');
+    /* mini item list ในตาราง (รูปจากเกมออโต้) */
+    const miniItems = itemOrder.map(name => {
+      const val = (row.items || {})[name];
+      const { qty, image } = dashParseItem(val);
+      if (qty <= 0) return '';
+      const imgSrc = dashRbxImgUrl(image);
+      return `<span title="${name}: ${qty}" style="display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:.5rem;color:var(--dim)">
+        <img src="${imgSrc}" width="12" height="12" style="object-fit:contain;opacity:.8" onerror="this.style.display='none'">
+        ${fmtQtyDash(qty)}
+      </span>`;
+    }).join('');
 
     return `
       <tr>
@@ -281,7 +313,6 @@ function renderDashboard() {
         </button>
       </div>
 
-      <!-- Filter dropdown panel -->
       <div id="dash-filter-panel" style="display:none;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:12px">
         <div style="font-family:'Geist Mono',monospace;font-size:.48rem;color:var(--dim2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">แสดง / ซ่อน ไอเทม</div>
         <div style="display:flex;flex-direction:column;gap:4px">
@@ -331,11 +362,8 @@ function renderDashboard() {
   `;
 }
 
-// ── filter & sort controls ──────────
-function dashSetFilter(f) {
-  _dashFilter = f;
-  renderDashboard();
-}
+/* ── controls ── */
+function dashSetFilter(f) { _dashFilter = f; renderDashboard(); }
 
 function dashSort(col) {
   if (_dashSortCol === col) _dashSortAsc = !_dashSortAsc;
@@ -343,7 +371,12 @@ function dashSort(col) {
   renderDashboard();
 }
 
-// ── fetch from Supabase ─────────────
+function dashToggleFilterPanel() {
+  const p = document.getElementById('dash-filter-panel');
+  if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+/* ── fetch from Supabase ── */
 async function fetchDashboard() {
   const btn = document.getElementById('dash-refresh-btn');
   if (btn) btn.classList.add('spinning');
@@ -354,7 +387,7 @@ async function fetchDashboard() {
   }
 
   try {
-    const { data, error } = await _invSb   // ใช้ client เดียวกับ inventory.js
+    const { data, error } = await _invSb
       .from('inventory')
       .select('username, items, updated_at')
       .order('updated_at', { ascending: false });
@@ -363,29 +396,21 @@ async function fetchDashboard() {
     _dashData = data || [];
     renderDashboard();
   } catch (e) {
-    const wrap = document.getElementById('dash-inner');
     if (wrap) wrap.innerHTML = `<div class="dash-empty">เกิดข้อผิดพลาด: ${e.message}</div>`;
   } finally {
     if (btn) btn.classList.remove('spinning');
   }
 }
 
-// ── filter panel toggle ──────────────
-function dashToggleFilterPanel() {
-  const p = document.getElementById('dash-filter-panel');
-  if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
-}
-
-// ── start / stop auto-refresh ───────
+/* ── auto-refresh ── */
 let _dashAutoTimer = null;
-
 function startDashboard() {
   fetchDashboard();
   if (_dashAutoTimer) clearInterval(_dashAutoTimer);
-  _dashAutoTimer = setInterval(fetchDashboard, 10000); // refresh ทุก 10 วิ
+  _dashAutoTimer = setInterval(fetchDashboard, 10000);
 }
 
-// ── checkbox helpers ─────────────────
+/* ── checkbox helpers ── */
 function dashToggleAll(checked) {
   document.querySelectorAll('.dash-row-check').forEach(c => c.checked = checked);
   dashUpdateDeleteBtn();
@@ -398,13 +423,12 @@ function dashUpdateDeleteBtn() {
     btn.style.display = cnt > 0 ? '' : 'none';
     btn.textContent = `🗑️ ลบที่เลือก (${cnt})`;
   }
-  // sync select-all
   const all = document.querySelectorAll('.dash-row-check').length;
   const allBox = document.getElementById('dash-check-all');
   if (allBox) allBox.checked = cnt === all && all > 0;
 }
 
-// ── delete functions ─────────────────
+/* ── delete ── */
 async function dashDeleteOne(username) {
   if (!confirm(`ลบ "${username}" ออกจากระบบ?`)) return;
   try {
