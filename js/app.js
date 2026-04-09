@@ -18,50 +18,90 @@ const BADGE_SVG = {
   diamond:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 9l10 13L22 9 12 2zm0 3.5L19 9l-7 9.1L5 9l7-3.5z"/></svg>`,
 };
 
-/* ── Nav & Sidebar ── */
-let _currentTab = 'profile';
+/* ── SPA Navigation ── */
+const HOME_PAGE_KEY = 'blahexm_homepage';
+let _currentPage = null;
 
-function scrollToSection(name) {
-  const el = document.getElementById('section-' + name);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  setActiveTab(name);
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sb-overlay');
-  if (sb && sb.classList.contains('open')) {
-    sb.classList.remove('open');
-    ov.classList.remove('open');
+function goPage(name) {
+  if (_currentPage === name) return;
+  _currentPage = name;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+
+  const page = document.getElementById('page-' + name);
+  const btn  = document.getElementById('bnav-' + name);
+  if (page) page.classList.add('active');
+  if (btn)  btn.classList.add('active');
+
+  // lazy init per page
+  if (name === 'finance')   renderFinanceDashboard(document.getElementById('calc-inner'));
+  if (name === 'calc')      renderQuickCalc(document.getElementById('quick-calc-inner'));
+  if (name === 'inventory') startInventoryRefresh();
+  if (name === 'settings')  initSettingsPage();
+}
+
+function setHomePage(page) {
+  localStorage.setItem(HOME_PAGE_KEY, page);
+  document.querySelectorAll('.set-page-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+}
+
+function switchCalcTab(tab) {
+  document.getElementById('calc-tab-smart').style.display = tab === 'smart' ? '' : 'none';
+  document.getElementById('calc-tab-quick').style.display = tab === 'quick' ? '' : 'none';
+  document.getElementById('ctab-smart').classList.toggle('active', tab === 'smart');
+  document.getElementById('ctab-quick').classList.toggle('active', tab === 'quick');
+  if (tab === 'quick') renderQuickCalc(document.getElementById('quick-calc-inner'));
+}
+
+function initSettingsPage() {
+  // homepage picker
+  const saved = localStorage.getItem(HOME_PAGE_KEY) || C.theme || 'profile';
+  document.querySelectorAll('.set-page-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === saved);
+  });
+  // theme grid
+  const g = document.getElementById('set-theme-grid');
+  if (g && !g.dataset.built) {
+    g.dataset.built = '1';
+    const savedT = localStorage.getItem('blahexm_theme') || C.theme || 'rose';
+    THEMES.forEach(t => {
+      const d = document.createElement('div');
+      d.className = 'theme-dot-big' + (t.id === savedT ? ' active' : '');
+      d.style.background = t.color;
+      d.title = t.id;
+      d.onclick = () => {
+        applyTheme(t.id);
+        document.querySelectorAll('.theme-dot-big').forEach(x => x.classList.remove('active'));
+        d.classList.add('active');
+      };
+      g.appendChild(d);
+    });
+  }
+  // size
+  const saved2 = parseInt(localStorage.getItem('blahexm_scale')) || 100;
+  const sl = document.getElementById('size-slider');
+  const sv = document.getElementById('set-size-val');
+  if (sl) sl.value = saved2;
+  if (sv) sv.textContent = saved2 + '%';
+  // footer
+  const sf = document.getElementById('set-footer-text');
+  if (sf) sf.textContent = C.footerText || 'blahexm · 2026';
+  // rate panel
+  const rp = document.getElementById('settings-rate-panel');
+  if (rp && !rp.dataset.built) {
+    rp.dataset.built = '1';
+    renderRateSettings(rp);
   }
 }
 
-function setActiveTab(name) {
-  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('tab-' + name);
-  if (btn) btn.classList.add('active');
-  _currentTab = name;
-}
-
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sb-overlay');
-  sb.classList.toggle('open');
-  ov.classList.toggle('open');
-}
-
-function initScrollSpy() {
-  const sections = ['profile', 'calc', 'smart', 'quick', 'inventory'];
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const name = e.target.id.replace('section-', '');
-        setActiveTab(name);
-      }
-    });
-  }, { threshold: 0.3 });
-  sections.forEach(name => {
-    const el = document.getElementById('section-' + name);
-    if (el) observer.observe(el);
-  });
-}
+// legacy stubs (no-op)
+function scrollToSection() {}
+function toggleSidebar() {}
+function toggleThemePanel() {}
+function initScrollSpy() {}
 
 /* ── Theme Switcher ── */
 const THEMES = [
@@ -83,21 +123,8 @@ function applyTheme(id) {
 }
 
 function buildThemeGrids() {
+  // Theme grids now live in Settings page — built lazily in initSettingsPage()
   const savedTheme = localStorage.getItem(THEME_KEY) || C.theme || 'rose';
-  ['theme-grid', 'mob-theme-grid'].forEach(gid => {
-    const g = document.getElementById(gid);
-    if (!g) return;
-    g.innerHTML = '';
-    THEMES.forEach(t => {
-      const d = document.createElement('div');
-      d.className = 'theme-dot' + (t.id === savedTheme ? ' active' : '');
-      d.dataset.theme = t.id;
-      d.style.background = t.color;
-      d.title = t.id;
-      d.onclick = () => { applyTheme(t.id); closeMobThemePanel(); };
-      g.appendChild(d);
-    });
-  });
   applyTheme(savedTheme);
 }
 
@@ -221,6 +248,8 @@ function applyScale(val) {
   localStorage.setItem(SCALE_KEY, pct);
   const label = document.getElementById('size-val');
   if (label) label.textContent = pct + '%';
+  const label2 = document.getElementById('set-size-val');
+  if (label2) label2.textContent = pct + '%';
   const slider = document.getElementById('size-slider');
   if (slider) slider.value = pct;
 }
@@ -236,7 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.title = C.name;
   document.getElementById('profile-name').textContent = C.name;
   document.getElementById('profile-bio').textContent  = C.bio || '';
-  document.getElementById('footer-text').textContent  = C.footerText;
   if (C.avatarUrl) document.getElementById('avatar').src = C.avatarUrl;
 
   renderBadge();
@@ -257,30 +285,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (C.music.url) document.getElementById('audio').src = C.music.url;
   }
 
-  buildThemeGrids();
-
-  const sbName = document.getElementById('sb-user-name');
-  const sbStatus = document.getElementById('sb-user-status');
-  if (sbName) sbName.textContent = C.name;
-  if (sbStatus) sbStatus.textContent = C.manualStatusText || '—';
-  if (C.avatarUrl) {
-    const sbAv = document.getElementById('sb-avatar');
-    if (sbAv) sbAv.src = C.avatarUrl;
-  }
-
+  buildThemeGrids(); // legacy (no-op since grids moved to settings)
   initScale();
   initCursor();
   initSecurity();
-  initScrollSpy();
   fetchLanyard();
   setInterval(fetchLanyard, 12000);
 
-  // Finance — เปิดตรงเลย ไม่มี PIN
-  renderFinanceDashboard(document.getElementById('calc-inner'));
-
-  const qcWrap = document.getElementById('quick-calc-inner');
-  if (qcWrap) renderQuickCalc(qcWrap);
-  renderInventory();
+  // go to home page
+  const homePage = localStorage.getItem(HOME_PAGE_KEY) || C.defaultPage || 'profile';
+  goPage(homePage);
 });
 
 /* ══════════════════════════════════════

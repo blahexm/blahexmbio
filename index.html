@@ -12,101 +12,68 @@
 <div id="cursor"></div>
 <div id="cursor-trail"></div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-dot"></div>
-    <span>blahexm</span>
-  </div>
-  <nav class="sb-nav">
-    <button class="sb-item active" id="tab-profile" onclick="scrollToSection('profile')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      <span>Profile</span>
-    </button>
-    <button class="sb-item" id="tab-calc" onclick="scrollToSection('calc')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      <span>Finance</span>
-    </button>
-    <button class="sb-item" id="tab-smart" onclick="scrollToSection('smart')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/><path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/></svg>
-      <span>Text Calc</span>
-    </button>
-    <button class="sb-item" id="tab-quick" onclick="scrollToSection('quick')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h2m4 0h2M7 12h2m4 0h2"/></svg>
-      <span>Quick Calc</span>
-    </button>
-    <button class="sb-item" id="tab-inventory" onclick="scrollToSection('inventory')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Inventory</span>
-    </button>
-  </nav>
-  <div class="sb-spacer"></div>
-  <div class="theme-section">
-    <div class="theme-label">Theme</div>
-    <div class="theme-grid" id="theme-grid"></div>
-  </div>
-  <div class="size-section">
-    <div class="size-label-row">
-      <span class="size-label">Size</span>
-      <span class="size-val" id="size-val">100%</span>
+<!-- ══════════════ BOTTOM NAV ══════════════ -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-item active" id="bnav-profile"   onclick="goPage('profile')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    <span>Profile</span>
+  </button>
+  <button class="bnav-item" id="bnav-finance"  onclick="goPage('finance')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    <span>Finance</span>
+  </button>
+  <button class="bnav-item" id="bnav-calc"     onclick="goPage('calc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/><path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/></svg>
+    <span>Calc</span>
+  </button>
+  <button class="bnav-item" id="bnav-inventory" onclick="goPage('inventory')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>Inventory</span>
+  </button>
+  <button class="bnav-item" id="bnav-settings" onclick="goPage('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    <span>Settings</span>
+  </button>
+</nav>
+
+<!-- ══════════════ PAGES ══════════════ -->
+
+<!-- PAGE: PROFILE -->
+<div class="page active" id="page-profile">
+  <header class="page-header">
+    <div class="page-header-left">
+      <div class="page-logo-dot"></div>
+      <span class="page-logo-text">blahexm</span>
     </div>
-    <input class="size-slider" id="size-slider" type="range" min="80" max="130" value="100" step="5" oninput="applyScale(this.value)" />
-  </div>
-  <div class="sb-footer">
-    <div class="sb-user">
-      <img class="sb-avatar" id="sb-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%231a1a1a'/%3E%3C/svg%3E" alt=""/>
-      <div class="sb-user-info">
-        <div class="sb-user-name" id="sb-user-name">—</div>
-        <div class="sb-user-status" id="sb-user-status">—</div>
+    <div class="page-header-right">
+      <button class="hdr-icon-btn" onclick="goPage('settings')" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="page-body">
+    <div class="profile-hero">
+      <div class="profile-avatar-wrap">
+        <img class="profile-avatar" id="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 86 86'%3E%3Ccircle cx='43' cy='43' r='43' fill='%231a1a1a'/%3E%3C/svg%3E" alt="avatar"/>
+        <div class="profile-avatar-ring"></div>
+        <div class="status-dot" id="status-dot"></div>
       </div>
-    </div>
-  </div>
-</aside>
-
-<!-- MOBILE TOPBAR -->
-<header class="topbar">
-  <button class="mob-menu-btn" onclick="toggleSidebar()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-  </button>
-  <div class="topbar-title">blahexm</div>
-  <button class="mob-theme-btn" onclick="toggleThemePanel()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-  </button>
-</header>
-<div class="mob-theme-panel" id="mob-theme-panel" style="display:none">
-  <div class="theme-grid" id="mob-theme-grid"></div>
-</div>
-<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
-
-<!-- MAIN -->
-<main class="main-content">
-
-  <!-- PROFILE -->
-  <section class="dash-section" id="section-profile">
-    <div class="section-header">
-      <h2 class="section-title">Profile</h2>
-    </div>
-    <div class="profile-grid">
-      <div class="dash-card profile-card">
-        <div class="profile-avatar-wrap">
-          <img class="profile-avatar" id="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 86 86'%3E%3Ccircle cx='43' cy='43' r='43' fill='%231a1a1a'/%3E%3C/svg%3E" alt="avatar"/>
-          <div class="profile-avatar-ring"></div>
-          <div class="status-dot" id="status-dot"></div>
+      <div class="profile-hero-info">
+        <div class="profile-name-row">
+          <span class="profile-name" id="profile-name">blahexm</span>
+          <div class="badge" id="badge"></div>
         </div>
-        <div class="profile-info">
-          <div class="profile-name-row">
-            <span class="profile-name" id="profile-name">blahexm</span>
-            <div class="badge" id="badge"></div>
-          </div>
-          <div class="profile-bio" id="profile-bio"></div>
-          <div class="status-label" id="status-label">
-            <span class="dot"></span>
-            <span id="status-text">connecting...</span>
-          </div>
+        <div class="profile-bio" id="profile-bio"></div>
+        <div class="status-label" id="status-label">
+          <span class="dot"></span>
+          <span id="status-text">connecting...</span>
         </div>
       </div>
-      <div class="dash-card activity-card" id="activity" style="display:none">
-        <div class="card-label">Now Playing</div>
+    </div>
+
+    <div class="profile-cards-grid">
+      <div class="pcard" id="activity" style="display:none">
+        <div class="pcard-label">Now Playing</div>
         <div class="activity-inner">
           <div class="activity-icon" id="activity-icon">🎮</div>
           <div>
@@ -115,8 +82,9 @@
           </div>
         </div>
       </div>
-      <div class="dash-card music-card" id="music-bar">
-        <div class="card-label">Music</div>
+
+      <div class="pcard" id="music-bar">
+        <div class="pcard-label">Music</div>
         <div class="music-inner">
           <button class="music-play-btn" onclick="toggleMusic()">
             <svg id="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -132,65 +100,130 @@
         </div>
       </div>
     </div>
-    <div class="dash-card socials-card">
-      <div class="card-label">Links</div>
+
+    <div class="pcard socials-card">
+      <div class="pcard-label">Links</div>
       <div class="socials" id="socials"></div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- FINANCE — เปิดตรง ไม่มี PIN -->
-  <section class="dash-section" id="section-calc">
-    <div class="section-header">
-      <h2 class="section-title">Finance</h2>
+<!-- PAGE: FINANCE -->
+<div class="page" id="page-finance">
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-title-text">Finance</span>
     </div>
-    <div class="dash-card">
-      <div id="calc-inner"></div>
-    </div>
-  </section>
+  </header>
+  <div class="page-body page-body-scroll">
+    <div id="calc-inner"></div>
+  </div>
+</div>
 
-  <!-- TEXT CALC -->
-  <section class="dash-section" id="section-smart">
-    <div class="section-header">
-      <h2 class="section-title">Calculator</h2>
-      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
+<!-- PAGE: CALC -->
+<div class="page" id="page-calc">
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-title-text">Calculator</span>
     </div>
-    <div class="dash-card">
+    <div class="page-header-right">
+      <button class="hdr-btn-outline" onclick="openRateSettings()">⚙️ เรท</button>
+    </div>
+  </header>
+  <div class="page-body page-body-scroll">
+    <div class="calc-tabs">
+      <button class="calc-tab active" id="ctab-smart" onclick="switchCalcTab('smart')">📋 Text Calc</button>
+      <button class="calc-tab" id="ctab-quick" onclick="switchCalcTab('quick')">🧮 Quick Calc</button>
+    </div>
+    <div id="calc-tab-smart">
       <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
       <textarea class="smart-input" id="smart-input"
         placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..."
         oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
-  </section>
-
-  <!-- QUICK CALC -->
-  <section class="dash-section" id="section-quick">
-    <div class="section-header">
-      <h2 class="section-title">Quick Calc</h2>
-      <button class="btn-outline" onclick="openRateSettings()">⚙️ แก้เรท</button>
-    </div>
-    <div class="dash-card">
+    <div id="calc-tab-quick" style="display:none">
       <div id="quick-calc-inner"></div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- INVENTORY — Supabase -->
-  <section class="dash-section" id="section-inventory">
-    <div class="section-header">
-      <h2 class="section-title">Inventory</h2>
-      <button class="btn-outline" onclick="startInventoryRefresh()">↺ รีเฟรช</button>
+<!-- PAGE: INVENTORY -->
+<div class="page" id="page-inventory">
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-title-text">Inventory</span>
     </div>
-    <div class="dash-card">
-      <div id="inv-inner"></div>
+    <div class="page-header-right">
+      <button class="hdr-btn-outline" onclick="startInventoryRefresh()">↺ รีเฟรช</button>
     </div>
-  </section>
+  </header>
+  <div class="page-body page-body-scroll">
+    <div id="inv-inner"></div>
+  </div>
+</div>
 
-  <footer class="dash-footer">
-    <p id="footer-text">blahexm · 2026</p>
-  </footer>
-</main>
+<!-- PAGE: SETTINGS -->
+<div class="page" id="page-settings">
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-title-text">Settings</span>
+    </div>
+  </header>
+  <div class="page-body page-body-scroll">
+    <!-- หน้าหลัก -->
+    <div class="set-section">
+      <div class="set-section-label">หน้าหลัก (เปิดมาแล้วเจอหน้าไหน)</div>
+      <div class="set-page-picker" id="set-page-picker">
+        <button class="set-page-btn" data-page="profile"   onclick="setHomePage('profile')">👤 Profile</button>
+        <button class="set-page-btn" data-page="finance"   onclick="setHomePage('finance')">💳 Finance</button>
+        <button class="set-page-btn" data-page="calc"      onclick="setHomePage('calc')">🧮 Calc</button>
+        <button class="set-page-btn" data-page="inventory" onclick="setHomePage('inventory')">📦 Inventory</button>
+      </div>
+    </div>
 
-<!-- Modal สำหรับ Inventory Local (ถ้ามีใช้) -->
+    <!-- Theme -->
+    <div class="set-section">
+      <div class="set-section-label">Theme</div>
+      <div class="theme-grid-big" id="set-theme-grid"></div>
+    </div>
+
+    <!-- Size -->
+    <div class="set-section">
+      <div class="set-section-label">
+        <span>ขนาดหน้าจอ</span>
+        <span class="set-val" id="set-size-val">100%</span>
+      </div>
+      <input class="size-slider" id="size-slider" type="range" min="80" max="130" value="100" step="5"
+             oninput="applyScale(this.value)" />
+    </div>
+
+    <!-- เรท -->
+    <div class="set-section">
+      <div class="set-section-label">เรทไอเทม</div>
+      <div id="settings-rate-panel"></div>
+    </div>
+
+    <!-- Finance Reset -->
+    <div class="set-section">
+      <div class="set-section-label">Finance</div>
+      <div class="set-danger-row">
+        <div class="set-danger-desc">
+          <div class="set-danger-title">รีเซ็ต Finance ทั้งหมด</div>
+          <div class="set-danger-sub">ลบข้อมูลทุกวัน ยอดกลับเป็น 0 ย้อนกลับไม่ได้</div>
+        </div>
+        <button class="set-danger-btn" onclick="finResetAll()">🗑️ ล้างทั้งหมด</button>
+      </div>
+    </div>
+
+    <!-- Footer info -->
+    <div class="set-footer-info">
+      <span id="set-footer-text">blahexm · 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Inventory -->
 <div class="inv-modal-overlay" id="inv-modal-overlay" style="display:none" onclick="closeIdModal()"></div>
 <div class="inv-modal" id="inv-modal" style="display:none">
   <div class="inv-modal-title" id="inv-modal-title">เพิ่ม ID</div>
