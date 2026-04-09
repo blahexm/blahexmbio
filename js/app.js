@@ -446,6 +446,7 @@ async function renderFinanceDashboard(wrap) {
     <div class="fin-foot-actions">
       <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
       <button class="fin-reset-btn" onclick="finResetToday()">🔄 รีเซ็ตวันนี้</button>
+      <button class="fin-reset-all-btn" onclick="finResetAll()">🗑️ ล้างทั้งหมด</button>
     </div>
   `;
 }
@@ -490,6 +491,14 @@ async function finResetToday() {
   const today = todayKey();
   if (!confirm(`รีเซ็ตยอดวันที่ ${today} เป็น 0 บาท?\n(ลบรายการทั้งหมดของวันนี้)`)) return;
   await financeSaveDay(today, []);
+  renderFinanceDashboard(document.getElementById('calc-inner'));
+}
+
+async function finResetAll() {
+  if (!confirm('⚠️ ล้างข้อมูล Finance ทั้งหมดทุกวัน?\nยอดจะกลับเป็น 0 หมดเลย ย้อนกลับไม่ได้!')) return;
+  const { data } = await _sb.from('finance').select('date');
+  if (!data || data.length === 0) { alert('ไม่มีข้อมูลอยู่แล้ว'); return; }
+  await _sb.from('finance').delete().neq('date', ''); // ลบทุก row
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
