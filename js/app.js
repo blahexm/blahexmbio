@@ -295,27 +295,70 @@ const _sb    = window.supabase.createClient(SB_URL, SB_KEY);
 async function financeLoad() {
   const { data } = await _sb.from('finance').select('*');
   const result = {};
-  (data || []).forEach(row => { result[row.date] = { total: row.total, logs: row.logs || [] }; });
+  (data || []).forEach(row => {
+    // คำนวณ total จาก logs เสมอเพื่อป้องกันข้อมูลเพี้ยน
+    const logs = row.logs || [];
+    const computedTotal = logs.reduce((s, l) => s + (l.amount || 0), 0);
+    result[row.date] = { total: computedTotal, logs };
+  });
   return result;
 }
-async function financeSaveDay(date, total, logs) {
+async function financeSaveDay(date, logs) {
+  // total คำนวณจาก logs ตรงๆ ป้องกันเพี้ยนจากการบวก/ลบหลายครั้ง
+  const total = logs.reduce((s, l) => s + (l.amount || 0), 0);
   await _sb.from('finance').upsert({ date, total, logs, updated_at: new Date().toISOString() }, { onConflict: 'date' });
+  return total;
 }
 
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+function dateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function getLast7Keys() {
   const keys = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+    keys.push(dateKey(d));
+  }
+  return keys;
+}
+function getWeekKeys() { return getLast7Keys(); }
+function getMonthKeys() {
+  const keys = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    keys.push(dateKey(d));
   }
   return keys;
 }
 function fmtMoney(n) {
   return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ── view state ── */
+let _finView = 'week'; // 'week' | 'month'
+let _finLogView = 'today'; // 'today' | 'all'
+
+function buildBarChart(data, keys, today) {
+  const vals   = keys.map(k => data[k]?.total || 0);
+  const maxVal = Math.max(...vals.map(Math.abs), 1);
+  return keys.map((k, i) => {
+    const v   = vals[i];
+    const pct = Math.max(4, Math.round((Math.abs(v) / maxVal) * 100));
+    const isT = k === today;
+    const lbl = k.slice(8); // DD
+    const isNeg = v < 0;
+    return `<div class="fin-bar-col">
+      <div class="fin-bar-amt ${isNeg?'neg':''}">${v !== 0 ? (v>=0?'+':'')+fmtMoney(v) : ''}</div>
+      <div class="fin-bar-wrap">
+        <div class="fin-bar-fill ${isT?'today':''} ${isNeg?'neg':''}" style="height:${pct}%"></div>
+      </div>
+      <div class="fin-bar-lbl ${isT?'today':''}">${lbl}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ── Finance Dashboard ── */
@@ -325,35 +368,36 @@ async function renderFinanceDashboard(wrap) {
   const data   = await financeLoad();
   const today  = todayKey();
   const todayD = data[today] || { total: 0, logs: [] };
-  const keys   = getLast7Keys();
+  const weekKeys  = getWeekKeys();
+  const monthKeys = getMonthKeys();
 
-  let weekTotal = 0;
-  keys.forEach(k => { weekTotal += (data[k]?.total || 0); });
+  const weekTotal  = weekKeys.reduce((s, k) => s + (data[k]?.total || 0), 0);
+  const monthTotal = monthKeys.reduce((s, k) => s + (data[k]?.total || 0), 0);
 
-  const vals   = keys.map(k => data[k]?.total || 0);
-  const maxVal = Math.max(...vals, 1);
-  const barHTML = keys.map((k, i) => {
-    const v   = vals[i];
-    const pct = Math.max(4, Math.round((v / maxVal) * 100));
-    const isT = k === today;
-    const lbl = k.slice(8);
-    return `<div class="fin-bar-col">
-      <div class="fin-bar-amt">${v > 0 ? '+'+fmtMoney(v) : ''}</div>
-      <div class="fin-bar-wrap">
-        <div class="fin-bar-fill ${isT?'today':''}" style="height:${pct}%"></div>
-      </div>
-      <div class="fin-bar-lbl ${isT?'today':''}">${lbl}</div>
-    </div>`;
-  }).join('');
+  const chartKeys = _finView === 'month' ? monthKeys.slice(-14) : weekKeys; // แสดง 14 วันสุดท้ายของเดือน หรือ 7 วัน
+  const barHTML = buildBarChart(data, _finView === 'month' ? monthKeys : weekKeys, today);
 
-  const logs    = (todayD.logs || []).slice(-5).reverse();
-  const logHTML = logs.length === 0
-    ? `<div class="fin-empty-log">ยังไม่มีรายการวันนี้</div>`
-    : logs.map(l => `
+  // logs
+  let logsToShow = [];
+  if (_finLogView === 'today') {
+    logsToShow = (todayD.logs || []).slice().reverse().slice(0, 10);
+  } else {
+    // รวม log ทุกวันใน 7 วัน เรียงใหม่สุดก่อน
+    weekKeys.slice().reverse().forEach(k => {
+      if (data[k]?.logs) {
+        data[k].logs.slice().reverse().forEach(l => logsToShow.push({ ...l, _date: k }));
+      }
+    });
+    logsToShow = logsToShow.slice(0, 20);
+  }
+
+  const logHTML = logsToShow.length === 0
+    ? `<div class="fin-empty-log">ยังไม่มีรายการ</div>`
+    : logsToShow.map(l => `
       <div class="fin-log-row">
         <span class="fin-log-dot ${l.amount>=0?'pos':'neg'}"></span>
         <span class="fin-log-note">${l.note || (l.amount>=0?'รายรับ':'รายจ่าย')}</span>
-        <span class="fin-log-time">${l.time}</span>
+        <span class="fin-log-time">${l._date && _finLogView==='all' ? l._date.slice(5)+' ' : ''}${l.time}</span>
         <span class="fin-log-amt ${l.amount>=0?'pos':'neg'}">${l.amount>=0?'+':''}${fmtMoney(l.amount)}฿</span>
       </div>`).join('');
 
@@ -361,15 +405,26 @@ async function renderFinanceDashboard(wrap) {
     <div class="fin-totals">
       <div class="fin-total-card main">
         <div class="fin-total-label">วันนี้</div>
-        <div class="fin-total-val">${todayD.total>=0?'+':''}${fmtMoney(todayD.total)}฿</div>
+        <div class="fin-total-val ${todayD.total<0?'neg':''}">${todayD.total>=0?'+':''}${fmtMoney(todayD.total)}฿</div>
       </div>
-      <div class="fin-total-card">
-        <div class="fin-total-label">7 วัน</div>
-        <div class="fin-total-val sm">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
+      <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('week')" title="สลับ">
+        <div class="fin-total-label">7 วัน ${_finView==='week'?'▸':''}</div>
+        <div class="fin-total-val sm ${weekTotal<0?'neg':''}">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
+      </div>
+      <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('month')" title="สลับ">
+        <div class="fin-total-label">30 วัน ${_finView==='month'?'▸':''}</div>
+        <div class="fin-total-val sm ${monthTotal<0?'neg':''}">${monthTotal>=0?'+':''}${fmtMoney(monthTotal)}฿</div>
       </div>
     </div>
-    <div class="fin-section-label">รายวัน (7 วัน)</div>
-    <div class="fin-chart">${barHTML}</div>
+
+    <div class="fin-view-tabs">
+      <button class="fin-view-tab ${_finView==='week'?'active':''}" onclick="switchFinView('week')">📅 รายสัปดาห์</button>
+      <button class="fin-view-tab ${_finView==='month'?'active':''}" onclick="switchFinView('month')">📆 รายเดือน</button>
+    </div>
+
+    <div class="fin-section-label">${_finView==='week'?'รายวัน (7 วัน)':'รายวัน (30 วัน)'}</div>
+    <div class="fin-chart ${_finView==='month'?'month':''}">${barHTML}</div>
+
     <div class="fin-input-row">
       <input class="fin-amount-input" id="fin-amount" type="number"
         placeholder="+200 หรือ -50" step="any"
@@ -381,12 +436,27 @@ async function renderFinanceDashboard(wrap) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
-    <div class="fin-section-label" style="margin-top:14px">รายการล่าสุด</div>
+
+    <div class="fin-section-label" style="margin-top:14px;display:flex;align-items:center;gap:8px">
+      <span>รายการ</span>
+      <button class="fin-log-tab ${_finLogView==='today'?'active':''}" onclick="switchFinLogView('today')">วันนี้</button>
+      <button class="fin-log-tab ${_finLogView==='all'?'active':''}" onclick="switchFinLogView('all')">7 วัน</button>
+    </div>
     <div class="fin-logs" id="fin-logs">${logHTML}</div>
     <div class="fin-foot-actions">
       <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
+      <button class="fin-reset-btn" onclick="finResetToday()">🔄 รีเซ็ตวันนี้</button>
     </div>
   `;
+}
+
+function switchFinView(v) {
+  _finView = v;
+  renderFinanceDashboard(document.getElementById('calc-inner'));
+}
+function switchFinLogView(v) {
+  _finLogView = v;
+  renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
 /* ── Actions ── */
@@ -400,9 +470,8 @@ async function finAddEntry() {
   const today = todayKey();
   const data  = await financeLoad();
   if (!data[today]) data[today] = { total: 0, logs: [] };
-  data[today].total += amt;
   data[today].logs.push({ amount: amt, note, time });
-  await financeSaveDay(today, data[today].total, data[today].logs);
+  await financeSaveDay(today, data[today].logs);
   if (amtEl)  amtEl.value  = '';
   if (noteEl) noteEl.value = '';
   renderFinanceDashboard(document.getElementById('calc-inner'));
@@ -412,9 +481,15 @@ async function finUndo() {
   const today = todayKey();
   const data  = await financeLoad();
   if (!data[today]?.logs?.length) return;
-  const last = data[today].logs.pop();
-  data[today].total -= last.amount;
-  await financeSaveDay(today, data[today].total, data[today].logs);
+  data[today].logs.pop();
+  await financeSaveDay(today, data[today].logs);
+  renderFinanceDashboard(document.getElementById('calc-inner'));
+}
+
+async function finResetToday() {
+  const today = todayKey();
+  if (!confirm(`รีเซ็ตยอดวันที่ ${today} เป็น 0 บาท?\n(ลบรายการทั้งหมดของวันนี้)`)) return;
+  await financeSaveDay(today, []);
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 

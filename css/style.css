@@ -392,7 +392,8 @@ body {
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 .shake { animation:shake .35s ease; }
 
-.fin-totals { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px; }
+.fin-totals { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px; }
+@media (max-width:480px) { .fin-totals { grid-template-columns:1fr 1fr; } }
 .fin-total-card { background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px; }
 .fin-total-card.main { background:var(--ag);border-color:rgba(255,255,255,.08); }
 .fin-total-label { font-family:'Geist Mono',monospace;font-size:.5rem;color:var(--dim2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px; }
@@ -406,6 +407,22 @@ body {
 .fin-bar-wrap { flex:1;width:100%;display:flex;align-items:flex-end;background:rgba(255,255,255,.03);border-radius:4px;overflow:hidden; }
 .fin-bar-fill { width:100%;background:rgba(255,255,255,.08);border-radius:4px;transition:height .4s cubic-bezier(.16,1,.3,1); }
 .fin-bar-fill.today { background:var(--a);box-shadow:0 0 10px var(--aglow); }
+.fin-bar-fill.neg { background:rgba(244,63,94,.5); }
+.fin-bar-fill.today.neg { background:#f43f5e; }
+.fin-bar-amt.neg { color:#f43f5e; }
+.fin-total-val.neg { color:#f43f5e; }
+.fin-chart.month { gap:2px; }
+.fin-chart.month .fin-bar-amt { font-size:.3rem;max-width:24px; }
+/* view tabs */
+.fin-view-tabs { display:flex;gap:6px;margin-bottom:12px; }
+.fin-view-tab { font-family:'Geist Mono',monospace;font-size:.52rem;padding:5px 11px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all .15s;letter-spacing:.04em; }
+.fin-view-tab.active { border-color:var(--a);color:var(--a);background:var(--ag); }
+/* log tabs */
+.fin-log-tab { font-family:'Geist Mono',monospace;font-size:.48rem;padding:3px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all .15s; }
+.fin-log-tab.active { border-color:var(--a);color:var(--a); }
+/* reset btn */
+.fin-reset-btn { flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--dim);font-family:'Geist Mono',monospace;font-size:.55rem;cursor:pointer;transition:all .18s;letter-spacing:.04em; }
+.fin-reset-btn:hover { color:#f59e0b;border-color:rgba(245,158,11,.4); }
 .fin-bar-lbl { font-family:'Geist Mono',monospace;font-size:.46rem;color:var(--dim2); }
 .fin-bar-lbl.today { color:var(--a);font-weight:700; }
 
@@ -433,7 +450,7 @@ body {
 .fin-empty-log { font-family:'Geist Mono',monospace;font-size:.58rem;color:var(--dim2);text-align:center;padding:16px 0; }
 
 .fin-foot-actions { display:flex;justify-content:space-between;margin-top:14px;gap:8px; }
-.fin-undo-btn,.fin-lock-btn { flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--dim);font-family:'Geist Mono',monospace;font-size:.55rem;cursor:pointer;transition:all .18s;letter-spacing:.04em; }
+.fin-undo-btn,.fin-lock-btn,.fin-reset-btn { flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--dim);font-family:'Geist Mono',monospace;font-size:.55rem;cursor:pointer;transition:all .18s;letter-spacing:.04em; }
 .fin-undo-btn:hover { color:var(--text);border-color:var(--border2); }
 .fin-lock-btn:hover { color:#f43f5e;border-color:rgba(244,63,94,.3); }
 .fin-loading { text-align:center;padding:40px 0;font-family:'Geist Mono',monospace;font-size:.6rem;color:var(--dim2);letter-spacing:.1em; }
