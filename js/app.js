@@ -25,8 +25,6 @@ function scrollToSection(name) {
   const el = document.getElementById('section-' + name);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   setActiveTab(name);
-  if (name === 'calc') setTimeout(() => renderCalcPage(), 300);
-  // close sidebar on mobile
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sb-overlay');
   if (sb && sb.classList.contains('open')) {
@@ -79,7 +77,6 @@ const THEME_KEY = 'blahexm_theme';
 function applyTheme(id) {
   document.documentElement.setAttribute('data-theme', id);
   localStorage.setItem(THEME_KEY, id);
-  // update active dot
   document.querySelectorAll('.theme-dot').forEach(d => {
     d.classList.toggle('active', d.dataset.theme === id);
   });
@@ -215,7 +212,6 @@ function initSecurity() {
   });
 }
 
-
 /* ── Size Scale ── */
 const SCALE_KEY = 'blahexm_scale';
 
@@ -261,10 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (C.music.url) document.getElementById('audio').src = C.music.url;
   }
 
-  // Apply saved theme
   buildThemeGrids();
 
-  // Update sidebar user info
   const sbName = document.getElementById('sb-user-name');
   const sbStatus = document.getElementById('sb-user-status');
   if (sbName) sbName.textContent = C.name;
@@ -280,22 +274,22 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollSpy();
   fetchLanyard();
   setInterval(fetchLanyard, 12000);
-  renderCalcPage();
+
+  // Finance — เปิดตรงเลย ไม่มี PIN
+  renderFinanceDashboard(document.getElementById('calc-inner'));
 
   const qcWrap = document.getElementById('quick-calc-inner');
   if (qcWrap) renderQuickCalc(qcWrap);
   renderInventory();
 });
+
 /* ══════════════════════════════════════
    FINANCE TRACKER — Supabase sync
+   ไม่มี PIN/Lock แล้ว — เปิดตรง
 ══════════════════════════════════════ */
-// PIN is now in config.js → C.financePin
-const SESSION_KEY = 'blahexm_auth';
-const SB_URL      = 'https://zwavwijmgjgpaembmpnl.supabase.co';
-const SB_KEY      = 'sb_publishable_3h62iooez-XuZR9DAuspbw_blEOj2zl';
-const _sb         = window.supabase.createClient(SB_URL, SB_KEY);
-
-let _financeUnlocked = false;
+const SB_URL = 'https://zwavwijmgjgpaembmpnl.supabase.co';
+const SB_KEY = 'sb_publishable_3h62iooez-XuZR9DAuspbw_blEOj2zl';
+const _sb    = window.supabase.createClient(SB_URL, SB_KEY);
 
 /* ── Supabase helpers ── */
 async function financeLoad() {
@@ -324,65 +318,9 @@ function fmtMoney(n) {
   return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/* ── Auth ── */
-function financeCheckSession() { return sessionStorage.getItem(SESSION_KEY) === '1'; }
-function financeSetSession()   { sessionStorage.setItem(SESSION_KEY, '1'); }
-
-function showTab(name) { scrollToSection(name); }
-
-/* ── Main render ── */
-function renderCalcPage() {
-  const wrap = document.getElementById('calc-inner');
-  if (!wrap) return;
-  if (financeCheckSession()) {
-    renderFinanceDashboard(wrap);
-  } else {
-    renderFinanceLock(wrap);
-  }
-}
-
-/* ── Lock screen ── */
-function renderFinanceLock(wrap) {
-  wrap.innerHTML = `
-    <div class="fin-lock">
-      <div class="fin-lock-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
-          <rect x="3" y="11" width="18" height="11" rx="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-      </div>
-      <div class="fin-lock-title">finance</div>
-      <div class="fin-lock-sub">enter password to continue</div>
-      <input class="fin-pin-input" id="fin-pin-input" type="password"
-        placeholder="••••••••" autocomplete="off" spellcheck="false"
-        oninput="finPinInput(this)" onkeydown="if(event.key==='Enter')finPinSubmit()" />
-      <div class="fin-pin-err" id="fin-pin-err"></div>
-    </div>
-  `;
-  setTimeout(() => document.getElementById('fin-pin-input')?.focus(), 100);
-}
-
-function finPinInput(el) {
-  document.getElementById('fin-pin-err').textContent = '';
-  el.style.borderColor = '';
-}
-
-function finPinSubmit() {
-  const val = document.getElementById('fin-pin-input')?.value || '';
-  if (val === (C.financePin || 'blahexm')) {
-    financeSetSession();
-    _financeUnlocked = true;
-    renderFinanceDashboard(document.getElementById('calc-inner'));
-  } else {
-    const inp = document.getElementById('fin-pin-input');
-    const err = document.getElementById('fin-pin-err');
-    if (inp) { inp.value = ''; inp.style.borderColor = 'rgba(244,63,94,.5)'; inp.classList.add('shake'); setTimeout(() => inp.classList.remove('shake'), 400); }
-    if (err) err.textContent = 'wrong password';
-  }
-}
-
-/* ── Dashboard ── */
+/* ── Finance Dashboard ── */
 async function renderFinanceDashboard(wrap) {
+  if (!wrap) return;
   wrap.innerHTML = `<div class="fin-loading">loading...</div>`;
   const data   = await financeLoad();
   const today  = todayKey();
@@ -447,7 +385,6 @@ async function renderFinanceDashboard(wrap) {
     <div class="fin-logs" id="fin-logs">${logHTML}</div>
     <div class="fin-foot-actions">
       <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
-      <button class="fin-lock-btn" onclick="finLock()">🔒 ล็อค</button>
     </div>
   `;
 }
@@ -481,16 +418,9 @@ async function finUndo() {
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
-function finLock() {
-  sessionStorage.removeItem(SESSION_KEY);
-  _financeUnlocked = false;
-  renderFinanceLock(document.getElementById('calc-inner'));
-}
-
 /* ══════════════════════════════════════
    SMART CALCULATOR
 ══════════════════════════════════════ */
-// เรทเริ่มต้น — divisor คือจำนวนของ ÷ divisor = ราคา฿
 const SMART_RATES_DEFAULT = {
   'Aura Crate':     { divisor: 0.3,    emoji: '📦', img: 'img/items/aura-crate.png',     multiply: true },
   'Cosmetic Crate': { divisor: 0.1,    emoji: '🎁', img: 'img/items/cosmetic-crate.png', multiply: true },
@@ -516,28 +446,21 @@ function saveRates(rates) {
 }
 let SMART_RATES = loadRates();
 
-
 function parseSmartText(text) {
   const results = {};
   const lines   = text.split('\n').map(l => l.trim()).filter(Boolean);
   const knownNames = Object.keys(SMART_RATES_DEFAULT);
-
-  // Strategy 1: NamexNUMBER on same line e.g. "Race Rerollx8227136"
-  // Strategy 2: Name on one line, xNUMBER on next line
-  // Strategy 3: Name repeated then xNUMBER (copy-paste artifact)
 
   function fuzzyMatch(raw) {
     const r = raw.toLowerCase().replace(/\s+/g,' ').trim();
     return knownNames.find(k => {
       const kl = k.toLowerCase();
       if (kl === r) return true;
-      // partial: all words of key appear in raw
       const words = kl.split(' ');
       return words.every(w => r.includes(w));
     });
   }
 
-  // Pass 1: same-line NamexNUM
   const usedLines = new Set();
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^(.+?)x(\d+)$/i);
@@ -549,12 +472,10 @@ function parseSmartText(text) {
     }
   }
 
-  // Pass 2: Name line followed by xNUMBER line (possibly with duplicate name in between)
   for (let i = 0; i < lines.length; i++) {
     if (usedLines.has(i)) continue;
     const matched = fuzzyMatch(lines[i]);
     if (!matched) continue;
-    // Look ahead up to 3 lines for xNUMBER
     for (let j = i+1; j < Math.min(i+4, lines.length); j++) {
       if (usedLines.has(j)) continue;
       const m = lines[j].match(/^x(\d+)$/i);
@@ -618,7 +539,6 @@ function smartCopy(val) {
   const btn = document.querySelector('.smart-copy-btn');
   if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
 }
-
 
 function renderRateSettings(panel) {
   const rates = loadRates();
@@ -685,21 +605,21 @@ function openRateSettings() {
     panel.style.display = 'none';
   }
 }
+
 /* ══════════════════════════════════════
-   QUICK CALC — กรอกจำนวนชิ้น คิดราคาออโต้
+   QUICK CALC
 ══════════════════════════════════════ */
-let _qcMode = 'qty'; // 'qty' = ชิ้น→บาท | 'price' = บาท→ชิ้น
+let _qcMode = 'qty';
 
 function renderQuickCalc(container) {
   const items = Object.entries(SMART_RATES_DEFAULT).filter(([,v]) => v.divisor > 0);
 
-  // ── mode: qty → price ──
   const inputsQtyHTML = items.map(([name, def]) => {
     const id = 'qc_' + name.replace(/\s/g,'_');
     const iconHtml = def.img
       ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-emoji" style="display:none">${def.emoji}</span>`
       : `<span class="qcalc-emoji">${def.emoji}</span>`;
-    return `<div class="qcalc-item">
+    return `<div class="qcalc-input-row">
       <span class="qcalc-icon-wrap">${iconHtml}</span>
       <span class="qcalc-name">${name}</span>
       <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0" oninput="updateQuickCalc()" />
@@ -719,13 +639,12 @@ function renderQuickCalc(container) {
     </div>`;
   }).join('');
 
-  // ── mode: price → qty ──
   const inputsPriceHTML = items.map(([name, def]) => {
     const id = 'rqc_' + name.replace(/\s/g,'_');
     const iconHtml = def.img
       ? `<img class="item-icon" src="${def.img}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="qcalc-emoji" style="display:none">${def.emoji}</span>`
       : `<span class="qcalc-emoji">${def.emoji}</span>`;
-    return `<div class="qcalc-item">
+    return `<div class="qcalc-input-row">
       <span class="qcalc-icon-wrap">${iconHtml}</span>
       <span class="qcalc-name">${name}</span>
       <input class="qcalc-field" id="${id}" type="number" min="0" placeholder="0฿" oninput="updateReverseCalc()" />
@@ -750,7 +669,6 @@ function renderQuickCalc(container) {
       <button class="qcalc-tab active" id="tab-qty" onclick="switchQcMode('qty')">🧮 ชิ้น → บาท</button>
       <button class="qcalc-tab" id="tab-price" onclick="switchQcMode('price')">💰 บาท → ชิ้น</button>
     </div>
-
     <div id="qcalc-qty-panel">
       <div class="qcalc-wrap">
         <div class="qcalc-left">
@@ -768,7 +686,6 @@ function renderQuickCalc(container) {
         </div>
       </div>
     </div>
-
     <div id="qcalc-price-panel" style="display:none">
       <div class="qcalc-wrap">
         <div class="qcalc-left">
@@ -847,7 +764,6 @@ function updateReverseCalc() {
     const baht = parseFloat(inp.value) || 0;
     const rate = SMART_RATES[name] || def;
     if (!rate || rate.divisor === 0) return;
-    // กลับสูตร: qty = baht / divisor (multiply) หรือ qty = baht * divisor (divide)
     const qty = rate.multiply ? baht / rate.divisor : baht * rate.divisor;
     grandBaht += baht;
     if (baht > 0) {
@@ -871,10 +787,12 @@ function quickCalcCopy() {
   const btn = document.getElementById('qcalc-copy-btn');
   if (btn) { btn.textContent = 'copied! ✓'; setTimeout(()=>{ btn.textContent = 'copy ยอดรวม'; }, 1500); }
 }
+
 /* ══════════════════════════════════════
-   INVENTORY — สต็อกรวม + สถานะ ID
+   INVENTORY LOCAL — สต็อกรวม + สถานะ ID
+   (แยกจาก inventory.js ที่ดึง Supabase)
 ══════════════════════════════════════ */
-const INV_KEY = 'blahexm_inventory'; // { ids: [ { name, online, items:{} } ] }
+const INV_KEY = 'blahexm_inventory';
 
 function invLoad() {
   try { return JSON.parse(localStorage.getItem(INV_KEY)) || { ids: [] }; } catch { return { ids: [] }; }
@@ -883,7 +801,6 @@ function invSave(data) { localStorage.setItem(INV_KEY, JSON.stringify(data)); }
 
 const INV_ITEMS = Object.keys(SMART_RATES_DEFAULT);
 
-/* ── render หน้า Inventory ── */
 function renderInventory() {
   renderInvSummary();
   renderInvIdList();
@@ -893,7 +810,6 @@ function renderInvSummary() {
   const el = document.getElementById('inv-summary');
   if (!el) return;
   const data = invLoad();
-  // รวมสต็อก
   const totals = {};
   INV_ITEMS.forEach(k => totals[k] = 0);
   data.ids.forEach(id => {
@@ -930,9 +846,7 @@ function renderInvIdList() {
       <span class="inv-id-name">${id.name}</span>
       <span class="inv-id-status">${id.online ? 'ออนไลน์' : 'ออฟไลน์'}</span>
       <div class="inv-id-actions">
-        <button class="inv-id-btn" onclick="toggleIdOnline(${i})">
-          ${id.online ? '🔴 ออฟ' : '🟢 ออน'}
-        </button>
+        <button class="inv-id-btn" onclick="toggleIdOnline(${i})">${id.online ? '🔴 ออฟ' : '🟢 ออน'}</button>
         <button class="inv-id-btn" onclick="openEditIdModal(${i})">✏️ แก้ไข</button>
         <button class="inv-id-btn danger" onclick="deleteId(${i})">🗑️</button>
       </div>
@@ -958,7 +872,6 @@ function updateInvDeleteBtn() {
   const checked = document.querySelectorAll('.inv-id-check:checked').length;
   const btn = document.getElementById('inv-delete-selected');
   if (btn) btn.style.display = checked > 0 ? '' : 'none';
-  // sync select-all checkbox
   const all = document.querySelectorAll('.inv-id-check').length;
   const allCheck = document.getElementById('inv-check-all');
   if (allCheck) allCheck.checked = checked === all && all > 0;
@@ -987,7 +900,6 @@ function deleteAllIds() {
   renderInventory();
 }
 
-/* ── Modal ── */
 let _editingIdx = -1;
 
 function openAddIdModal() {
@@ -1029,7 +941,6 @@ function renderModalItems(items) {
     </div>`;
   }).join('');
 
-  // toggle label
   document.getElementById('inv-modal-online').onchange = function() {
     document.getElementById('inv-modal-status-txt').textContent = this.checked ? 'ออนไลน์' : 'ออฟไลน์';
   };
@@ -1041,8 +952,12 @@ function closeIdModal() {
 }
 
 function saveIdModal() {
-  const name   = document.getElementById('inv-modal-idname').value.trim();
-  if (!name) { document.getElementById('inv-modal-idname').classList.add('shake'); setTimeout(()=>document.getElementById('inv-modal-idname').classList.remove('shake'),400); return; }
+  const name = document.getElementById('inv-modal-idname').value.trim();
+  if (!name) {
+    document.getElementById('inv-modal-idname').classList.add('shake');
+    setTimeout(()=>document.getElementById('inv-modal-idname').classList.remove('shake'),400);
+    return;
+  }
   const online = document.getElementById('inv-modal-online').checked;
   const items  = {};
   INV_ITEMS.forEach(n => {

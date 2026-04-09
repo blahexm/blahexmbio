@@ -13,15 +13,12 @@ const C = {
   badge:       "crown",
   badgeCustom: "⚡",
 
-  /* 🟢 สถานะ Discord */
+  /* 🟢 สถานะ Discord (ใส่ Discord User ID หรือปล่อยว่างถ้าไม่ใช้) */
   discordId:        "",
   manualStatus:     "idle",
   manualStatusText: "copy & paste then successfull",
 
-  /* 🔒 Finance PIN — เปลี่ยนได้ที่นี่ */
-  financePin: "blahexm",
-
-  /* 🎨 ธีมเริ่มต้น (จะถูก override ถ้าเคยเลือกในเว็บแล้ว)
+  /* 🎨 ธีมเริ่มต้น
      crimson | rose | orange | amber | gold | yellow
      mint | cobalt | violet | silver | mocha */
   theme: "rose",
@@ -46,7 +43,7 @@ const C = {
     artist: "",
   },
 
-  /* 🎧 เพลงโปรด */
+  /* 🎧 เพลงโปรด (Spotify / YouTube URL) */
   favMusic: [
     "https://open.spotify.com/track/1EXw7rqJcFIvMtj4Q8fhKw?si=laPSvDCxTTWQOK_DAjaaQA",
     "https://open.spotify.com/track/4xOFLtbauANPP5wXKwzApD?si=loI_IZExT3-2HvHmORU1eQ",

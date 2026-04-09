@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <title>blahexm</title>
 <link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/Dashboard.css"/>
+<link rel="stylesheet" href="css/inventory.css"/>
 </head>
 <body>
 <div id="cursor"></div>
@@ -79,6 +81,7 @@
 <!-- MAIN -->
 <main class="main-content">
 
+  <!-- PROFILE -->
   <section class="dash-section" id="section-profile">
     <div class="section-header">
       <h2 class="section-title">Profile</h2>
@@ -135,6 +138,7 @@
     </div>
   </section>
 
+  <!-- FINANCE — เปิดตรง ไม่มี PIN -->
   <section class="dash-section" id="section-calc">
     <div class="section-header">
       <h2 class="section-title">Finance</h2>
@@ -144,6 +148,7 @@
     </div>
   </section>
 
+  <!-- TEXT CALC -->
   <section class="dash-section" id="section-smart">
     <div class="section-header">
       <h2 class="section-title">Calculator</h2>
@@ -151,11 +156,14 @@
     </div>
     <div class="dash-card">
       <div class="smart-settings-panel" id="smart-settings-top" style="display:none"></div>
-      <textarea class="smart-input" id="smart-input" placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..." oninput="smartCalc()"></textarea>
+      <textarea class="smart-input" id="smart-input"
+        placeholder="แปะข้อความจากเกมตรงนี้...&#10;Race Rerollx8227136&#10;100&#10;Epic&#10;..."
+        oninput="smartCalc()"></textarea>
       <div id="smart-result"></div>
     </div>
   </section>
 
+  <!-- QUICK CALC -->
   <section class="dash-section" id="section-quick">
     <div class="section-header">
       <h2 class="section-title">Quick Calc</h2>
@@ -166,6 +174,7 @@
     </div>
   </section>
 
+  <!-- INVENTORY — Supabase -->
   <section class="dash-section" id="section-inventory">
     <div class="section-header">
       <h2 class="section-title">Inventory</h2>
@@ -181,15 +190,33 @@
   </footer>
 </main>
 
+<!-- Modal สำหรับ Inventory Local (ถ้ามีใช้) -->
+<div class="inv-modal-overlay" id="inv-modal-overlay" style="display:none" onclick="closeIdModal()"></div>
+<div class="inv-modal" id="inv-modal" style="display:none">
+  <div class="inv-modal-title" id="inv-modal-title">เพิ่ม ID</div>
+  <input class="inv-modal-input" id="inv-modal-idname" placeholder="ชื่อ ID" />
+  <div class="inv-modal-status-row">
+    <span class="inv-modal-label">สถานะ</span>
+    <label class="inv-toggle">
+      <input type="checkbox" id="inv-modal-online" checked />
+      <span class="inv-toggle-slider"></span>
+    </label>
+    <span id="inv-modal-status-txt">ออนไลน์</span>
+  </div>
+  <div class="inv-modal-label">จำนวนของ</div>
+  <div class="inv-modal-items" id="inv-modal-items"></div>
+  <div class="inv-modal-actions">
+    <button class="inv-modal-save" onclick="saveIdModal()">บันทึก</button>
+    <button class="inv-modal-cancel" onclick="closeIdModal()">ยกเลิก</button>
+  </div>
+</div>
+
 <audio id="audio" loop></audio>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
-<script src="js/inventory.js"></script>
-</body>
-</html>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/config.js"></script>
 <script src="js/inventory.js"></script>
 <script src="js/Dashboard.js"></script>
-<script src="js/app.js"></script>
+</body>
+</html>
