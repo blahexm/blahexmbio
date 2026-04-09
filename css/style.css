@@ -942,3 +942,113 @@ body {
 
 /* checkbox */
 .inv-id-check { width:15px; height:15px; accent-color:var(--a); cursor:pointer; flex-shrink:0; }
+/* ══════════════════════════════════════
+   LIGHT MODE — data-mode="light"
+   ใช้ร่วมกับทุก accent theme ได้เลย
+══════════════════════════════════════ */
+[data-mode="light"],
+[data-theme="white"] {
+  --bg:    #f4f4f6;
+  --bg2:   #ffffff;
+  --card:  #ffffff;
+  --card2: #ebebee;
+  --border:  rgba(0,0,0,.08);
+  --border2: rgba(0,0,0,.14);
+  --text:  #111111;
+  --dim:   rgba(17,17,17,.5);
+  --dim2:  rgba(17,17,17,.3);
+}
+
+[data-mode="light"] body,
+[data-theme="white"] body {
+  background: var(--bg);
+}
+
+[data-mode="light"] .bnav,
+[data-theme="white"] .bnav {
+  background: rgba(255,255,255,.94);
+  border-top-color: rgba(0,0,0,.1);
+}
+
+[data-mode="light"] .page-header,
+[data-theme="white"] .page-header {
+  background: #ffffff;
+  border-bottom-color: rgba(0,0,0,.09);
+}
+
+[data-mode="light"] .page,
+[data-theme="white"] .page {
+  background: var(--bg);
+}
+
+[data-mode="light"] .pcard,
+[data-mode="light"] .set-section,
+[data-mode="light"] .dash-card,
+[data-mode="light"] .fin-card,
+[data-theme="white"] .pcard,
+[data-theme="white"] .set-section,
+[data-theme="white"] .dash-card,
+[data-theme="white"] .fin-card {
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+}
+
+[data-mode="light"] .smart-input,
+[data-mode="light"] .fin-amount-input,
+[data-mode="light"] .fin-note-input,
+[data-mode="light"] .fin-pin-input,
+[data-mode="light"] .inv-modal-input,
+[data-mode="light"] .rate-input,
+[data-mode="light"] .qcalc-field,
+[data-theme="white"] .smart-input,
+[data-theme="white"] .fin-amount-input,
+[data-theme="white"] .fin-note-input,
+[data-theme="white"] .fin-pin-input,
+[data-theme="white"] .inv-modal-input,
+[data-theme="white"] .rate-input,
+[data-theme="white"] .qcalc-field {
+  background: rgba(0,0,0,.05);
+  color: #111;
+}
+
+[data-mode="light"] .smart-row,
+[data-mode="light"] .qcalc-result-row,
+[data-mode="light"] .fin-log-row,
+[data-mode="light"] .inv-id-row,
+[data-theme="white"] .smart-row,
+[data-theme="white"] .qcalc-result-row,
+[data-theme="white"] .fin-log-row,
+[data-theme="white"] .inv-id-row {
+  background: rgba(0,0,0,.03);
+}
+
+[data-mode="light"] .fin-bar-wrap,
+[data-theme="white"] .fin-bar-wrap {
+  background: rgba(0,0,0,.06);
+}
+
+[data-mode="light"] .fin-bar-fill,
+[data-theme="white"] .fin-bar-fill {
+  background: rgba(0,0,0,.12);
+}
+
+[data-mode="light"] .inv-modal,
+[data-theme="white"] .inv-modal {
+  background: #fff;
+}
+
+[data-mode="light"] #cursor,
+[data-theme="white"] #cursor {
+  mix-blend-mode: multiply;
+}
+
+/* dash-id-table light */
+[data-mode="light"] .dash-id-table tr:hover td,
+[data-theme="white"] .dash-id-table tr:hover td {
+  background: rgba(0,0,0,.03);
+}
+
+[data-mode="light"] .dash-id-search,
+[data-theme="white"] .dash-id-search {
+  background: #ebebee;
+  color: #111;
+}

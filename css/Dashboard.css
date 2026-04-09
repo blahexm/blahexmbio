@@ -317,3 +317,184 @@
   box-shadow: 0 1px 3px rgba(0,0,0,.4);
 }
 .dash-filter-toggle.on .dash-filter-toggle-knob { transform: translateX(14px); }
+/* ══════════════════════════════════════
+   FINANCE — Missing Classes Fix
+══════════════════════════════════════ */
+
+/* Finance page wrapper — ให้ทุก element อยู่ใน card */
+.fin-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  position: relative;
+  margin-bottom: 12px;
+}
+.fin-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--a), transparent);
+  opacity: .18; border-radius: 1px;
+}
+
+/* View tabs (รายสัปดาห์ / รายเดือน) */
+.fin-view-tabs {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.fin-view-tab {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  color: var(--dim);
+  font-family: 'Geist Mono', monospace;
+  font-size: .6rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .18s;
+  letter-spacing: .03em;
+}
+.fin-view-tab:hover { border-color: var(--a); color: var(--a); }
+.fin-view-tab.active {
+  background: var(--ag);
+  border-color: var(--a);
+  color: var(--a);
+  font-weight: 700;
+}
+
+/* Log tabs (วันนี้ / 7 วัน) */
+.fin-log-tab {
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  font-family: 'Geist Mono', monospace;
+  font-size: .52rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.fin-log-tab:hover { border-color: var(--a); color: var(--a); }
+.fin-log-tab.active {
+  background: var(--ag);
+  border-color: var(--a);
+  color: var(--a);
+  font-weight: 700;
+}
+
+/* fin-total neg color */
+.fin-total-val.neg { color: #f43f5e; }
+
+/* Reset / extra action buttons */
+.fin-reset-btn,
+.fin-reset-all-btn {
+  flex: 1;
+  padding: 7px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  color: var(--dim);
+  font-family: 'Geist Mono', monospace;
+  font-size: .55rem;
+  cursor: pointer;
+  transition: all .18s;
+  letter-spacing: .04em;
+}
+.fin-reset-btn:hover {
+  color: var(--text);
+  border-color: var(--border2);
+}
+.fin-reset-all-btn:hover {
+  color: #ef4444;
+  border-color: rgba(239,68,68,.4);
+  background: rgba(239,68,68,.06);
+}
+
+/* Bar chart negative */
+.fin-bar-fill.neg { background: rgba(244,63,94,.5); }
+.fin-bar-fill.neg.today { background: #f43f5e; box-shadow: 0 0 10px rgba(244,63,94,.4); }
+.fin-bar-amt.neg { color: #f43f5e; }
+
+/* ══════════════════════════════════════
+   DARK / LIGHT MODE TOGGLE (Settings)
+══════════════════════════════════════ */
+.mode-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+.mode-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.mode-toggle-icon { font-size: 1.1rem; }
+.mode-toggle-sub {
+  font-family: 'Geist Mono', monospace;
+  font-size: .52rem;
+  color: var(--dim2);
+  margin-top: 2px;
+}
+
+/* The pill toggle */
+.mode-pill {
+  display: flex;
+  align-items: center;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+  cursor: pointer;
+}
+.mode-pill-btn {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--dim);
+  font-family: 'Geist Mono', monospace;
+  font-size: .58rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+.mode-pill-btn.active {
+  background: var(--a);
+  color: #000;
+  box-shadow: 0 2px 8px var(--aglow);
+}
+[data-theme="white"] .mode-pill-btn.active { color: #fff; }
+
+/* White theme: light mode overrides สมบูรณ์ */
+[data-theme="white"] .fin-card,
+[data-theme="white"] .dash-stat-card,
+[data-theme="white"] .dash-sum-card,
+[data-theme="white"] .dash-id-table-wrap {
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+}
+[data-theme="white"] .dash-id-table tr:hover td {
+  background: rgba(0,0,0,.03);
+}
+[data-theme="white"] .dash-id-search {
+  background: #f0f0f2;
+  color: #111;
+}
+[data-theme="white"] .fin-view-tab,
+[data-theme="white"] .fin-log-tab,
+[data-theme="white"] .fin-reset-btn,
+[data-theme="white"] .fin-reset-all-btn,
+[data-theme="white"] .dash-filter-btn {
+  background: rgba(0,0,0,.03);
+}
+[data-theme="white"] .fin-logs { scrollbar-color: rgba(0,0,0,.15) transparent; }

@@ -62,6 +62,28 @@ function initSettingsPage() {
   document.querySelectorAll('.set-page-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.page === saved);
   });
+  // mode toggle — inject pill into #set-mode-toggle if exists
+  const mt = document.getElementById('set-mode-toggle');
+  if (mt && !mt.dataset.built) {
+    mt.dataset.built = '1';
+    const curMode = localStorage.getItem(MODE_KEY) || 'dark';
+    mt.innerHTML = `
+      <div class="mode-toggle-wrap">
+        <div>
+          <div class="mode-toggle-label">
+            <span class="mode-toggle-icon">${curMode === 'light' ? '☀️' : '🌙'}</span>
+            <div>
+              <div>${curMode === 'light' ? 'Light Mode' : 'Dark Mode'}</div>
+              <div class="mode-toggle-sub">เปลี่ยนโทนสีหน้าจอ</div>
+            </div>
+          </div>
+        </div>
+        <div class="mode-pill">
+          <button class="mode-pill-btn ${curMode==='dark'?'active':''}" data-mode="dark" onclick="applyMode('dark');initSettingsPage()">🌙 Dark</button>
+          <button class="mode-pill-btn ${curMode==='light'?'active':''}" data-mode="light" onclick="applyMode('light');initSettingsPage()">☀️ Light</button>
+        </div>
+      </div>`;
+  }
   // theme grid
   const g = document.getElementById('set-theme-grid');
   if (g && !g.dataset.built) {
@@ -75,8 +97,14 @@ function initSettingsPage() {
       d.title = t.id;
       d.onclick = () => {
         applyTheme(t.id);
+        // if picking non-white theme, set dark mode
+        if (t.id !== 'white') applyMode('dark');
+        else applyMode('light');
         document.querySelectorAll('.theme-dot-big').forEach(x => x.classList.remove('active'));
         d.classList.add('active');
+        // rebuild mode toggle to reflect change
+        const mt2 = document.getElementById('set-mode-toggle');
+        if (mt2) { mt2.dataset.built = ''; initSettingsPage(); }
       };
       g.appendChild(d);
     });
@@ -112,10 +140,11 @@ const THEMES = [
   { id:'mint',    color:'#34d399' }, { id:'cobalt',  color:'#3b82f6' },
   { id:'violet',  color:'#8b5cf6' }, { id:'silver',  color:'#94a3b8' },
   { id:'mocha',   color:'#a0785a' },
-  { id:'white',   color:'#111111', border:'1px solid #ccc' },
-  { id:'black',   color:'#f5f5f5', border:'1px solid #444' },
+  { id:'white',   color:'#111111', border:'1px solid #ccc', label:'☀️ Light' },
+  { id:'black',   color:'#f5f5f5', border:'1px solid #444', label:'🌙 Dark' },
 ];
 const THEME_KEY = 'blahexm_theme';
+const MODE_KEY  = 'blahexm_mode'; // 'dark' | 'light'
 
 function applyTheme(id) {
   document.documentElement.setAttribute('data-theme', id);
@@ -125,10 +154,36 @@ function applyTheme(id) {
   });
 }
 
+function applyMode(mode) {
+  localStorage.setItem(MODE_KEY, mode);
+  if (mode === 'light') {
+    document.documentElement.setAttribute('data-mode', 'light');
+    // switch to white theme when light mode
+    applyTheme('white');
+    document.querySelectorAll('.theme-dot-big').forEach(d => {
+      d.classList.toggle('active', d.title === 'white');
+    });
+  } else {
+    document.documentElement.removeAttribute('data-mode');
+    // if currently on white theme, switch back to rose
+    const cur = localStorage.getItem(THEME_KEY);
+    if (cur === 'white') {
+      applyTheme('rose');
+      document.querySelectorAll('.theme-dot-big').forEach(d => {
+        d.classList.toggle('active', d.title === 'rose');
+      });
+    }
+  }
+  document.querySelectorAll('.mode-pill-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+}
+
 function buildThemeGrids() {
-  // Theme grids now live in Settings page — built lazily in initSettingsPage()
   const savedTheme = localStorage.getItem(THEME_KEY) || C.theme || 'rose';
   applyTheme(savedTheme);
+  const savedMode = localStorage.getItem(MODE_KEY) || 'dark';
+  applyMode(savedMode);
 }
 
 function toggleThemePanel() {
@@ -419,51 +474,55 @@ async function renderFinanceDashboard(wrap) {
       </div>`).join('');
 
   wrap.innerHTML = `
-    <div class="fin-totals">
-      <div class="fin-total-card main">
-        <div class="fin-total-label">วันนี้</div>
-        <div class="fin-total-val ${todayD.total<0?'neg':''}">${todayD.total>=0?'+':''}${fmtMoney(todayD.total)}฿</div>
+    <div class="fin-card">
+      <div class="fin-totals">
+        <div class="fin-total-card main">
+          <div class="fin-total-label">วันนี้</div>
+          <div class="fin-total-val ${todayD.total<0?'neg':''}">${todayD.total>=0?'+':''}${fmtMoney(todayD.total)}฿</div>
+        </div>
+        <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('week')" title="สลับ">
+          <div class="fin-total-label">7 วัน ${_finView==='week'?'▸':''}</div>
+          <div class="fin-total-val sm ${weekTotal<0?'neg':''}">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
+        </div>
+        <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('month')" title="สลับ">
+          <div class="fin-total-label">30 วัน ${_finView==='month'?'▸':''}</div>
+          <div class="fin-total-val sm ${monthTotal<0?'neg':''}">${monthTotal>=0?'+':''}${fmtMoney(monthTotal)}฿</div>
+        </div>
       </div>
-      <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('week')" title="สลับ">
-        <div class="fin-total-label">7 วัน ${_finView==='week'?'▸':''}</div>
-        <div class="fin-total-val sm ${weekTotal<0?'neg':''}">${weekTotal>=0?'+':''}${fmtMoney(weekTotal)}฿</div>
+    </div>
+
+    <div class="fin-card">
+      <div class="fin-view-tabs">
+        <button class="fin-view-tab ${_finView==='week'?'active':''}" onclick="switchFinView('week')">📅 รายสัปดาห์</button>
+        <button class="fin-view-tab ${_finView==='month'?'active':''}" onclick="switchFinView('month')">📆 รายเดือน</button>
       </div>
-      <div class="fin-total-card" style="cursor:pointer" onclick="switchFinView('month')" title="สลับ">
-        <div class="fin-total-label">30 วัน ${_finView==='month'?'▸':''}</div>
-        <div class="fin-total-val sm ${monthTotal<0?'neg':''}">${monthTotal>=0?'+':''}${fmtMoney(monthTotal)}฿</div>
+      <div class="fin-section-label">${_finView==='week'?'รายวัน (7 วัน)':'รายวัน (30 วัน)'}</div>
+      <div class="fin-chart ${_finView==='month'?'month':''}">${barHTML}</div>
+    </div>
+
+    <div class="fin-card">
+      <div class="fin-input-row">
+        <input class="fin-amount-input" id="fin-amount" type="number"
+          placeholder="+200 หรือ -50" step="any"
+          onkeydown="if(event.key==='Enter')finAddEntry()" />
+        <input class="fin-note-input" id="fin-note" type="text"
+          placeholder="หมายเหตุ (optional)"
+          onkeydown="if(event.key==='Enter')finAddEntry()" />
+        <button class="fin-add-btn" onclick="finAddEntry()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
       </div>
-    </div>
-
-    <div class="fin-view-tabs">
-      <button class="fin-view-tab ${_finView==='week'?'active':''}" onclick="switchFinView('week')">📅 รายสัปดาห์</button>
-      <button class="fin-view-tab ${_finView==='month'?'active':''}" onclick="switchFinView('month')">📆 รายเดือน</button>
-    </div>
-
-    <div class="fin-section-label">${_finView==='week'?'รายวัน (7 วัน)':'รายวัน (30 วัน)'}</div>
-    <div class="fin-chart ${_finView==='month'?'month':''}">${barHTML}</div>
-
-    <div class="fin-input-row">
-      <input class="fin-amount-input" id="fin-amount" type="number"
-        placeholder="+200 หรือ -50" step="any"
-        onkeydown="if(event.key==='Enter')finAddEntry()" />
-      <input class="fin-note-input" id="fin-note" type="text"
-        placeholder="หมายเหตุ (optional)"
-        onkeydown="if(event.key==='Enter')finAddEntry()" />
-      <button class="fin-add-btn" onclick="finAddEntry()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
-    </div>
-
-    <div class="fin-section-label" style="margin-top:14px;display:flex;align-items:center;gap:8px">
-      <span>รายการ</span>
-      <button class="fin-log-tab ${_finLogView==='today'?'active':''}" onclick="switchFinLogView('today')">วันนี้</button>
-      <button class="fin-log-tab ${_finLogView==='all'?'active':''}" onclick="switchFinLogView('all')">7 วัน</button>
-    </div>
-    <div class="fin-logs" id="fin-logs">${logHTML}</div>
-    <div class="fin-foot-actions">
-      <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
-      <button class="fin-reset-btn" onclick="finResetToday()">🔄 รีเซ็ตวันนี้</button>
-      <button class="fin-reset-all-btn" onclick="finResetAll()">🗑️ ล้างทั้งหมด</button>
+      <div class="fin-section-label" style="margin-top:14px;display:flex;align-items:center;gap:8px">
+        <span>รายการ</span>
+        <button class="fin-log-tab ${_finLogView==='today'?'active':''}" onclick="switchFinLogView('today')">วันนี้</button>
+        <button class="fin-log-tab ${_finLogView==='all'?'active':''}" onclick="switchFinLogView('all')">7 วัน</button>
+      </div>
+      <div class="fin-logs" id="fin-logs">${logHTML}</div>
+      <div class="fin-foot-actions">
+        <button class="fin-undo-btn" onclick="finUndo()">↩ ย้อนกลับ</button>
+        <button class="fin-reset-btn" onclick="finResetToday()">🔄 รีเซ็ตวันนี้</button>
+        <button class="fin-reset-all-btn" onclick="finResetAll()">🗑️ ล้างทั้งหมด</button>
+      </div>
     </div>
   `;
 }
