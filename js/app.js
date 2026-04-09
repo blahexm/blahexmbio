@@ -71,6 +71,7 @@ function initSettingsPage() {
       const d = document.createElement('div');
       d.className = 'theme-dot-big' + (t.id === savedT ? ' active' : '');
       d.style.background = t.color;
+      if (t.border) d.style.border = t.border;
       d.title = t.id;
       d.onclick = () => {
         applyTheme(t.id);
@@ -111,6 +112,8 @@ const THEMES = [
   { id:'mint',    color:'#34d399' }, { id:'cobalt',  color:'#3b82f6' },
   { id:'violet',  color:'#8b5cf6' }, { id:'silver',  color:'#94a3b8' },
   { id:'mocha',   color:'#a0785a' },
+  { id:'white',   color:'#111111', border:'1px solid #ccc' },
+  { id:'black',   color:'#f5f5f5', border:'1px solid #444' },
 ];
 const THEME_KEY = 'blahexm_theme';
 

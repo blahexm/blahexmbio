@@ -12,6 +12,21 @@
 [data-theme="violet"]   {--a:#8b5cf6;--ag:rgba(139,92,246,.1);--aglow:rgba(139,92,246,.25);--tc:#c4b5fd}
 [data-theme="silver"]   {--a:#94a3b8;--ag:rgba(148,163,184,.08);--aglow:rgba(148,163,184,.2);--tc:#cbd5e1}
 [data-theme="mocha"]    {--a:#a0785a;--ag:rgba(160,120,90,.1);--aglow:rgba(160,120,90,.25);--tc:#c4a882}
+[data-theme="white"]   {--a:#111111;--ag:rgba(17,17,17,.08);--aglow:rgba(17,17,17,.18);--tc:#333333}
+[data-theme="black"]   {--a:#f5f5f5;--ag:rgba(245,245,245,.07);--aglow:rgba(245,245,245,.18);--tc:#cccccc}
+
+/* ── White theme overrides (light mode) ── */
+[data-theme="white"] {
+  --bg:    #f5f5f7;
+  --bg2:   #ffffff;
+  --card:  #ffffff;
+  --card2: #f0f0f2;
+  --border:  rgba(0,0,0,.08);
+  --border2: rgba(0,0,0,.14);
+  --text:  #111111;
+  --dim:   rgba(17,17,17,.45);
+  --dim2:  rgba(17,17,17,.28);
+}
 
 :root {
   --bg: #0a0a0c;
@@ -543,6 +558,13 @@ body {
 /* ══════════════════════
    FINANCE
 ══════════════════════ */
+/* Fix: Finance page inner container */
+#calc-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .fin-lock { display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 20px; }
 .fin-lock-icon { width:48px;height:48px;border-radius:12px;background:var(--ag);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--a); }
 .fin-lock-title { font-size:1rem;font-weight:700;color:var(--text); }
@@ -650,6 +672,37 @@ body {
 /* Footer */
 .dash-footer { margin-top: 16px; padding-top: 20px; border-top: 1px solid var(--border); }
 .dash-footer p { font-family:'Geist Mono',monospace;font-size:.6rem;color:var(--dim2);letter-spacing:.08em; }
+
+/* ── White theme: component overrides ── */
+[data-theme="white"] .bnav {
+  background: rgba(255,255,255,.92);
+  border-top-color: rgba(0,0,0,.1);
+}
+[data-theme="white"] .page-header {
+  background: #ffffff;
+  border-bottom-color: rgba(0,0,0,.1);
+}
+[data-theme="white"] .page { background: #f5f5f7; }
+[data-theme="white"] .pcard,
+[data-theme="white"] .set-section,
+[data-theme="white"] .dash-card { box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+[data-theme="white"] .smart-input,
+[data-theme="white"] .fin-amount-input,
+[data-theme="white"] .fin-note-input,
+[data-theme="white"] .inv-modal-input,
+[data-theme="white"] .rate-input,
+[data-theme="white"] .qcalc-field {
+  background: rgba(0,0,0,.04);
+  color: #111;
+}
+[data-theme="white"] .fin-pin-input { background: rgba(0,0,0,.04); color: #111; }
+[data-theme="white"] .fin-bar-wrap  { background: rgba(0,0,0,.05); }
+[data-theme="white"] .fin-bar-fill  { background: rgba(0,0,0,.1); }
+[data-theme="white"] .smart-row,
+[data-theme="white"] .qcalc-result-row,
+[data-theme="white"] .fin-log-row,
+[data-theme="white"] .inv-id-row { background: rgba(0,0,0,.03); }
+[data-theme="white"] #cursor { mix-blend-mode: multiply; }
 
 /* ══════════════════════
    RESPONSIVE — SPA
