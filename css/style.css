@@ -1779,6 +1779,292 @@ body {
 .fin-bar-wrap { background: var(--card2); }
 .fin-bar-fill { background: var(--border2); }
 
+/* ── Finance: missing classes ── */
+.fin-loading {
+  text-align: center;
+  padding: 32px 0;
+  font-size: .78rem;
+  color: var(--dim2);
+}
+
+/* Totals row */
+.fin-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+@media (max-width: 480px) { .fin-totals { grid-template-columns: 1fr; } }
+
+.fin-total-card {
+  background: var(--card2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0px 0px 0px 1px var(--shadow-ring);
+  transition: box-shadow .15s;
+}
+
+.fin-total-card.main {
+  box-shadow: var(--shadow-card);
+}
+
+.fin-total-card:hover { box-shadow: var(--shadow-hover); }
+
+.fin-total-label {
+  font-size: .65rem;
+  color: var(--dim2);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+
+.fin-total-val {
+  font-family: 'Cal Sans', 'Inter', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -.02em;
+  line-height: 1.1;
+}
+
+.fin-total-val.sm { font-size: 1rem; }
+
+/* Section label */
+.fin-section-label {
+  font-size: .65rem;
+  color: var(--dim2);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Bar chart */
+.fin-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 80px;
+  padding: 0 2px;
+}
+
+.fin-chart.month { gap: 2px; }
+
+.fin-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+}
+
+.fin-bar-amt {
+  font-size: .48rem;
+  color: var(--dim2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  max-width: 100%;
+  text-align: center;
+  height: 14px;
+  line-height: 14px;
+}
+
+.fin-bar-wrap {
+  flex: 1;
+  width: 100%;
+  border-radius: 3px;
+  background: var(--card2);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.fin-bar-fill {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: var(--border2);
+  transition: height .3s ease;
+}
+
+.fin-bar-fill.today { background: var(--text); opacity: .85; }
+.fin-bar-fill.neg { background: rgba(244,63,94,.4); }
+.fin-bar-fill.neg.today { background: #f43f5e; opacity: 1; }
+
+.fin-bar-lbl {
+  font-size: .5rem;
+  color: var(--dim2);
+}
+
+.fin-bar-lbl.today { color: var(--text); font-weight: 600; }
+.fin-bar-amt.neg { color: #f43f5e; }
+
+/* Input row */
+.fin-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fin-amount-input {
+  width: 120px;
+  flex-shrink: 0;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: .82rem;
+  font-family: monospace;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.fin-amount-input::-webkit-outer-spin-button,
+.fin-amount-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+.fin-note-input {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: .82rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+.fin-pin-input {
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: .82rem;
+  font-family: monospace;
+  outline: none;
+}
+
+.fin-add-btn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--border2);
+  background: var(--text);
+  color: var(--bg);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+.fin-add-btn:hover { opacity: .8; }
+
+/* Logs */
+.fin-logs {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.fin-logs::-webkit-scrollbar { width: 2px; }
+.fin-logs::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 1px; }
+
+.fin-log-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  transition: background .12s;
+}
+.fin-log-row:hover { background: var(--card2); }
+
+.fin-log-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fin-log-dot.pos { background: #22c55e; }
+.fin-log-dot.neg { background: #f43f5e; }
+
+.fin-log-note {
+  flex: 1;
+  font-size: .78rem;
+  color: var(--dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fin-log-time {
+  font-size: .68rem;
+  color: var(--dim2);
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.fin-log-amt {
+  font-family: monospace;
+  font-size: .82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 72px;
+  text-align: right;
+}
+
+.fin-log-amt.pos { color: #22c55e; }
+.fin-log-amt.neg { color: #f43f5e; }
+
+.fin-empty-log {
+  text-align: center;
+  padding: 20px 0;
+  font-size: .75rem;
+  color: var(--dim2);
+}
+
+/* Footer actions */
+.fin-foot-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.fin-undo-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--dim);
+  font-family: 'Inter', sans-serif;
+  font-size: .72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+}
+.fin-undo-btn:hover {
+  border-color: var(--text);
+  color: var(--text);
+  background: var(--card2);
+}
+
+/* Light mode overrides for new Finance classes */
+[data-mode="light"] .fin-total-card,
+[data-theme="white"] .fin-total-card { background: #f0f0f2; }
+
+[data-mode="light"] .fin-log-row:hover,
+[data-theme="white"] .fin-log-row:hover { background: rgba(0,0,0,.03); }
+
+[data-mode="light"] .fin-add-btn,
+[data-theme="white"] .fin-add-btn { background: #242424; color: #fff; }
+
+/* Shake animation */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%,60%  { transform: translateX(-4px); }
+  40%,80%  { transform: translateX(4px); }
+}
+.shake { animation: shake .4s ease; }
+
 /* ================================================================
    DASHBOARD
    ================================================================ */
