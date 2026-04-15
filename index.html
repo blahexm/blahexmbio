@@ -35,7 +35,7 @@
       Calculator
     </button>
     <button class="sidebar-item" id="snav-inventory" onclick="goPage('inventory')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       Inventory
     </button>
 
@@ -70,7 +70,7 @@
     <span>Calc</span>
   </button>
   <button class="bnav-item" id="bnav-inventory" onclick="goPage('inventory')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
     <span>Inventory</span>
   </button>
   <button class="bnav-item" id="bnav-settings" onclick="goPage('settings')">
@@ -82,7 +82,9 @@
 <!-- ══════════════ PAGES ══════════════ -->
 <div class="app-main" id="app-main">
 
-<!-- PAGE: PROFILE -->
+<!-- ════════════════════════════
+   PAGE: PROFILE
+════════════════════════════ -->
 <div class="page active" id="page-profile">
   <header class="page-header">
     <div class="page-header-left">
@@ -152,7 +154,9 @@
   </div>
 </div>
 
-<!-- PAGE: FINANCE -->
+<!-- ════════════════════════════
+   PAGE: FINANCE
+════════════════════════════ -->
 <div class="page" id="page-finance">
   <header class="page-header">
     <div class="page-header-left">
@@ -164,7 +168,9 @@
   </div>
 </div>
 
-<!-- PAGE: CALC -->
+<!-- ════════════════════════════
+   PAGE: CALCULATOR
+════════════════════════════ -->
 <div class="page" id="page-calc">
   <header class="page-header">
     <div class="page-header-left">
@@ -192,7 +198,9 @@
   </div>
 </div>
 
-<!-- PAGE: INVENTORY -->
+<!-- ════════════════════════════
+   PAGE: INVENTORY
+════════════════════════════ -->
 <div class="page" id="page-inventory">
   <header class="page-header">
     <div class="page-header-left">
@@ -207,7 +215,9 @@
   </div>
 </div>
 
-<!-- PAGE: SETTINGS -->
+<!-- ════════════════════════════
+   PAGE: SETTINGS
+════════════════════════════ -->
 <div class="page" id="page-settings">
   <header class="page-header">
     <div class="page-header-left">
@@ -215,7 +225,6 @@
     </div>
   </header>
   <div class="page-body page-body-scroll">
-    <!-- หน้าหลัก -->
     <div class="set-section">
       <div class="set-section-label">หน้าหลัก (เปิดมาแล้วเจอหน้าไหน)</div>
       <div class="set-page-picker" id="set-page-picker">
@@ -226,19 +235,16 @@
       </div>
     </div>
 
-    <!-- Theme -->
     <div class="set-section">
       <div class="set-section-label">Theme</div>
       <div class="theme-grid-big" id="set-theme-grid"></div>
     </div>
 
-    <!-- Dark / Light Mode -->
     <div class="set-section">
       <div class="set-section-label">โหมดสี</div>
       <div id="set-mode-toggle"></div>
     </div>
 
-    <!-- Size -->
     <div class="set-section">
       <div class="set-section-label">
         <span>ขนาดหน้าจอ</span>
@@ -248,13 +254,11 @@
              oninput="applyScale(this.value)" />
     </div>
 
-    <!-- เรท -->
     <div class="set-section">
       <div class="set-section-label">เรทไอเทม</div>
       <div id="settings-rate-panel"></div>
     </div>
 
-    <!-- Finance Reset -->
     <div class="set-section">
       <div class="set-section-label">Finance</div>
       <div class="set-danger-row">
@@ -266,16 +270,161 @@
       </div>
     </div>
 
-    <!-- Footer info -->
     <div class="set-footer-info">
       <span id="set-footer-text">blahexm · 2026</span>
     </div>
   </div>
 </div>
 
+<!-- ════════════════════════════
+   PAGE: DASHBOARD  ← ใหม่ (matches reference image)
+════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <!-- ── Header ── -->
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-title-text">Dashboard</span>
+      <span style="font-size:.68rem;color:var(--dim);font-family:'DM Mono',monospace;margin-left:10px;" id="dash-header-date"></span>
+    </div>
+    <div class="page-header-right" style="display:flex;gap:8px;align-items:center;">
+      <button class="hdr-icon-btn" onclick="toggleModeFromSidebar()" title="Toggle Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-body page-body-scroll">
+
+    <!-- Auto-update bar -->
+    <div class="dash-autoupdate-bar" id="dash-autoupdate-bar">
+      <div class="dash-autoupdate-left">
+        <div class="dash-autoupdate-dot"></div>
+        <span class="dash-autoupdate-label">Auto-updating</span>
+        <span class="dash-autoupdate-time" id="dash-last-time">Last: —</span>
+      </div>
+      <div class="dash-autoupdate-right">
+        <span class="dash-autoupdate-countdown" id="dash-countdown">18s</span>
+        Data updates live — no refresh needed
+      </div>
+    </div>
+
+    <!-- Top row: Group Key + PC Online + PC Offline -->
+    <div class="dash-top-row">
+      <!-- Group Key -->
+      <div class="dash-key-card">
+        <div class="dash-key-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </div>
+        <div>
+          <div class="dash-key-label">Group Key</div>
+          <div class="dash-key-val" id="dash-group-key">—</div>
+        </div>
+      </div>
+
+      <!-- PC Online -->
+      <div class="dash-stat-card" style="border-top:2px solid var(--s-online);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="dash-stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="dash-stat-label">PC Online</div>
+        </div>
+        <div class="dash-stat-val green" id="dash-online-count">0</div>
+      </div>
+
+      <!-- PC Offline -->
+      <div class="dash-stat-card" style="border-top:2px solid var(--s-error);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="dash-stat-icon offline">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><line x1="4" y1="4" x2="20" y2="20" stroke="var(--s-error)" stroke-width="2"/></svg>
+          </div>
+          <div class="dash-stat-label">PC Offline</div>
+        </div>
+        <div class="dash-stat-val red" id="dash-offline-count">0</div>
+      </div>
+    </div>
+
+    <!-- Mini status row -->
+    <div class="dash-mini-row">
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Accounts</div>
+          <div class="dash-mini-val" id="dash-accounts-count">0</div>
+        </div>
+      </div>
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot active"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Active</div>
+          <div class="dash-mini-val" id="dash-active-count">0</div>
+        </div>
+      </div>
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot farming"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Farming</div>
+          <div class="dash-mini-val" id="dash-farming-count">0</div>
+        </div>
+      </div>
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot done"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Done</div>
+          <div class="dash-mini-val" id="dash-done-count">0</div>
+        </div>
+      </div>
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot warning"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Warning</div>
+          <div class="dash-mini-val" id="dash-warning-count">0</div>
+        </div>
+      </div>
+      <div class="dash-mini-card">
+        <div class="dash-mini-dot dead"></div>
+        <div class="dash-mini-info">
+          <div class="dash-mini-label">Dead</div>
+          <div class="dash-mini-val" id="dash-dead-count">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connected PCs section -->
+    <div class="dash-pcs-section">
+      <div class="dash-pcs-header">
+        <div class="dash-pcs-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          Connected PCs
+        </div>
+        <div class="dash-pcs-actions">
+          <button class="dash-fetch-btn" id="dash-fetch-btn" onclick="handleFetchAll()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            Fetch All
+          </button>
+          <input
+            class="dash-filter-input"
+            placeholder="Filter PCs..."
+            oninput="handleFilterPcs(this.value)"
+          />
+          <button class="dash-sort-btn">Sort / Filter ↓</button>
+        </div>
+      </div>
+
+      <!-- PC Grid — populated by Dashboard.js renderDashboard() -->
+      <div class="dash-pc-grid" id="pc-list">
+        <div class="dash-pc-waiting">Waiting for PCs…</div>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</div><!-- /page-dashboard -->
+
 </div><!-- /app-main -->
 
-<!-- Modal Inventory -->
+<!-- ════════════════════════════
+   MODAL: INVENTORY
+════════════════════════════ -->
 <div class="inv-modal-overlay" id="inv-modal-overlay" style="display:none" onclick="closeIdModal()"></div>
 <div class="inv-modal" id="inv-modal" style="display:none">
   <div class="inv-modal-title" id="inv-modal-title">เพิ่ม ID</div>
@@ -298,29 +447,61 @@
 
 <audio id="audio" loop></audio>
 
+<!-- ════════════════════════════
+   SCRIPTS
+════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js"></script>
 <script src="js/app.js"></script>
 <script src="js/inventory.js"></script>
 <script src="js/Dashboard.js"></script>
+
 <script>
-/* ── Sidebar active sync ── */
+/* ══════════════════════════════════════
+   PATCH: Sidebar active sync + page nav
+══════════════════════════════════════ */
 (function() {
-  const _origGoPage = window.goPage;
+  /* Wrap goPage to sync sidebar highlights */
+  const _orig = window.goPage;
   window.goPage = function(page) {
-    if (_origGoPage) _origGoPage(page);
+    if (_orig) _orig(page);
+
+    /* Sync sidebar */
     document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
     const sItem = document.getElementById('snav-' + page);
     if (sItem) sItem.classList.add('active');
+
+    /* If navigating to dashboard, init it */
+    if (page === 'dashboard') {
+      _initDashboardPage();
+    }
   };
 
-  /* Dark mode toggle from sidebar */
+  /* Dark mode toggle */
   window.toggleModeFromSidebar = function() {
     const el = document.documentElement;
     const isLight = el.getAttribute('data-mode') === 'light';
     el.setAttribute('data-mode', isLight ? 'dark' : 'light');
-    try { localStorage.setItem('mode', isLight ? 'dark' : 'light'); } catch(e){}
+    try { localStorage.setItem('mode', isLight ? 'dark' : 'light'); } catch(e) {}
   };
+
+  /* Init dashboard page header date */
+  function _initDashboardPage() {
+    const dateEl = document.getElementById('dash-header-date');
+    if (dateEl) {
+      const d = new Date();
+      dateEl.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    /* Load demo data — replace with real API call */
+    if (typeof loadDemoDashboard === 'function') loadDemoDashboard();
+    if (typeof initAutoUpdateBar === 'function') initAutoUpdateBar();
+  }
+
+  /* Auto-init if dashboard is active page on load */
+  window.addEventListener('DOMContentLoaded', function() {
+    const active = document.querySelector('.page.active');
+    if (active && active.id === 'page-dashboard') _initDashboardPage();
+  });
 })();
 </script>
 </body>

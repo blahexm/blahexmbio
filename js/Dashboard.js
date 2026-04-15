@@ -1,314 +1,240 @@
-/* ══════════════════════════════════════
-   DASHBOARD.JS — Multi-ID Overview
-   - รวมของทุก ID
-   - Online / Offline ตาม updated_at
-   - คำนวณมูลค่าด้วยเรทเดียวกับ Quick Calc
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   DASHBOARD.JS — Dark Premium Dashboard Logic
+   Matches: reference image (horstmanager style)
+   Pure Vanilla JS — no frameworks
+══════════════════════════════════════════════════════ */
 
-// ── config ──────────────────────────
-// ถ้า updated_at ภายใน X นาที = online
-const ONLINE_THRESHOLD_MIN = 10;
+/* ────────────────────────────────
+   AUTO-UPDATE TIMER
+──────────────────────────────── */
+(function initAutoUpdateBar() {
+  const bar = document.getElementById('dash-autoupdate-bar');
+  if (!bar) return;
 
-// ── state ────────────────────────────
-let _dashData     = [];      // raw rows จาก Supabase
-let _dashFilter   = 'all';   // 'all' | 'online' | 'offline'
-let _dashSearch   = '';
-let _dashSortCol  = 'value'; // column ที่ sort
-let _dashSortAsc  = false;
-let _dashTimer    = null;
+  let countdown = 18;
+  const countdownEl = document.getElementById('dash-countdown');
+  const timeEl = document.getElementById('dash-last-time');
 
-// ── helpers ──────────────────────────
-function isOnline(dateStr) {
-  if (!dateStr) return false;
-  const diffMin = (Date.now() - new Date(dateStr).getTime()) / 60000;
-  return diffMin <= ONLINE_THRESHOLD_MIN;
-}
-
-function calcRowValue(items) {
-  // ใช้ SMART_RATES (จาก app.js ที่โหลดอยู่แล้ว)
-  // ถ้า SMART_RATES ไม่มี fallback ไป SMART_RATES_DEFAULT
-  const rates = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
-             || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
-  let total = 0;
-  Object.entries(items || {}).forEach(([name, val]) => {
-    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-    const rate = rates[name];
-    if (!rate || rate.divisor === 0) return;
-    const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
-    total += v;
-  });
-  return total;
-}
-
-function calcTotalItems(items) {
-  let t = 0;
-  Object.values(items || {}).forEach(val => {
-    const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-    t += qty;
-  });
-  return t;
-}
-
-function fmtBaht(n) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'M฿';
-  if (n >= 1_000)     return (n / 1_000).toFixed(1) + 'K฿';
-  return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '฿';
-}
-
-function fmtQtyDash(n) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
-  return n.toLocaleString('th-TH');
-}
-
-function timeSinceDash(dateStr) {
-  if (!dateStr) return '—';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1)  return 'เมื่อกี้';
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
-// ── compute aggregated totals per item ──
-function aggregateItems(rows) {
-  const totals = {};
-  rows.forEach(row => {
-    Object.entries(row.items || {}).forEach(([name, val]) => {
-      const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-      totals[name] = (totals[name] || 0) + qty;
-    });
-  });
-  return totals;
-}
-
-// ── filter & sort rows ──
-function getFilteredRows() {
-  let rows = _dashData.map(row => ({
-    ...row,
-    _online: isOnline(row.updated_at),
-    _value:  calcRowValue(row.items),
-    _total:  calcTotalItems(row.items),
-  }));
-
-  if (_dashFilter === 'online')  rows = rows.filter(r => r._online);
-  if (_dashFilter === 'offline') rows = rows.filter(r => !r._online);
-  if (_dashSearch) {
-    const q = _dashSearch.toLowerCase();
-    rows = rows.filter(r => r.username.toLowerCase().includes(q));
+  function updateTime() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    if (timeEl) timeEl.textContent = `Last: ${hh}:${mm}:${ss}`;
   }
 
-  rows.sort((a, b) => {
-    let va, vb;
-    if (_dashSortCol === 'name')    { va = a.username; vb = b.username; return _dashSortAsc ? va.localeCompare(vb) : vb.localeCompare(va); }
-    if (_dashSortCol === 'value')   { va = a._value;   vb = b._value; }
-    if (_dashSortCol === 'items')   { va = a._total;   vb = b._total; }
-    if (_dashSortCol === 'updated') { va = new Date(a.updated_at||0); vb = new Date(b.updated_at||0); }
-    return _dashSortAsc ? va - vb : vb - va;
-  });
+  updateTime();
 
-  return rows;
+  setInterval(() => {
+    countdown--;
+    if (countdown <= 0) countdown = 18;
+    if (countdownEl) countdownEl.textContent = countdown + 's';
+    if (countdown === 18) updateTime();
+  }, 1000);
+})();
+
+/* ────────────────────────────────
+   PC CARD RENDERER
+──────────────────────────────── */
+
+/**
+ * renderDashboard(data)
+ * @param {Object} data - { pcs: Array, stats: Object }
+ *
+ * data.pcs = [{
+ *   id: 'DDC-2',
+ *   version: '11.2',
+ *   status: 'running' | 'offline',
+ *   offlineAgo: '7h 45m ago',   // only if offline
+ *   accounts: 51,
+ *   pending: 1,
+ *   done: 42,
+ *   dead: 7
+ * }]
+ *
+ * data.stats = {
+ *   pcOnline: 5,
+ *   pcOffline: 1,
+ *   accounts: 0,
+ *   active: 0,
+ *   farming: 0,
+ *   done: 0,
+ *   warning: 0,
+ *   dead: 0,
+ *   groupKey: 'a694e7fb940a6aed8f5cb0546e84b...'
+ * }
+ */
+function renderDashboard(data) {
+  const stats = data?.stats || {};
+  const pcs   = data?.pcs   || [];
+
+  _renderStats(stats);
+  _renderPcGrid(pcs);
 }
 
-// ── render ────────────────────────────
-function renderDashboard() {
-  const wrap = document.getElementById('dash-inner');
-  if (!wrap) return;
+/* ── Render top stat cards ── */
+function _renderStats(s) {
+  _setEl('dash-online-count',  s.pcOnline  ?? 0);
+  _setEl('dash-offline-count', s.pcOffline ?? 0);
+  _setEl('dash-accounts-count',s.accounts  ?? 0);
+  _setEl('dash-active-count',  s.active    ?? 0);
+  _setEl('dash-farming-count', s.farming   ?? 0);
+  _setEl('dash-done-count',    s.done      ?? 0);
+  _setEl('dash-warning-count', s.warning   ?? 0);
+  _setEl('dash-dead-count',    s.dead      ?? 0);
+  _setEl('dash-group-key',     s.groupKey  ?? '—');
+}
 
-  if (_dashData.length === 0) {
-    wrap.innerHTML = `<div class="dash-empty">ยังไม่มีข้อมูล — รอโหลด...</div>`;
+/* ── Render PC grid ── */
+function _renderPcGrid(pcs) {
+  const grid = document.getElementById('pc-list');
+  if (!grid) return;
+
+  if (!pcs.length) {
+    grid.innerHTML = `<div class="dash-pc-waiting">Waiting for PCs…</div>`;
     return;
   }
 
-  const allRows     = _dashData.map(r => ({ ...r, _online: isOnline(r.updated_at), _value: calcRowValue(r.items) }));
-  const onlineCnt   = allRows.filter(r => r._online).length;
-  const offlineCnt  = allRows.length - onlineCnt;
-  const totalVal    = allRows.reduce((s, r) => s + r._value, 0);
-  const aggItems    = aggregateItems(_dashData);
-  const filteredRows = getFilteredRows();
+  grid.innerHTML = pcs.map(pc => _pcCardHTML(pc)).join('');
+}
 
-  // ── Stats bar ──
-  const statsHtml = `
-    <div class="dash-stats-row">
-      <div class="dash-stat-card">
-        <div class="dash-stat-label">ทั้งหมด</div>
-        <div class="dash-stat-val">${allRows.length}</div>
-        <div class="dash-stat-sub">ID</div>
+/* ── Single PC card HTML ── */
+function _pcCardHTML(pc) {
+  const isOffline = pc.status === 'offline';
+  const cardClass = isOffline ? 'dash-pc-card offline' : 'dash-pc-card running';
+  const statusBadge = isOffline
+    ? `<span class="dash-pc-status offline">Offline</span>`
+    : `<span class="dash-pc-status running">Running</span>`;
+
+  const actionBtn = isOffline
+    ? `<button class="dash-view-btn" onclick="handlePcView('${pc.id}')">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+         View
+       </button>`
+    : `<button class="dash-manage-btn" onclick="handlePcManage('${pc.id}')">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+         Manage
+       </button>`;
+
+  const offlineLine = isOffline && pc.offlineAgo
+    ? `<div class="dash-pc-offline-time">${pc.offlineAgo}</div>`
+    : '';
+
+  // Color-coded stats
+  const pendingColor = (pc.pending > 0) ? 'amber' : '';
+  const deadColor    = (pc.dead    > 0) ? 'red'   : '';
+  const doneColor    = (pc.done    > 0) ? 'green'  : '';
+
+  return `
+  <div class="${cardClass}" id="pc-card-${pc.id}">
+    <div class="dash-pc-top">
+      <div class="dash-pc-name-row">
+        <input type="checkbox" class="dash-pc-checkbox" onchange="handlePcSelect('${pc.id}', this.checked)">
+        <div>
+          <div class="dash-pc-name">${pc.id} <span class="dash-pc-version">Version ${pc.version ?? '—'}</span></div>
+          ${offlineLine}
+        </div>
       </div>
-      <div class="dash-stat-card">
-        <div class="dash-stat-label">Online</div>
-        <div class="dash-stat-val green">${onlineCnt}</div>
-        <div class="dash-stat-sub">≤ ${ONLINE_THRESHOLD_MIN} นาที</div>
-      </div>
-      <div class="dash-stat-card">
-        <div class="dash-stat-label">Offline</div>
-        <div class="dash-stat-val ${offlineCnt > 0 ? 'red' : ''}">${offlineCnt}</div>
-        <div class="dash-stat-sub">ไม่ active</div>
-      </div>
-      <div class="dash-stat-card">
-        <div class="dash-stat-label">มูลค่ารวม</div>
-        <div class="dash-stat-val" style="font-size:.95rem;color:#34d399">${fmtBaht(totalVal)}</div>
-        <div class="dash-stat-sub">ทุก ID รวมกัน</div>
-      </div>
-    </div>`;
-
-  // ── Item summary ──
-  const itemOrder = typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(aggItems);
-  const rates     = (typeof SMART_RATES !== 'undefined' ? SMART_RATES : null)
-                 || (typeof SMART_RATES_DEFAULT !== 'undefined' ? SMART_RATES_DEFAULT : {});
-
-  const itemSummaryHtml = itemOrder
-    .filter(name => (aggItems[name] || 0) > 0)
-    .map(name => {
-      const qty  = aggItems[name] || 0;
-      const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-      const rate = rates[name];
-      const rarity = meta.rarity || 'legendary';
-      const rc = (typeof RARITY_COLOR !== 'undefined' ? RARITY_COLOR[rarity] : null) || { color: '#f59e0b', glow: '' };
-      let valStr = '—';
-      let hasVal = false;
-      if (rate && rate.divisor > 0) {
-        const v = rate.multiply ? qty * rate.divisor : qty / rate.divisor;
-        valStr = fmtBaht(v);
-        hasVal = true;
-      }
-      return `
-        <div class="dash-sum-card" style="--rc:${rc.color}">
-          <div class="dash-sum-top">
-            <img class="dash-sum-img" src="${meta.img || ''}" alt="${name}" onerror="this.style.opacity='.2'">
-            <span class="dash-sum-name">${name}</span>
-          </div>
-          <div class="dash-sum-qty">x${fmtQtyDash(qty)}</div>
-          <div class="dash-sum-val ${hasVal ? 'has-val' : ''}">${valStr}</div>
-        </div>`;
-    }).join('');
-
-  // ── ID table ──
-  const thArrow = (col) => {
-    const arrow = _dashSortCol === col ? (_dashSortAsc ? '▲' : '▼') : '▾';
-    return `<span class="sort-arrow">${arrow}</span>`;
-  };
-  const thCls = (col) => _dashSortCol === col ? 'sorted' : '';
-
-  const tableRowsHtml = filteredRows.map(row => {
-    const statusCls   = row._online ? 'online' : 'offline';
-    const statusLabel = row._online ? 'online' : 'offline';
-    const valStr      = row._value > 0 ? fmtBaht(row._value) : '—';
-    const valCls      = row._value > 0 ? '' : 'zero';
-
-    // items mini-list (แสดงแค่ของที่มี > 0)
-    const miniItems = (typeof ITEM_META !== 'undefined' ? Object.keys(ITEM_META) : Object.keys(row.items || {}))
-      .map(name => {
-        const val = (row.items || {})[name];
-        const qty = typeof val === 'object' ? (val.qty ?? 0) : (val ?? 0);
-        if (qty <= 0) return '';
-        const meta = typeof ITEM_META !== 'undefined' ? (ITEM_META[name] || {}) : {};
-        return `<span title="${name}: ${qty}" style="display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:.5rem;color:var(--dim)">
-          <img src="${meta.img||''}" width="12" height="12" style="object-fit:contain;opacity:.8" onerror="this.style.display='none'">
-          ${fmtQtyDash(qty)}
-        </span>`;
-      }).join('');
-
-    return `
-      <tr>
-        <td>
-          <div class="dash-id-name">
-            <span class="dash-id-status-dot ${statusCls}"></span>
-            ${row.username}
-          </div>
-        </td>
-        <td><span class="dash-id-status-badge ${statusCls}">${statusLabel}</span></td>
-        <td><span class="dash-id-val ${valCls}">${valStr}</span></td>
-        <td style="max-width:200px;overflow:hidden">${miniItems}</td>
-        <td><span class="dash-id-time">${timeSinceDash(row.updated_at)}</span></td>
-      </tr>`;
-  }).join('');
-
-  wrap.innerHTML = `
-    ${statsHtml}
-
-    <div class="dash-card" style="margin-bottom:12px">
-      <div class="dash-section-label">ของรวมทุก ID</div>
-      <div class="dash-item-summary">
-        ${itemSummaryHtml || '<div class="dash-empty" style="padding:16px 0">ยังไม่มีของ</div>'}
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        ${statusBadge}
+        ${actionBtn}
       </div>
     </div>
-
-    <div class="dash-card">
-      <div class="dash-id-filters">
-        <button class="dash-filter-btn ${_dashFilter==='all'?'active':''}" onclick="dashSetFilter('all')">ทั้งหมด (${allRows.length})</button>
-        <button class="dash-filter-btn online ${_dashFilter==='online'?'active':''}" onclick="dashSetFilter('online')">🟢 Online (${onlineCnt})</button>
-        <button class="dash-filter-btn offline ${_dashFilter==='offline'?'active':''}" onclick="dashSetFilter('offline')">⚫ Offline (${offlineCnt})</button>
-        <input class="dash-id-search" placeholder="ค้นหา username..." value="${_dashSearch}"
-               oninput="_dashSearch=this.value;renderDashboard()">
+    <div class="dash-pc-stats">
+      <div class="dash-pc-stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="s-val">${pc.accounts ?? 0}</span> accs
       </div>
-
-      <div class="dash-id-table-wrap">
-        <table class="dash-id-table">
-          <thead>
-            <tr>
-              <th class="${thCls('name')}"    onclick="dashSort('name')">Username ${thArrow('name')}</th>
-              <th>Status</th>
-              <th class="${thCls('value')}"   onclick="dashSort('value')">มูลค่า ${thArrow('value')}</th>
-              <th>ของในคลัง</th>
-              <th class="${thCls('updated')}" onclick="dashSort('updated')">อัปเดต ${thArrow('updated')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml || `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--dim2);font-size:.6rem">ไม่พบ ID ที่ตรงกัน</td></tr>`}
-          </tbody>
-        </table>
+      <div class="dash-pc-stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span class="s-val ${pendingColor}">${pc.pending ?? 0}</span>
+      </div>
+      <div class="dash-pc-stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span class="s-val ${doneColor}">${pc.done ?? 0}</span>
+      </div>
+      <div class="dash-pc-stat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <span class="s-val ${deadColor}">${pc.dead ?? 0}</span>
       </div>
     </div>
-  `;
+  </div>`;
 }
 
-// ── filter & sort controls ──────────
-function dashSetFilter(f) {
-  _dashFilter = f;
-  renderDashboard();
+/* ────────────────────────────────
+   ACTION HANDLERS (bind to your JS)
+──────────────────────────────── */
+
+function handlePcManage(pcId) {
+  console.log('[Dashboard] Manage PC:', pcId);
+  // TODO: เชื่อมต่อกับ logic จัดการ PC ของคุณที่นี่
 }
 
-function dashSort(col) {
-  if (_dashSortCol === col) _dashSortAsc = !_dashSortAsc;
-  else { _dashSortCol = col; _dashSortAsc = false; }
-  renderDashboard();
+function handlePcView(pcId) {
+  console.log('[Dashboard] View PC:', pcId);
+  // TODO: เชื่อมต่อกับ logic ดู PC ออฟไลน์
 }
 
-// ── fetch from Supabase ─────────────
-async function fetchDashboard() {
-  const btn = document.getElementById('dash-refresh-btn');
-  if (btn) btn.classList.add('spinning');
+function handlePcSelect(pcId, checked) {
+  console.log('[Dashboard] Select PC:', pcId, checked);
+  // TODO: multi-select logic
+}
 
-  const wrap = document.getElementById('dash-inner');
-  if (wrap && _dashData.length === 0) {
-    wrap.innerHTML = `<div class="dash-loading"><div class="dash-spinner"></div><span>กำลังโหลด...</span></div>`;
+function handleFetchAll() {
+  const btn = document.getElementById('dash-fetch-btn');
+  if (btn) {
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+    setTimeout(() => {
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }, 1200);
   }
-
-  try {
-    const { data, error } = await _invSb   // ใช้ client เดียวกับ inventory.js
-      .from('inventory')
-      .select('username, items, updated_at')
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-    _dashData = data || [];
-    renderDashboard();
-  } catch (e) {
-    const wrap = document.getElementById('dash-inner');
-    if (wrap) wrap.innerHTML = `<div class="dash-empty">เกิดข้อผิดพลาด: ${e.message}</div>`;
-  } finally {
-    if (btn) btn.classList.remove('spinning');
-  }
+  console.log('[Dashboard] Fetch All triggered');
+  // TODO: เชื่อมต่อกับ API/Supabase fetch ของคุณ
 }
 
-// ── start / stop auto-refresh ───────
-let _dashAutoTimer = null;
+function handleFilterPcs(val) {
+  const cards = document.querySelectorAll('.dash-pc-card');
+  const q = val.toLowerCase();
+  cards.forEach(c => {
+    const name = (c.id || '').replace('pc-card-', '').toLowerCase();
+    c.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
+}
 
-function startDashboard() {
-  fetchDashboard();
-  if (_dashAutoTimer) clearInterval(_dashAutoTimer);
-  _dashAutoTimer = setInterval(fetchDashboard, 30000); // refresh ทุก 30 วิ
+/* ────────────────────────────────
+   DEMO: load sample data on Dashboard page open
+   (ลบออกเมื่อเชื่อมต่อ API จริง)
+──────────────────────────────── */
+function loadDemoDashboard() {
+  renderDashboard({
+    stats: {
+      pcOnline:  5,
+      pcOffline: 1,
+      accounts:  0,
+      active:    0,
+      farming:   0,
+      done:      0,
+      warning:   0,
+      dead:      0,
+      groupKey:  'a694e7fb940a6aed8f5cb0546e84b…'
+    },
+    pcs: [
+      { id: 'DDC-2',    version: '11.2', status: 'running', accounts: 51, pending: 1, done: 42, dead: 7 },
+      { id: 'DDC-3',    version: '11.2', status: 'running', accounts: 51, pending: 0, done: 35, dead: 15 },
+      { id: 'DDC-4',    version: '11.2', status: 'running', accounts: 51, pending: 2, done: 39, dead: 9 },
+      { id: 'DDC-5',    version: '11.2', status: 'running', accounts: 51, pending: 0, done: 35, dead: 15 },
+      { id: 'HIM-MAIN', version: '11.2', status: 'running', accounts: 47, pending: 1, done: 40, dead: 6 },
+      { id: 'DDC-1',    version: '11.2', status: 'offline', offlineAgo: '7h 45m ago', accounts: 51, pending: 50, done: 0, dead: 0 },
+    ]
+  });
+}
+
+/* ────────────────────────────────
+   UTILITY
+──────────────────────────────── */
+function _setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
