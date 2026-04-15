@@ -1155,3 +1155,41 @@ function deleteId(i) {
   invSave(data);
   renderInventory();
 }
+// === ส่วนสำหรับจัดการการสลับหน้า (Navigation System) ===
+window.goPage = function(pageId) {
+    // 1. ซ่อนทุกหน้า (ลบคลาส active ออกจากทุก element ที่มีคลาส page)
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(p => p.classList.remove('active'));
+
+    // 2. แสดงหน้าเป้าหมาย (เพิ่มคลาส active ให้หน้าที่เลือก)
+    const targetPage = document.getElementById('page-' + pageId);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    } else {
+        console.error('ไม่พบหน้า: page-' + pageId);
+    }
+
+    // 3. เปลี่ยนสถานะปุ่มใน Sidebar ให้เป็นสี Active
+    document.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('snav-' + pageId);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+
+    // 4. ถ้าสลับไปหน้า dashboard ให้สั่งโหลดข้อมูลหรือตั้งค่าวันที่ใหม่
+    if (pageId === 'dashboard') {
+        if (typeof _initDashboardPage === 'function') {
+            _initDashboardPage();
+        }
+    }
+};
+
+// ตรวจสอบเมื่อโหลดหน้าเว็บครั้งแรก ให้แสดงหน้าที่มีคลาส active อยู่แล้ว
+document.addEventListener('DOMContentLoaded', () => {
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+        const id = activePage.id.replace('page-', '');
+        const btn = document.getElementById('snav-' + id);
+        if (btn) btn.classList.add('active');
+    }
+});
