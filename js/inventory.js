@@ -1,13 +1,27 @@
 /* ══════════════════════════════════════
    INVENTORY — Supabase Reader
    รูปดึงจากเกม Roblox ออโต้ผ่าน image field
+   (local fallback ถ้า Roblox CDN block)
 ══════════════════════════════════════ */
 
 const INV_SB_URL = 'https://nzzsqkvjzlaszxswehkd.supabase.co';
 const INV_SB_KEY = 'sb_publishable_B04udlxe_F-GxoGCoiFdBQ_LCLS9LVq';
 const _invSb     = window.supabase.createClient(INV_SB_URL, INV_SB_KEY);
 
-/* ── rarity config (ไม่มีรูป local แล้ว — รูปมาจากเกมอัตโนมัติ) ── */
+/* ── รูป local สำรอง (กันกรณี Roblox CDN block CORS) ── */
+const ITEM_LOCAL_IMG = {
+  'Race Reroll':    'img/items/race-reroll.png',
+  'Trait Reroll':   'img/items/trait-reroll.png',
+  'Clan Reroll':    'img/items/clan-reroll.png',
+  'Mythical Chest': 'img/items/mythical-chest.png',
+  'Aura Crate':     'img/items/aura-crate.png',
+  'Cosmetic Crate': 'img/items/cosmetic-crate.png',
+  'Passive Shard':  'img/items/passive-shard.png',
+  'Power Shard':    'img/items/power-shard.png',
+  'Upper Seal':     'img/items/upper-seal.png',
+};
+
+/* ── rarity config ── */
 const ITEM_META = {
   'Race Reroll':    { rarity: 'epic',      label: 'Epic'      },
   'Trait Reroll':   { rarity: 'epic',      label: 'Epic'      },
@@ -30,7 +44,6 @@ const RARITY_COLOR = {
 /* ── แปลง rbxassetid://XXXXX → URL รูปจริงจาก Roblox CDN ── */
 function rbxImgUrl(rbxImg) {
   if (!rbxImg) return '';
-  // รองรับทั้ง "rbxassetid://12345" และ "rbxthumb://..." และ assetid ตรงๆ
   const thumbMatch = rbxImg.match(/rbxthumb:\/\/.*?assetId=(\d+)/i);
   if (thumbMatch) {
     return `https://www.roblox.com/asset-thumbnail/image?assetId=${thumbMatch[1]}&width=150&height=150&format=png`;
@@ -76,7 +89,11 @@ function renderItemCard(name, qty, rbxImg) {
   const rarity = meta.rarity || 'legendary';
   const rc     = RARITY_COLOR[rarity] || RARITY_COLOR.legendary;
   const label  = meta.label || rarity;
-  const imgSrc = rbxImgUrl(rbxImg); // รูปจากเกมออโต้
+
+  // ใช้รูป local ก่อน (เร็ว + ไม่โดน CORS block) ถ้าไม่มีค่อยใช้ Roblox CDN
+  const localSrc  = ITEM_LOCAL_IMG[name] || '';
+  const robloxSrc = rbxImgUrl(rbxImg);
+  const imgSrc    = localSrc || robloxSrc;
 
   return `
     <div class="inv-card" style="--rc:${rc.color};--rg:${rc.glow}">

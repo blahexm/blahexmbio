@@ -7,7 +7,12 @@
 /* ────────────────────────────────
    AUTO-UPDATE TIMER
 ──────────────────────────────── */
-(function initAutoUpdateBar() {
+let _autoUpdateTimer = null;
+
+function initAutoUpdateBar() {
+  // ป้องกัน timer ซ้อนกัน ถ้า init ซ้ำให้ clear ก่อน
+  if (_autoUpdateTimer) clearInterval(_autoUpdateTimer);
+
   const bar = document.getElementById('dash-autoupdate-bar');
   if (!bar) return;
 
@@ -25,13 +30,13 @@
 
   updateTime();
 
-  setInterval(() => {
+  _autoUpdateTimer = setInterval(() => {
     countdown--;
     if (countdown <= 0) countdown = 18;
     if (countdownEl) countdownEl.textContent = countdown + 's';
     if (countdown === 18) updateTime();
   }, 1000);
-})();
+}
 
 /* ────────────────────────────────
    PC CARD RENDERER

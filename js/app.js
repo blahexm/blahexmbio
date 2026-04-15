@@ -23,7 +23,6 @@ const HOME_PAGE_KEY = 'blahexm_homepage';
 let _currentPage = null;
 
 function goPage(name) {
-  if (_currentPage === name) return;
   _currentPage = name;
 
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -34,11 +33,13 @@ function goPage(name) {
   if (page) page.classList.add('active');
   if (btn)  btn.classList.add('active');
 
-  // lazy init per page
-  if (name === 'finance')   renderFinanceDashboard(document.getElementById('calc-inner'));
-  if (name === 'calc')      renderQuickCalc(document.getElementById('quick-calc-inner'));
-  if (name === 'inventory') startInventoryRefresh();
-  if (name === 'settings')  initSettingsPage();
+  // lazy init per page — wrapped in try/catch so one broken page can't block navigation
+  try {
+    if (name === 'finance')   renderFinanceDashboard(document.getElementById('calc-inner')).catch(e => console.error('[Finance]', e));
+    if (name === 'calc')      renderQuickCalc(document.getElementById('quick-calc-inner'));
+    if (name === 'inventory') startInventoryRefresh();
+    if (name === 'settings')  initSettingsPage();
+  } catch(e) { console.error('[goPage]', e); }
 }
 
 function setHomePage(page) {
@@ -574,7 +575,13 @@ async function finResetAll() {
   if (!confirm('⚠️ ล้างข้อมูล Finance ทั้งหมดทุกวัน?\nยอดจะกลับเป็น 0 หมดเลย ย้อนกลับไม่ได้!')) return;
   const { data } = await _sb.from('finance').select('date');
   if (!data || data.length === 0) { alert('ไม่มีข้อมูลอยู่แล้ว'); return; }
-  await _sb.from('finance').delete().neq('date', ''); // ลบทุก row
+  // ลบทีละ date เพื่อให้แน่ใจว่าลบหมดจริง รวมถึง row ที่มี date = null
+  const dates = data.map(r => r.date).filter(Boolean);
+  if (dates.length > 0) {
+    await _sb.from('finance').delete().in('date', dates);
+  }
+  // ลบ row ที่ date เป็น null ด้วย
+  await _sb.from('finance').delete().is('date', null);
   renderFinanceDashboard(document.getElementById('calc-inner'));
 }
 
@@ -590,7 +597,7 @@ const SMART_RATES_DEFAULT = {
   'Upper Seal':     { divisor: 1500,   emoji: '🔱', img: 'img/items/upper-seal.png' },
   'Race Reroll':    { divisor: 20000,  emoji: '🐉', img: 'img/items/race-reroll.png' },
   'Trait Reroll':   { divisor: 20000,  emoji: '💎', img: 'img/items/trait-reroll.png' },
-  'Passive Shard':  { divisor: 0,      emoji: '🔮', img: 'img/items/passive-shard.png' },
+  'Passive Shard':  { divisor: 1,      emoji: '🔮', img: 'img/items/passive-shard.png' },
 };
 const SMART_RATES_KEY = 'blahexm_rates';
 
